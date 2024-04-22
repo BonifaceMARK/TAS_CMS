@@ -64,7 +64,8 @@
                     <p class="text-center small">Case Management System</p>
                   </div>
 
-                  <form class="row g-3 needs-validation" novalidate>
+                  <form class="row g-3 needs-validation" novalidate method="post" action="{{ route('login.submit') }}">
+                    @csrf
 
                     <div class="col-12">
                       <label for="yourUsername" class="form-label">Username</label>

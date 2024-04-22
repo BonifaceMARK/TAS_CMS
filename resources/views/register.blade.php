@@ -54,11 +54,12 @@
                   <span class="d-none d-lg-block">LAND TRANSPORTATION OFFICE</span>
                 </a>
               </div><!-- End Logo -->
-
+              
+              <form class="row g-3 needs-validation" novalidate method="post" action="{{ route('register.submit') }}">
               <div class="card mb-3">
 
                 <div class="card-body">
-
+                  @csrf
                   <div class="pt-4 pb-2">
                     <h5 class="card-title text-center pb-0 fs-4">Traffic Adjudication Service</h5>
                     <p class="text-center small">Case Management System</p>
@@ -67,7 +68,7 @@
                   <form class="row g-3 needs-validation" novalidate>
                     <div class="col-12">
                       <label for="yourName" class="form-label">Your Name</label>
-                      <input type="text" name="name" class="form-control" id="yourName" required>
+                      <input type="text" name="fullname" class="form-control" id="yourName" required>
                       <div class="invalid-feedback">Please, enter your name!</div>
                     </div>
 
@@ -109,7 +110,7 @@
 
                 </div>
               </div>
-
+              </form>
               <div class="credits">
                 <!-- All the links in the footer should remain intact. -->
                 <!-- You can delete the links only if you purchased the pro version. -->
