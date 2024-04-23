@@ -6,6 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Crypt;
+
+
+
 class AuthController extends Controller
 {
     public function loadlogin()
@@ -30,9 +36,7 @@ public function login(Request $request)
 
         if ($validatedData && Auth::attempt($validatedData)) {
             $user = Auth::user();
-            if ($user->isactive == 0) {
-                throw new \Exception('Your account is not active. Please contact support.');
-            }
+            
 
             // Update user activity status
             $user->update(['isactive' => 1]);
@@ -56,7 +60,6 @@ public function register(Request $request)
         'email' => 'required|email',
     ]);
 
-    $validatedData = $request->only('email', 'password');
 
     try {
         User::create([
@@ -76,7 +79,7 @@ public function register(Request $request)
 
 
 
-function logout(){
+function logoutx(){
 
     $activex = User::where('isactive', 1)->update(['isactive' => 0]);
 
