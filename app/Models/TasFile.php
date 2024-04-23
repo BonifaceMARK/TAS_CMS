@@ -18,7 +18,7 @@ class TasFile extends Model
         'violation',
         'transaction_no',
         'transaction_date', 
-<<<<<<< Updated upstream
         'remarks',
+        'file_attach',
     ];
 }

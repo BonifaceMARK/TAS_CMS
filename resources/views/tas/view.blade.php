@@ -61,11 +61,11 @@
                                 <tbody>
                                     @foreach($tasFiles as $tasFile)
                                     <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
-                                        <td>{{ $tasFile->NAME }}</td>
-                                        <td>{{ $tasFile->CASE_NO }}</td>
-                                        <td>{{ $tasFile->TOP }}</td>
-                                        <td>{{ $tasFile->VIOLATION }}</td>
-                                        <td>{{ $tasFile->TRANSACTION_NO }}</td>
+                                        <td>{{ $tasFile->name }}</td>
+                                        <td>{{ $tasFile->case_no }}</td>
+                                        <td>{{ $tasFile->top }}</td>
+                                        <td>{{ $tasFile->violation }}</td>
+                                        <td>{{ $tasFile->transaction_no }}</td>
                                         <td>{{ $tasFile->transaction_date }}</td>
                                     </tr>
                                     @endforeach
@@ -123,7 +123,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Details for {{ $tasFile->NAME }}</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Details for {{ $tasFile->name }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/save-remarks" method="POST">
@@ -133,15 +133,15 @@
                         <div class="col-md-6">
                             <h6>Basic Information</h6>
                             <hr>
-                            <p><strong>Name:</strong> {{ $tasFile->NAME }}</p>
-                            <p><strong>Case No:</strong> {{ $tasFile->CASE_NO }}</p>
-                            <p><strong>Top:</strong> {{ $tasFile->TOP }}</p>
+                            <p><strong>Name:</strong> {{ $tasFile->name }}</p>
+                            <p><strong>Case No:</strong> {{ $tasFile->case_no }}</p>
+                            <p><strong>top:</strong> {{ $tasFile->top }}</p>
                         </div>
                         <div class="col-md-6">
                             <h6>Violation Details</h6>
                             <hr>
-                            <p><strong>Violation:</strong> {{ $tasFile->VIOLATION }}</p>
-                            <p><strong>Transaction No:</strong> {{ $tasFile->TRANSACTION_NO }}</p>
+                            <p><strong>Violation:</strong> {{ $tasFile->violation }}</p>
+                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no }}</p>
                             <p><strong>Transaction Date:</strong> {{ $tasFile->transaction_date }}</p>
                         </div>
                     </div>
