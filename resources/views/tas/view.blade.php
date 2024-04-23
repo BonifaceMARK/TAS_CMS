@@ -159,7 +159,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Details for {{ $tasFile->NAME }}</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Details for {{ $tasFile->name }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/save-remarks" method="POST">
@@ -177,6 +177,8 @@
                         <div class="col-md-6">
                             <h6>Violation Details</h6>
                             <hr>
+                            <p><strong>Violation:</strong> {{ $tasFile->violation }}</p>
+                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no }}</p>
                             <p><strong>Violation:</strong> {{ $tasFile->violation }}</p>
                             <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no }}</p>
                             <p><strong>Transaction Date:</strong> {{ $tasFile->transaction_date }}</p>

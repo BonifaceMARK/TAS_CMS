@@ -19,5 +19,6 @@ class TasFile extends Model
         'transaction_no',
         'transaction_date', 
         'remarks',
+        'file_attach',
     ];
 }
