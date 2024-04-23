@@ -29,3 +29,5 @@ Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboard');
 Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
 
+Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');
+Route::get('/showTAS', [DashboardController::class, 'tasShow'])->name('tas.show');

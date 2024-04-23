@@ -281,26 +281,28 @@
   /**
    * Initiate Datatables
    */
-  const datatables = select('.datatable', true)
+  const datatables = document.querySelectorAll('.datatable');
+
   datatables.forEach(datatable => {
     new simpleDatatables.DataTable(datatable, {
-      perPageSelect: [5, 10, 15, ["All", -1]],
+      perPageSelect: [5, 10, 15, ["All", -1]], // Configure the number of items per page dropdown
+      // Configure columns settings
       columns: [{
-          select: 2,
+          select: 2, // Sort the third column in descending order by default
           sortSequence: ["desc", "asc"]
         },
         {
-          select: 3,
+          select: 3, // Sort the fourth column in descending order by default
           sortSequence: ["desc"]
         },
         {
           select: 4,
-          cellClass: "green",
-          headerClass: "red"
+          cellClass: "green", // Apply green color to cells in the fifth column
+          headerClass: "red" // Apply red color to the header of the fifth column
         }
       ]
     });
-  })
+  });
 
   /**
    * Autoresize echart charts
