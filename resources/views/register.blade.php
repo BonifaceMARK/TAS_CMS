@@ -55,16 +55,26 @@
                 </a>
               </div><!-- End Logo -->
               
-   
+              @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
               <div class="card mb-3">
 
                 <div class="card-body">
-                  @csrf
+              
                   <div class="pt-4 pb-2">
                     <h5 class="card-title text-center pb-0 fs-4">Traffic Adjudication Service</h5>
                     <p class="text-center small">Case Management System</p>
                   </div>
                   <form class="row g-3 needs-validation" novalidate method="post" action="{{ route('register.submit') }}">
+                  @csrf
                     <div class="col-12">
                       <label for="yourName" class="form-label">Your Name</label>
                       <input type="text" name="fullname" class="form-control" id="yourName" required>

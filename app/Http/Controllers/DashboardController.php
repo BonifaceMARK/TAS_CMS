@@ -26,29 +26,37 @@ class DashboardController extends Controller
     $tasFiles = TasFile::paginate(10); 
     return view('tas.view', compact('tasFiles'));
 }
-
 public function saveRemarks(Request $request)
 {
     $request->validate([
         'remarks' => 'required|string|max:255',
     ]);
 
-    // Retrieve the TasFile object
-    $tasFile = TasFile::find($id);
+    try {
+        // Retrieve the TasFile ID from the request
+        $id = $request->input('tas_file_id');
 
-
-    if ($tasFile) {
-
+        // Retrieve the TasFile object
+        $tasFile = TasFile::findOrFail($id);
+        
+        // Update the REMARKS attribute with the input value
         $tasFile->REMARKS = $request->input('remarks');
 
+        // Save the TasFile object
         $tasFile->save();
 
+        // Redirect back with a success message
         return back()->with('success', 'Remarks saved successfully!');
-    } else {
+    } catch (\Throwable $th) {
+        // Log the error
+        logger()->error('Error saving remarks: ' . $th->getMessage());
 
-        return back()->with('error', 'Failed to save remarks. File not found.');
+        // Redirect back with an error message
+        return back()->with('error', 'Failed to save remarks. Please try again later.');
     }
 }
+
+
 
     
 }
