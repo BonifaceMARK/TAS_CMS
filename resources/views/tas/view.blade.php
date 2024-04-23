@@ -90,11 +90,39 @@
         </table>
     </div>
     <!-- Pagination -->
-    <nav aria-label="Table Pagination">
-        <ul class="pagination justify-content-center">
-            <!-- Pagination buttons here -->
-        </ul>
-    </nav>
+    <div class="datatable-bottom">
+    <div class="datatable-info">
+    Showing {{ $tasFiles->firstItem() }} to {{ $tasFiles->lastItem() }} of {{ $tasFiles->total() }} entries
+</div>
+<nav class="datatable-pagination">
+    <ul class="datatable-pagination-list">
+        <!-- Previous Page Button -->
+        <li class="datatable-pagination-list-item">
+            @if ($tasFiles->onFirstPage())
+                <button class="datatable-pagination-list-item-link" disabled aria-label="Previous Page">‹</button>
+            @else
+                <a href="{{ $tasFiles->previousPageUrl() }}" class="datatable-pagination-list-item-link" aria-label="Previous Page">‹</a>
+            @endif
+        </li>
+
+        <!-- Page Numbers -->
+        @for ($i = 1; $i <= $tasFiles->lastPage(); $i++)
+            <li class="datatable-pagination-list-item">
+                <a href="{{ $tasFiles->url($i) }}" class="datatable-pagination-list-item-link" aria-label="Page {{ $i }}">{{ $i }}</a>
+            </li>
+        @endfor
+
+        <!-- Next Page Button -->
+        <li class="datatable-pagination-list-item">
+            @if ($tasFiles->hasMorePages())
+                <a href="{{ $tasFiles->nextPageUrl() }}" class="datatable-pagination-list-item-link" aria-label="Next Page">›</a>
+            @else
+                <button class="datatable-pagination-list-item-link" disabled aria-label="Next Page">›</button>
+            @endif
+        </li>
+    </ul>
+</nav>
+
 </div>
 
                     </div>
@@ -112,25 +140,28 @@
 
         selector.addEventListener("change", function () {
             const value = parseInt(selector.value);
+            const totalRows = rows.length - 1; // Exclude header row
             
+            let startIndex = 1;
+            let endIndex = value;
+
             if (value === -1) {
                 // Show all rows
-                for (let i = 0; i < rows.length; i++) {
+                startIndex = 1;
+                endIndex = totalRows;
+            }
+
+            for (let i = 1; i <= totalRows; i++) {
+                if (i >= startIndex && i <= endIndex) {
                     rows[i].style.display = "";
-                }
-            } else {
-                // Hide rows greater than the selected value
-                for (let i = 1; i < rows.length; i++) {
-                    if (i <= value) {
-                        rows[i].style.display = "";
-                    } else {
-                        rows[i].style.display = "none";
-                    }
+                } else {
+                    rows[i].style.display = "none";
                 }
             }
         });
     });
 </script>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

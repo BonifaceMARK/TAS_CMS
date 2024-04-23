@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('violation')->nullable();
             $table->string('transaction_no')->nullable();
-            $table->date('transaction_date')->nullable(); 
+            $table->date('transaction_date')->nullable();
+            $table->string('contact_no')->nullable(); // Add contact_no field
             $table->string('remarks')->nullable();
             $table->text('file_attach')->nullable(); 
             $table->timestamps();
