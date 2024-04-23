@@ -70,22 +70,26 @@
             </thead>
             <!-- Table body -->
             <tbody>
-                @foreach($tasFiles as $tasFile)
-                <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
-                    <td>{{ $tasFile->name }}</td>
-                    <td>{{ $tasFile->case_no }}</td>
-                    <td>{{ $tasFile->top }}</td>
-                    <td>{{ $tasFile->violation }}</td>
-                    <td>{{ $tasFile->transaction_no }}</td>
-                    <td>{{ $tasFile->transaction_date }}</td>
-                    <td>
+            @if ($tasFiles)
+    @foreach ($tasFiles as $tasFile)
+        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
+            <td>{{ $tasFile->name }}</td>
+            <td>{{ $tasFile->case_no }}</td>
+            <td>{{ $tasFile->top }}</td>
+            <td>{{ $tasFile->violation }}</td>
+            <td>{{ $tasFile->transaction_no }}</td>
+            <td>{{ $tasFile->transaction_date }}</td>
+            <td>
+                @if ($tasFile->file_attach)
                     @foreach (json_decode($tasFile->file_attach) as $filePath)
-                    <li><a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a></li>
+                        <li><a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a></li>
+                    @endforeach
+                @endif
+            </td>
+        </tr>
+    @endforeach
+@endif
 
-            @endforeach
-        </td>
-                </tr>
-                @endforeach
             </tbody>
         </table>
     </div>
