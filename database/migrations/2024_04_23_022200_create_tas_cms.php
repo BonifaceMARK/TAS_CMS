@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('transaction_no')->nullable();
             $table->date('transaction_date')->nullable(); 
             $table->string('remarks')->nullable();
+            $table->string('file_attach')->nullable();
             $table->timestamps();
         });
     }

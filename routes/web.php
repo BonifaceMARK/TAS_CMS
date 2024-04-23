@@ -28,8 +28,9 @@ Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboard');
 Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
-
 Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');
 Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view');
 
 Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
+Route::post('/manageTAS', [DashboardController::class, 'submitForm'])->name('submitForm.tas');
+Route::get('/showTAS', [DashboardController::class, 'tasShow'])->name('tas.show');
