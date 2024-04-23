@@ -19,23 +19,33 @@ public function loadregister()
 }
 public function login(Request $request)
 {
-    // Validate the form data
-    $request->validate([
-        'username' => 'required',
-        'password' => 'required',
+    try {
+        // Validate the form data
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
 
-    ]);
+        $validatedData = $request->only('username', 'password');
 
-    $validatedData = $request->only('username', 'password');
- 
-    if ($validatedData && Auth::attempt($validatedData))
-    {
-        $activex = User::where('isactive', 0)->update(['isactive' => 1]);
-    
-        return redirect()->route('dashboard');
+        if ($validatedData && Auth::attempt($validatedData)) {
+            $user = Auth::user();
+            if ($user->isactive == 0) {
+                throw new \Exception('Your account is not active. Please contact support.');
+            }
+
+            // Update user activity status
+            $user->update(['isactive' => 1]);
+
+            return redirect()->route('dashboard');
+        } else {
+            throw new \Exception('Invalid credentials. Please try again.');
+        }
+    } catch (\Exception $e) {
+        return redirect()->back()->withInput()->with('error', $e->getMessage());
     }
-    
 }
+
 public function register(Request $request)
 {
     // Validate the form data
@@ -47,15 +57,34 @@ public function register(Request $request)
     ]);
 
     $validatedData = $request->only('email', 'password');
- 
-    User::create([
-        'fullname' =>$request->fullname,
-        'username' =>$request->username,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-    ]);
-    return redirect()->route('login')->with('success', 'Register success');
+
+    try {
+        User::create([
+            'fullname' => $request->fullname,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
+        
+        return redirect()->route('login')->with('success', 'Registration successful');
+    } catch (\Exception $e) {
+        return redirect()->back()->withInput()->with('error', 'Registration failed: ' . $e->getMessage());
+    }
 }
 
 
+
+
+
+function logout(){
+
+    $activex = User::where('isactive', 1)->update(['isactive' => 0]);
+
+    
+
+
+    Session::flush();
+    Auth::logout();
+    return redirect('/');
+ }
 }

@@ -10,4 +10,8 @@ class DashboardController extends Controller
 
         return view('index');
     }
+    public function tables(){
+
+        return view('layout');
+    }
 }

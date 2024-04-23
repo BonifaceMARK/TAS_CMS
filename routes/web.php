@@ -23,6 +23,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
 Route::get('/registerpage', [AuthController::class, 'loadregister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 
 
 Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboard');
+Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
+

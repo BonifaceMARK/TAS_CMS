@@ -5,13 +5,13 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>HeroBiz Bootstrap Template - Home 3</title>
+  <title>LTO - TAS</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
 <!-- Favicons -->
-<link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
-<link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+<link href="{{asset('assets/img/logo.jpg')}}" rel="icon">
+<link href="{{asset('assets/img/logo.jpg')}}" rel="apple-touch-icon">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,8 +121,8 @@
         </ul>
         <i class="bi bi-list mobile-nav-toggle d-none"></i>
       </nav><!-- .navbar -->
-
-      <a class="btn-getstarted scrollto" href="index.html#about">Get Started</a>
+      <a href="{{route('login')}}" class="btn-getstarted scrollto">Login</a>
+      {{-- <a class="btn-getstarted scrollto" href="index.html#about">Get Started</a> --}}
 
     </div>
   </header><!-- End Header -->
