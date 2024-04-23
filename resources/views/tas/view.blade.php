@@ -25,6 +25,11 @@
         {{ session('success') }}
     </div>
 @endif
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 </div>
                 <div class="card-body">
 
@@ -60,6 +65,7 @@
                     <th>Violation</th>
                     <th>Transaction No</th>
                     <th>Transaction Date</th>
+                    <th>Attachment</th>
                 </tr>
             </thead>
             <!-- Table body -->
@@ -72,6 +78,12 @@
                     <td>{{ $tasFile->violation }}</td>
                     <td>{{ $tasFile->transaction_no }}</td>
                     <td>{{ $tasFile->transaction_date }}</td>
+                    <td>
+                    @foreach (json_decode($tasFile->file_attach) as $filePath)
+                    <li><a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a></li>
+
+            @endforeach
+        </td>
                 </tr>
                 @endforeach
             </tbody>

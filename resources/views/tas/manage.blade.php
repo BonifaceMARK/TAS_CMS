@@ -13,8 +13,16 @@
  @include('layouts.sidebar')
 
   <main id="main" class="main">
-
-
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 
     <div class="container-fluid"> <!-- Make the container wider -->
         <div class="row justify-content-center">
@@ -69,10 +77,10 @@
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
-                                <label for="validationTooltipFile" class="form-label">File Attachments (optional)</label>
-                                <input type="file" name="file_attachments[]" class="form-control" id="validationTooltipFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
+                                <label for="validationTooltipFile" class="form-label">File Attachment (optional)</label>
+                                <input type="file" name="file_attachment[]" class="form-control" id="validationTooltipFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
                                 <div class="invalid-tooltip">
-                                    Please attach file(s) (Max size: 5MB each).
+                                    Please attach a file (Max size: 5MB).
                                 </div>
                             </div>
                             
@@ -81,7 +89,7 @@
                             </div>
                         </form>
                         
-                        
+                        <a href="{{ asset('storage\attachments\1713858878_WIN_20230717_13_27_01_Pro.jpg') }}">Download PDF</a>
                         
                         <!-- Form End -->
                     </div>
