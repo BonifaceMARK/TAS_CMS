@@ -12,12 +12,12 @@ class TasFile extends Model
     protected $table = 'tas_files';
 
     protected $fillable = [
-        'CASE_NO',
-        'TOP',
-        'NAME',
-        'VIOLATION',
-        'TRANSACTION_NO',
+        'case_no',
+        'top',
+        'name',
+        'violation',
+        'transaction_no',
         'transaction_date', 
-        'REMARKS',
+        'remarks',
     ];
 }

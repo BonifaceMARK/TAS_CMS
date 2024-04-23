@@ -55,7 +55,7 @@
                 </a>
               </div><!-- End Logo -->
               
-              <form class="row g-3 needs-validation" novalidate method="post" action="{{ route('register.submit') }}">
+   
               <div class="card mb-3">
 
                 <div class="card-body">
@@ -64,8 +64,7 @@
                     <h5 class="card-title text-center pb-0 fs-4">Traffic Adjudication Service</h5>
                     <p class="text-center small">Case Management System</p>
                   </div>
-
-                  <form class="row g-3 needs-validation" novalidate>
+                  <form class="row g-3 needs-validation" novalidate method="post" action="{{ route('register.submit') }}">
                     <div class="col-12">
                       <label for="yourName" class="form-label">Your Name</label>
                       <input type="text" name="fullname" class="form-control" id="yourName" required>

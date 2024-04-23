@@ -15,13 +15,13 @@ return new class extends Migration
     {
         Schema::create('tas_files', function (Blueprint $table) {
             $table->id();
-            $table->string('CASE_NO')->nullable();
-            $table->string('TOP')->nullable();
-            $table->string('NAME')->nullable();
-            $table->string('VIOLATION')->nullable();
-            $table->string('TRANSACTION_NO')->nullable();
+            $table->string('case_no')->nullable();
+            $table->string('top')->nullable();
+            $table->string('name')->nullable();
+            $table->string('violation')->nullable();
+            $table->string('transaction_no')->nullable();
             $table->date('transaction_date')->nullable(); 
-            $table->string('REMARKS')->nullable();
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }

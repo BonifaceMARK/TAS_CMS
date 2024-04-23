@@ -1231,3 +1231,7 @@ h6 {
   font-size: 13px;
   color: #012970;
 }
+.table-row:hover {
+  cursor: pointer;
+  background-color: #f8f9fa; /* Change this to the desired hover background color */
+}

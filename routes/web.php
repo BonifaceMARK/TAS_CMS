@@ -19,10 +19,10 @@ Route::get('/', function () {
 });
 
 Route::get('/loginpage', [AuthController::class, 'loadlogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/loginpost', [AuthController::class, 'login'])->name('login.submit');
 
 Route::get('/registerpage', [AuthController::class, 'loadregister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::post('/registerpost', [AuthController::class, 'register'])->name('register.submit');
 Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 
 
@@ -30,4 +30,6 @@ Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboar
 Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
 
 Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');
-Route::get('/showTAS', [DashboardController::class, 'tasShow'])->name('tas.show');
+Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view');
+
+Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
