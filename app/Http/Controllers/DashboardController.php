@@ -22,21 +22,35 @@ class DashboardController extends Controller
 {
     public function indexa()
     {
-        $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        
-        // Fetch sales for today
-        $salesToday = TasFile::whereDate('created_at', today())->count();
-
         // Fetch revenue for this month
         $revenueThisMonth = TasFile::whereMonth('created_at', now())->count();
+    
+        // Fetch revenue for the previous month
+        $previousMonthRevenue = TasFile::whereMonth('created_at', Carbon::now()->subMonth())->count();
+    
+        // Calculate the percentage change
+        $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
+    
+        $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
 
+        // Fetch recent activity
+        $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
+    
+        // Fetch sales for today
+        $salesToday = TasFile::whereDate('created_at', today())->count();
+    
         // Fetch customers for this year
         $customersThisYear = TasFile::whereYear('created_at', now())->count();
-
+    
+        // Fetch recent sales for today
         $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        $recentViolationsToday = $this->getRecentViolationsToday();
-        return view('index', compact('recentActivity', 'recentViolationsToday','recentSalesToday','salesToday', 'revenueThisMonth', 'customersThisYear'));
-        }
+    
+        // Calculate average violations for the previous week
+        $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])
+                                ->count() / 7;
+    
+        return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
+    }
         public function getRecentViolationsToday()
         {
             // Retrieve all recent violations, regardless of the date
@@ -145,59 +159,7 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-    public function admittedsubmit(Request $request)
-    {
-        // dd($request->all());
-        try {
-            $validatedData = $request->validate([
-                
-                'top' => 'required|string',
-                'name' => 'required|string',
-                'violation' => 'required|string',
-                'transaction_no' => 'required|string',
-                'contact_no' => 'required|string',
-                'transaction_date' => 'required|date',
-                'file_attachment' => 'nullable|array',
-                'file_attachment.*' => 'nullable|file|max:5120',
-            ]);
-    
-            DB::beginTransaction();
-            $existingTasFile = admitted::where('transaction_no', $validatedData['transaction_no'])->first();
-            if (!$existingTasFile) {
-                $tasFile = new admitted([
-                    'top' => $validatedData['top'],
-                    'name' => $validatedData['name'],
-                    'violation' => $validatedData['violation'],
-                    'transaction_no' => $validatedData['transaction_no'],
-                    'contact_no' => $validatedData['contact_no'],
-                    'transaction_date' => $validatedData['transaction_date'],
-                ]);
-                if ($request->hasFile('file_attachment')) {
-                    $filePaths = [];
-                    $cx = 1;
-                    foreach ($request->file('file_attachment') as $file) {
-                        $x = $validatedData['name'] . "_documents_" . $cx . "_";
-                        $fileName = $x . time();
-                        $file->storeAs('attachments', $fileName, 'public');
-                        $filePaths[] = 'attachments/' . $fileName;
-                        $cx++;
-                    }
-                    $tasFile->file_attach = json_encode($filePaths);
-                }
-                $tasFile->save();
-            } else {
-                return redirect()->back()->with('error', 'Case no. already exists.');
-            }
-    
-            DB::commit();
-            return redirect()->back()->with('success', 'Form submitted successfully!');
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors());
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-    }
+
 public function getChartData()
 {
     // Fetch data from the database
@@ -211,11 +173,55 @@ public function getChartData()
         ];
     });
 
-    return response()->json($chartData);
-}
+        return response()->json($chartData);
+    }
 
+    private function getTodayData()
+    {
+        // Fetch data for today
+        $chartData = TasFile::whereDate('created_at', today())->get();
 
+        // Process the data as needed for the chart
+        $formattedData = $this->formatChartData($chartData);
 
+        return $formattedData;
+    }
+
+    private function getThisMonthData()
+    {
+        // Fetch data for this month
+        $chartData = TasFile::whereMonth('created_at', today())->get();
+
+        // Process the data as needed for the chart
+        $formattedData = $this->formatChartData($chartData);
+
+        return $formattedData;
+    }
+
+    private function getThisYearData()
+    {
+        // Fetch data for this year
+        $chartData = TasFile::whereYear('created_at', today())->get();
+
+        // Process the data as needed for the chart
+        $formattedData = $this->formatChartData($chartData);
+
+        return $formattedData;
+    }
+
+    private function formatChartData($chartData)
+    {
+        // Process the fetched data into the format expected by ApexCharts
+        $formattedData = [
+            'categories' => $chartData->pluck('name')->toArray(),
+            'series' => [[
+                'name' => 'Bar Chart',
+                'data' => $chartData->pluck('value')->toArray()
+            ]]
+        ];
+
+        return $formattedData;
+    }
 
 
 
