@@ -48,5 +48,6 @@ class User extends Authenticatable
     public function setFullnameAttribute($value)
     {
         $this->attributes['fullname'] = ucwords(strtolower($value));
+        $this->attributes['username'] = strtolower($value);
     }
 }

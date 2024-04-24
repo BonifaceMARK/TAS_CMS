@@ -40,20 +40,17 @@
             <div class="col-lg-8"> <!-- Adjusted the width of the column -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Contest Case - Input <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
+                        
+                        <h5 class="card-title">Admitted Case - Input     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
                             View Violations
-                          </button></h5>
-    
+                        </button></h5>
+                           
+                        
+                    
+                           
                         <!-- Form Start -->
-                        <form method="POST" action="{{ route('submitForm.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('admittedsubmit.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
                             @csrf
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipCaseno" class="form-label">Case no.</label>
-                                <input type="number" name="case_no" class="form-control" id="validationTooltipCaseno" min="1" max="9999" required>
-                                <div class="invalid-tooltip">
-                                    Please enter a valid Case no. (Number only)
-                                </div>
-                            </div>
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipTOP" class="form-label">TOP</label>
                                 <input type="text" name="top" class="form-control" id="validationTooltipTOP" required>
@@ -201,7 +198,7 @@
                             </div>
                         </form>
                         
-                        
+                        {{-- <a href="{{ asset('storage\attachments\1713858878_WIN_20230717_13_27_01_Pro.jpg') }}">Download PDF</a> --}}
                         
                         <!-- Form End -->
                     </div>
@@ -210,6 +207,8 @@
         </div>
     </div>
     
+
+
 <!-- Modal -->
 <div class="modal fade" id="violationsModal" tabindex="-1" aria-labelledby="violationsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">

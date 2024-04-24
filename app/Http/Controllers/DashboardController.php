@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\TasFile;
+use App\Models\admitted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
@@ -60,6 +61,16 @@ class DashboardController extends Controller
         $tasFiles = TasFile::paginate(10);
         return view('tas.view', compact('tasFiles'));
     }
+    public function admitmanage()
+    {
+        return view('admitted.manage');
+    }
+
+    public function admitview()
+    {
+        $tasFiles = TasFile::paginate(10);
+        return view('admitted.view', compact('tasFiles'));
+    }
 
     public function saveRemarks(Request $request)
     {
@@ -89,6 +100,7 @@ class DashboardController extends Controller
                 'name' => 'required|string',
                 'violation' => 'required|string',
                 'transaction_no' => 'required|string',
+                'contact_no' => 'required|string',
                 'transaction_date' => 'required|date',
                 'file_attachment' => 'nullable|array',
                 'file_attachment.*' => 'nullable|file|max:5120',
@@ -103,6 +115,7 @@ class DashboardController extends Controller
                     'name' => $validatedData['name'],
                     'violation' => $validatedData['violation'],
                     'transaction_no' => $validatedData['transaction_no'],
+                    'contact_no' => $validatedData['contact_no'],
                     'transaction_date' => $validatedData['transaction_date'],
                 ]);
                 if ($request->hasFile('file_attachment')) {
@@ -132,7 +145,59 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
+    public function admittedsubmit(Request $request)
+    {
+        // dd($request->all());
+        try {
+            $validatedData = $request->validate([
+                
+                'top' => 'required|string',
+                'name' => 'required|string',
+                'violation' => 'required|string',
+                'transaction_no' => 'required|string',
+                'contact_no' => 'required|string',
+                'transaction_date' => 'required|date',
+                'file_attachment' => 'nullable|array',
+                'file_attachment.*' => 'nullable|file|max:5120',
+            ]);
+    
+            DB::beginTransaction();
+            $existingTasFile = admitted::where('transaction_no', $validatedData['transaction_no'])->first();
+            if (!$existingTasFile) {
+                $tasFile = new admitted([
+                    'top' => $validatedData['top'],
+                    'name' => $validatedData['name'],
+                    'violation' => $validatedData['violation'],
+                    'transaction_no' => $validatedData['transaction_no'],
+                    'contact_no' => $validatedData['contact_no'],
+                    'transaction_date' => $validatedData['transaction_date'],
+                ]);
+                if ($request->hasFile('file_attachment')) {
+                    $filePaths = [];
+                    $cx = 1;
+                    foreach ($request->file('file_attachment') as $file) {
+                        $x = $validatedData['name'] . "_documents_" . $cx . "_";
+                        $fileName = $x . time();
+                        $file->storeAs('attachments', $fileName, 'public');
+                        $filePaths[] = 'attachments/' . $fileName;
+                        $cx++;
+                    }
+                    $tasFile->file_attach = json_encode($filePaths);
+                }
+                $tasFile->save();
+            } else {
+                return redirect()->back()->with('error', 'Case no. already exists.');
+            }
+    
+            DB::commit();
+            return redirect()->back()->with('success', 'Form submitted successfully!');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 public function getChartData()
 {
     // Fetch data from the database

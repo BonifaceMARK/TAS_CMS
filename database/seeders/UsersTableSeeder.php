@@ -15,15 +15,26 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        // Seed a sample user
-        DB::table('users')->insert([
-            'fullname' => 'John Doe',
-            'username' => 'johndoe',
-            'email' => 'johndoe@example.com',
-            'password' => Hash::make('password'),
-            'isactive' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Seed multiple sample users
+        $users = [
+            [
+                'fullname' => 'Administrator TAS',
+                'username' => 'Admin',
+                'email' => 'admin@tas.com',
+                'password' => Hash::make('p@s$w0rd123'),
+                'email_verified_at' => now(),
+                'role' => 2,
+                'isactive' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            
+            // Add more users as needed
+        ];
+
+        // Insert each user into the users table
+        foreach ($users as $user) {
+            DB::table('users')->insert($user);
+        }
     }
 }

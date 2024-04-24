@@ -44,11 +44,9 @@
                         <td>{{ $user->email }}</td>
                         <td>
                             @if ($user->role == 1)
-                                <span class="text-success">Employee</span>
-                            @elseif ($user->role == 2)
-                                <span class="text-primary">Administrator</span>
+                            <span class="text-primary">Administrator</span>
                             @else
-                                <span class="text-danger">User</span>
+                            <span class="text-success">Employee</span>
                             @endif
                         </td>
                         <td>

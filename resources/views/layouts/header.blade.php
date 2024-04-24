@@ -169,7 +169,11 @@
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
               <h6>{{Auth::user()->fullname}}</h6>
-              <span>Administrator</span>
+              @if (Auth::user()->role == 1)
+                  <span>Administrator</span>
+              @else
+                  <span>Employee</span>
+              @endif
             </li>
             <li>
               <hr class="dropdown-divider">

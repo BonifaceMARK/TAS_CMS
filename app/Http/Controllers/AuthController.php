@@ -34,14 +34,16 @@ public function login(Request $request)
 
         $validatedData = $request->only('username', 'password');
 
-        if ($validatedData && Auth::attempt($validatedData)) {
+        if ($validatedData && Auth::attempt($validatedData) ) {
             $user = Auth::user();
-            
-
-            // Update user activity status
             $user->update(['isactive' => 1]);
 
-            return redirect()->route('dashboard');
+            if ($user->role == 1) {
+                return redirect()->to('/administrator/dashboard');
+            }  else {
+                return redirect()->to('/employee/dashboard');
+            }
+            
         } else {
             throw new \Exception('Invalid credentials. Please try again.');
         }
@@ -73,7 +75,8 @@ public function register(Request $request)
 }
 
 function logoutx(){
-    $activex = User::where('isactive', 1)->update(['isactive' => 0]);
+    $user = Auth::user();
+    $user->update(['isactive' => 0]);
     Session::flush();
     Auth::logout();
     return redirect('/');
