@@ -5,7 +5,18 @@
 @include('layouts.title')
 
 <body>
-
+    <style>
+        /* Hide the spinner arrows for number input */
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+    
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
   <!-- ======= Header ======= -->
 @include('layouts.header')
 
@@ -36,9 +47,9 @@
                             @csrf
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipCaseno" class="form-label">Case no.</label>
-                                <input type="text" name="case_no" class="form-control" id="validationTooltipCaseno" required>
+                                <input type="number" name="case_no" class="form-control" id="validationTooltipCaseno" min="1" max="9999" required>
                                 <div class="invalid-tooltip">
-                                    Please Enter Case no.
+                                    Please enter a valid Case no. (Number only)
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
@@ -67,6 +78,13 @@
                                 <input type="text" name="transaction_no" class="form-control" id="validationTooltipTransac" required>
                                 <div class="invalid-tooltip">
                                     Please provide a Transaction No.
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="validationTooltipContac" class="form-label">Contact no.</label>
+                                <input type="text" name="transaction_no" class="form-control" id="validationTooltipContac" required>
+                                <div class="invalid-tooltip">
+                                    Please provide a Contact no.
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
@@ -99,7 +117,14 @@
     </div>
     
 
-
+    <script>
+        document.getElementById('validationTooltipCaseno').addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+            }
+        });
+    </script>
+    
   </main><!-- End #main -->
 
  @include('layouts.footer')

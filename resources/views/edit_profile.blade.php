@@ -10,7 +10,7 @@
 
   <main id="main" class="main">
     <div class="container">
-      <h1>Edit Profile</h1>
+      <h1>Edit User Profile</h1>
       <form method="POST" action="{{ route('profile.update', ['id' => $user->id]) }}">
         @csrf
         @method('PUT')
@@ -26,7 +26,8 @@
             <label for="email" class="form-label">Email Address</label>
             <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}">
         </div>
-        <button type="submit" class="btn btn-primary">Update Profile</button>
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="javascript:history.back()" class="btn btn-primary">Return</a>
       </form>
 
     </div>

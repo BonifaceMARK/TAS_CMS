@@ -31,6 +31,13 @@
           <span>Profile</span>
         </a>
       </li><!-- End Profile Page Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{{route('user_management')}}">
+          <i class="bi bi-person-fill-add"></i>
+          <span>User Management</span>
+        </a>
+      </li><!-- End Profile Page Nav -->
     </ul>
+    
 
   </aside><!-- End Sidebar-->
