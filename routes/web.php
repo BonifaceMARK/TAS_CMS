@@ -34,3 +34,5 @@ Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view'
 Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
 Route::post('/manageTAS', [DashboardController::class, 'submitForm'])->name('submitForm.tas');
 Route::get('/showTAS', [DashboardController::class, 'tasShow'])->name('tas.show');
+
+Route::get('/getChartData', [DashboardController::class, 'getChartData']);

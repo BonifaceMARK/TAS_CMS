@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Carbon\Carbon;
 use App\Models\TasFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,9 +11,30 @@ class DashboardController extends Controller
 {
     public function indexa()
     {
-        return view('index');
-    }
+        $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
+        
+        // Fetch sales for today
+        $salesToday = TasFile::whereDate('created_at', today())->count();
 
+        // Fetch revenue for this month
+        $revenueThisMonth = TasFile::whereMonth('created_at', now())->count();
+
+        // Fetch customers for this year
+        $customersThisYear = TasFile::whereYear('created_at', now())->count();
+
+        $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
+        $recentViolationsToday = $this->getRecentViolationsToday();
+        return view('index', compact('recentActivity', 'recentViolationsToday','recentSalesToday','salesToday', 'revenueThisMonth', 'customersThisYear'));
+        }
+        public function getRecentViolationsToday()
+        {
+            // Retrieve all recent violations, regardless of the date
+            $recentViolationsToday = TasFile::orderBy('transaction_date', 'desc')
+                ->get();
+        
+            return $recentViolationsToday;
+        }
+        
     public function tables()
     {
         return view('layout');
@@ -115,5 +136,26 @@ class DashboardController extends Controller
         return redirect()->back()->with('error', $e->getMessage());
     }
 }
+public function getChartData()
+{
+    // Fetch data from the database
+    $tasFiles = TasFile::all();
+
+    // Transform the data into the format expected by ApexCharts
+    $chartData = $tasFiles->map(function ($tasFile) {
+        return [
+            'name' => $tasFile->violation,
+            'data' => [$tasFile->case_no], // Use the case_no field as the value
+        ];
+    });
+
+    return response()->json($chartData);
+}
+
+
+
+
+
+
 
 }

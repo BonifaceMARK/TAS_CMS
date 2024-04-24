@@ -18,8 +18,13 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
-                <div class="card-header">
-            <h5 class="card-title">Traffic Adjudication Service</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="card-title">Traffic Adjudication Service</h5>
+    <div class="datatable-search">
+        <input class="datatable-input" id="searchInput" placeholder="Search..." type="search" title="Search within table">
+    </div>
+</div>
+
                     @if (session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
@@ -31,6 +36,7 @@
     </div>
 @endif
 </div>
+<div class="card">
                 <div class="card-body">
 
                
@@ -40,18 +46,10 @@
                         <div class="datatable-top">
                             <div class="datatable-dropdown">
                             <label>
-    <select class="datatable-selector" id="datatable-selector">
-        <option value="5">5</option>
-        <option value="10" selected>10</option>
-        <option value="15">15</option>
-        <option value="-1">All</option>
-    </select> entries per page
-</label>
+ 
 
                             </div>
-                            <div class="datatable-search">
-                                <input class="datatable-input" id="searchInput" placeholder="Search..." type="search" title="Search within table">
-                            </div>
+                        
                         </div>
                         <div class="datatable-container">
     <div class="table-responsive">
@@ -70,29 +68,34 @@
             </thead>
             <!-- Table body -->
             <tbody>
-            @if ($tasFiles)
-    @foreach ($tasFiles as $tasFile)
-        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
-            <td>{{ $tasFile->name }}</td>
-            <td>{{ $tasFile->case_no }}</td>
-            <td>{{ $tasFile->top }}</td>
-            <td>{{ $tasFile->violation }}</td>
-            <td>{{ $tasFile->transaction_no }}</td>
-            <td>{{ $tasFile->transaction_date }}</td>
-            <td>
-                @if ($tasFile->file_attach)
-                    @foreach (json_decode($tasFile->file_attach) as $filePath)
-                        <li><a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a></li>
+                @if ($tasFiles)
+                    @foreach ($tasFiles as $tasFile)
+                        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
+                            <td>{{ $tasFile->name }}</td>
+                            <td>{{ $tasFile->case_no }}</td>
+                            <td>{{ $tasFile->top }}</td>
+                            <td>{{ $tasFile->violation }}</td>
+                            <td>{{ $tasFile->transaction_no }}</td>
+                            <td>{{ $tasFile->transaction_date }}</td>
+                            <td>
+                                @if ($tasFile->file_attach)
+                                    <ul class="list-unstyled">
+                                        @foreach (json_decode($tasFile->file_attach) as $filePath)
+                                            <li>
+                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </td>
+                        </tr>
                     @endforeach
                 @endif
-            </td>
-        </tr>
-    @endforeach
-@endif
-
             </tbody>
         </table>
     </div>
+</div>
+
     <!-- Pagination -->
     <div class="datatable-bottom">
     <div class="datatable-info">
@@ -206,7 +209,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Details for {{ $tasFile->name }}</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Case No: <strong>{{ $tasFile->case_no }}</strong> </h5><span> | Details for: <strong>{{ $tasFile->name }}</strong></span>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/save-remarks" method="POST">
@@ -249,7 +252,7 @@
     </div>
 </div>
 @endforeach
-
+</div>
 </section>
 
 

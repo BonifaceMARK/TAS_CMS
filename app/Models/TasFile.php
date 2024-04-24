@@ -18,7 +18,7 @@ class TasFile extends Model
         'violation',
         'transaction_no',
         'transaction_date',
-        'contact_no', // Add contact_no field to the $fillable array
+        'contact_no', 
         'remarks',
         'file_attach',
     ];

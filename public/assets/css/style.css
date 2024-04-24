@@ -1235,3 +1235,63 @@ h6 {
   cursor: pointer;
   background-color: #f8f9fa; /* Change this to the desired hover background color */
 }
+   /* Custom styles for the table */
+   .datatable-container {
+    margin-top: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid #dee2e6;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.attachment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.attachment-list li {
+    margin-bottom: 5px;
+}
+
+.attachment-list li a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.attachment-list li a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .table th,
+    .table td {
+        padding: 10px;
+        font-size: 12px;
+    }
+}
+
+/* Highlight table rows on hover */
+.table tbody tr:hover {
+    background-color: #f0f0f0;
+}

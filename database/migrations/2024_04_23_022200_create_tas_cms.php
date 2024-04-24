@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('tas_files', function (Blueprint $table) {
             $table->id();
-            $table->int('case_no')->nullable();
+            $table->integer('case_no')->nullable();
             $table->string('top')->nullable();
             $table->string('name')->nullable();
             $table->string('violation')->nullable();
