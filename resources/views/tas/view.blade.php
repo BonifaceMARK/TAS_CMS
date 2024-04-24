@@ -40,13 +40,13 @@
                         <div class="datatable-top">
                             <div class="datatable-dropdown">
                             <label>
-    <select class="datatable-selector" id="datatable-selector">
-        <option value="5">5</option>
-        <option value="10" selected>10</option>
-        <option value="15">15</option>
-        <option value="-1">All</option>
-    </select> entries per page
-</label>
+                                <select class="datatable-selector" id="datatable-selector">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="15">15</option>
+                                    <option value="-1">All</option>
+                                </select> entries per page
+                            </label>
 
                             </div>
                             <div class="datatable-search">
@@ -137,6 +137,10 @@
     </div>
 </section>
 <script>
+    function stopAttachmentLink(event) {
+        event.stopPropagation(); // Prevent event from propagating to parent elements
+        event.preventDefault(); // Prevent the default behavior of anchor tags
+    };
     document.addEventListener("DOMContentLoaded", function () {
         const selector = document.getElementById("datatable-selector");
         const table = document.getElementById("dataTable");

@@ -34,3 +34,9 @@ Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view'
 Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
 Route::post('/manageTAS', [DashboardController::class, 'submitForm'])->name('submitForm.tas');
 Route::get('/showTAS', [DashboardController::class, 'tasShow'])->name('tas.show');
+
+Route::get('/{id}/profile', [DashboardController::class, 'profile'])->name('profile');
+Route::get('/{id}/profile/edit', [DashboardController::class, 'edit'])->name('profile.edit');
+Route::put('/{id}/profile/update', [DashboardController::class, 'update'])->name('profile.update');
+Route::get('/{id}/profile/change_password', [DashboardController::class, 'change'])->name('profile.change');
+Route::post('/{id}/profile/update_password', [DashboardController::class, 'updatePassword'])->name('profile.update_password');

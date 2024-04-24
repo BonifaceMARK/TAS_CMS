@@ -67,6 +67,7 @@ public function register(Request $request)
             'username' => $request->username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'email_verified_at' => now(),
         ]);
         
         return redirect()->route('login')->with('success', 'Registration successful');

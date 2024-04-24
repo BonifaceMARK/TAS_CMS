@@ -15,10 +15,12 @@
         <div class="col-md-6">
           <div class="card">
             <div class="card-body">
+              <img src="{{ asset('assets/img/pzpx.png') }}" alt="User Image" style="width: 100px; height: auto; border-radius: 50%;">
               <h5 class="card-title">User Information</h5>
-              <p>Name: {{ Auth::user()->name }}</p>
+              <p>Name: {{ Auth::user()->fullname }}</p>
               <p>Email: {{ Auth::user()->email }}</p>
-              <!-- Add more user information fields as needed -->
+                <a href="{{ route('profile.edit', ['id' => Auth::id()]) }}" class="btn btn-primary">Edit Profile</a>
+                <a href="{{ route('profile.change', ['id' => Auth::id()]) }}" class="btn btn-success">Change Password</a>
             </div>
           </div>
         </div>
