@@ -133,24 +133,75 @@ class DashboardController extends Controller
         }
     }
 
-public function getChartData()
-{
-    // Fetch data from the database
-    $tasFiles = TasFile::all();
+    public function getChartData(Request $request)
+    {
+        $filter = $request->query('filter');
 
-    // Transform the data into the format expected by ApexCharts
-    $chartData = $tasFiles->map(function ($tasFile) {
-        return [
-            'name' => $tasFile->violation,
-            'data' => [$tasFile->case_no], // Use the case_no field as the value
+        // Fetch data based on filter type
+        switch ($filter) {
+            case 'today':
+                $chartData = $this->getTodayData();
+                break;
+            case 'this_month':
+                $chartData = $this->getThisMonthData();
+                break;
+            case 'this_year':
+                $chartData = $this->getThisYearData();
+                break;
+            default:
+                $chartData = [];
+                break;
+        }
+
+        return response()->json($chartData);
+    }
+
+    private function getTodayData()
+    {
+        // Fetch data for today
+        $chartData = TasFile::whereDate('created_at', today())->get();
+
+        // Process the data as needed for the chart
+        $formattedData = $this->formatChartData($chartData);
+
+        return $formattedData;
+    }
+
+    private function getThisMonthData()
+    {
+        // Fetch data for this month
+        $chartData = TasFile::whereMonth('created_at', today())->get();
+
+        // Process the data as needed for the chart
+        $formattedData = $this->formatChartData($chartData);
+
+        return $formattedData;
+    }
+
+    private function getThisYearData()
+    {
+        // Fetch data for this year
+        $chartData = TasFile::whereYear('created_at', today())->get();
+
+        // Process the data as needed for the chart
+        $formattedData = $this->formatChartData($chartData);
+
+        return $formattedData;
+    }
+
+    private function formatChartData($chartData)
+    {
+        // Process the fetched data into the format expected by ApexCharts
+        $formattedData = [
+            'categories' => $chartData->pluck('name')->toArray(),
+            'series' => [[
+                'name' => 'Bar Chart',
+                'data' => $chartData->pluck('value')->toArray()
+            ]]
         ];
-    });
 
-    return response()->json($chartData);
-}
-
-
-
+        return $formattedData;
+    }
 
 
 

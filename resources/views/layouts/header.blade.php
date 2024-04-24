@@ -12,13 +12,28 @@
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
 
-        <li class="nav-item d-block d-lg-none">
-          <a class="nav-link nav-icon search-bar-toggle " href="#">
-            <i class="bi bi-search"></i>
-          </a>
-        </li><!-- End Search Icon-->
+<!-- Your existing HTML code -->
+<li class="nav-item">
+    <span class="nav-link calendar-date" id="calendarDate">{{ date('l, F j, Y h:i:s A') }}</span>
+</li>
 
         <li class="nav-item dropdown">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+<script>
+    // Initialize Bootstrap Datepicker
+    $(document).ready(function() {
+        $('#calendarDate').datepicker({
+            format: 'yyyy-mm-dd', // Change the format as needed
+            autoclose: true,
+            todayHighlight: true
+        });
+
+        // Add custom class to the Datepicker element
+        $('#calendarDate').datepicker('widget').addClass('datepicker');
+    });
+</script>
+
 
           <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
             <i class="bi bi-bell"></i>
