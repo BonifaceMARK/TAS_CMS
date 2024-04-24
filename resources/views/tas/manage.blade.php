@@ -89,7 +89,7 @@
                             </div>
                         </form>
                         
-                        <a href="{{ asset('storage\attachments\1713858878_WIN_20230717_13_27_01_Pro.jpg') }}">Download PDF</a>
+                        {{-- <a href="{{ asset('storage\attachments\1713858878_WIN_20230717_13_27_01_Pro.jpg') }}">Download PDF</a> --}}
                         
                         <!-- Form End -->
                     </div>

@@ -64,7 +64,6 @@ class DashboardController extends Controller
     public function submitForm(Request $request)
 {
     try {
-        // Validate the form data
         $validatedData = $request->validate([
             'case_no' => 'required|string',
             'top' => 'required|string',
@@ -72,22 +71,21 @@ class DashboardController extends Controller
             'violation' => 'required|string',
             'transaction_no' => 'required|string',
             'transaction_date' => 'required|date',
-            'file_attachment' => 'nullable|array', // Ensure it's an array
-            'file_attachment.*' => 'nullable|file|max:5120', // Validate each file
+            'file_attachment' => 'nullable|array', 
+            'file_attachment.*' => 'nullable|file|max:5120', 
         ]);
-
-        // Start transaction
         DB::beginTransaction();
-
-        // Handle file attachments if present
+        
         if ($request->hasFile('file_attachment')) {
-            $filePaths = []; // Array to store file names
+            $filePaths = []; 
+            $cx = 1;
             foreach ($request->file('file_attachment') as $file) {
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $file->storeAs('attachments', $fileName, 'public'); // Store the file
-                $filePaths[] = 'attachments/' . $fileName; // Store the file path in the array
+                $x = $validatedData['case_no']. "_documents_" . $cx . "_";
+                $fileName = $x . time();
+                $file->storeAs('attachments', $fileName, 'public'); 
+                $filePaths[] = 'attachments/' . $fileName; 
+                $cx++; // Increment the counter for the next file
             }
-            // Store file names in JSON format in the database
             $tasFile = new TasFile([
                 'case_no' => $validatedData['case_no'],
                 'top' => $validatedData['top'],
@@ -95,10 +93,9 @@ class DashboardController extends Controller
                 'violation' => $validatedData['violation'],
                 'transaction_no' => $validatedData['transaction_no'],
                 'transaction_date' => $validatedData['transaction_date'],
-                'file_attach' => json_encode($filePaths), // Store file attachment information
+                'file_attach' => json_encode($filePaths), 
             ]);
         } else {
-            // If no file attachment, create TasFile instance without file_attach
             $tasFile = new TasFile([
                 'case_no' => $validatedData['case_no'],
                 'top' => $validatedData['top'],
@@ -108,28 +105,14 @@ class DashboardController extends Controller
                 'transaction_date' => $validatedData['transaction_date'],
             ]);
         }
-
-        // Save the TasFile instance
         $tasFile->save();
-
-        // Commit transaction
         DB::commit();
-
-        // Redirect or return a response
         return redirect()->back()->with('success', 'Form submitted successfully!');
     } catch (ValidationException $e) {
-        // Redirect back with validation errors
         return redirect()->back()->withErrors($e->errors());
     } catch (\Exception $e) {
-        // Rollback transaction on error
         DB::rollBack();
-
-        // Log the error
-        //logger()->error('Error submitting form: ' . $e->getMessage());
-
-        // Redirect back with an error message
         return redirect()->back()->with('error', $e->getMessage());
-
     }
 }
 
