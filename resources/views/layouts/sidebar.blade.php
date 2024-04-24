@@ -3,7 +3,7 @@
     <ul class="sidebar-nav" id="sidebar-nav">
 
       <li class="nav-item">
-        <a class="nav-link " href="dashboard">
+        <a class="nav-link " href="{{route('dashboard')}}">
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
@@ -26,11 +26,18 @@
 
       <li class="nav-heading">Manage Users</li>
       <li class="nav-item">
-        <a class="nav-link collapsed" href="users-profile.html">
+        <a class="nav-link collapsed" href="{{ route('profile', ['id' => Auth::id()]) }}">
           <i class="bi bi-person"></i>
           <span>Profile</span>
         </a>
       </li><!-- End Profile Page Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{{route('user_management')}}">
+          <i class="bi bi-person-fill-add"></i>
+          <span>User Management</span>
+        </a>
+      </li><!-- End Profile Page Nav -->
     </ul>
+    
 
   </aside><!-- End Sidebar-->

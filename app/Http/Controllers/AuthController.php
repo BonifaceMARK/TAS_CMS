@@ -52,40 +52,28 @@ public function login(Request $request)
 
 public function register(Request $request)
 {
-    // Validate the form data
     $request->validate([
         'fullname' => 'required',
         'username' => 'required',
         'password' => 'required',
         'email' => 'required|email',
     ]);
-
-
     try {
         User::create([
             'fullname' => $request->fullname,
             'username' => $request->username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'email_verified_at' => now(),
         ]);
-        
         return redirect()->route('login')->with('success', 'Registration successful');
     } catch (\Exception $e) {
         return redirect()->back()->withInput()->with('error', 'Registration failed: ' . $e->getMessage());
     }
 }
 
-
-
-
-
 function logoutx(){
-
     $activex = User::where('isactive', 1)->update(['isactive' => 0]);
-
-    
-
-
     Session::flush();
     Auth::logout();
     return redirect('/');

@@ -2,46 +2,43 @@
 
 <body>
 
-  <!-- ======= Header ======= -->
-@include('layouts.header')
+  <!-- Include Header -->
+  @include('layouts.header')
 
+  <!-- Include Sidebar -->
+  @include('layouts.sidebar')
 
-@include('layouts.sidebar')
+  <main id="main" class="main">
+    <div class="container">
+      <h1>Add User</h1>
 
-<main id="main" class="main">
+      <form action="{{ route('users.store') }}" method="POST">
+          @csrf
 
+          <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" class="form-control" id="name" name="name" required>
+          </div>
 
+          <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" class="form-control" id="email" name="email" required>
+          </div>
 
-<table class="table datatable">
-                <thead>
-                  <tr>
-                    <th>
-                      <b>N</b>ame
-                    </th>
-                    <th>Ext.</th>
-                    <th>City</th>
-                    <th data-type="date" data-format="YYYY/DD/MM">Start Date</th>
-                    <th>Completion</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    
-                  </tr>
-                    
-                </tbody>
-              </table>
+          <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+          </div>
 
+          <!-- Add more fields as needed -->
 
+          <button type="submit" class="btn btn-primary">Create User</button>
+      </form>
+  </div>
+  </main>
 
-
-
-    
-
-
-</main><!-- End #main -->
-
-@include('layouts.footer')
+  <!-- Include Footer -->
+  @include('layouts.footer')
 </body>
 
 </html>
