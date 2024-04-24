@@ -35,7 +35,7 @@
 <div class="col-xxl-4 col-md-6">
     <div class="card info-card sales-card">
         <div class="card-body">
-            <h5 class="card-title"> <span> | Violations Today</span></h5> <!-- Display today's date -->
+            <h5 class="card-title"> {{ date('l') }} <span> | Violations Today</span></h5> <!-- Display today's date -->
             <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                 <i class="bi bi-cone-striped"></i>

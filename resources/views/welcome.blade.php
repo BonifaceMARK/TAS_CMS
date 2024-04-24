@@ -133,7 +133,7 @@
       <h3>Case Management System</h3>
       <div class="d-flex">
         <a href="{{route('login')}}" class="btn-get-started scrollto">Login</a>
-        <a href="https://www.youtube.com/watch?v=LXb3EKWsInQ" class="glightbox btn-watch-video d-flex align-items-center"><i class="bi bi-play-circle"></i><span>Watch Video</span></a>
+        <a href="https://www.youtube.com/watch?v=8U_a_tTdLDA&pp=ygUOTFRPIENPTU1FUkNJQUw%3D" class="glightbox btn-watch-video d-flex align-items-center"><i class="bi bi-play-circle"></i><span>Watch Video</span></a>
       </div>
     </div>
   </section>
