@@ -21,21 +21,35 @@ class DashboardController extends Controller
 {
     public function indexa()
     {
-        $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        
-        // Fetch sales for today
-        $salesToday = TasFile::whereDate('created_at', today())->count();
-
         // Fetch revenue for this month
         $revenueThisMonth = TasFile::whereMonth('created_at', now())->count();
+    
+        // Fetch revenue for the previous month
+        $previousMonthRevenue = TasFile::whereMonth('created_at', Carbon::now()->subMonth())->count();
+    
+        // Calculate the percentage change
+        $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
+    
+        $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
 
+        // Fetch recent activity
+        $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
+    
+        // Fetch sales for today
+        $salesToday = TasFile::whereDate('created_at', today())->count();
+    
         // Fetch customers for this year
         $customersThisYear = TasFile::whereYear('created_at', now())->count();
-
+    
+        // Fetch recent sales for today
         $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        $recentViolationsToday = $this->getRecentViolationsToday();
-        return view('index', compact('recentActivity', 'recentViolationsToday','recentSalesToday','salesToday', 'revenueThisMonth', 'customersThisYear'));
-        }
+    
+        // Calculate average violations for the previous week
+        $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])
+                                ->count() / 7;
+    
+        return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
+    }
         public function getRecentViolationsToday()
         {
             // Retrieve all recent violations, regardless of the date

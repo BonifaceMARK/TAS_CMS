@@ -30,23 +30,30 @@
         <!-- Left side columns -->
         <div class="col-lg-8">
           <div class="row">
-
-          <!-- Sales Card -->
+<!-- Sales Card -->
 <div class="col-xxl-4 col-md-6">
     <div class="card info-card sales-card">
         <div class="card-body">
             <h5 class="card-title"> {{ date('l') }} <span> | Violations Today</span></h5> <!-- Display today's date -->
             <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                <i class="bi bi-cone-striped"></i>
+                    <i class="bi bi-cone-striped"></i>
                 </div>
                 <div class="ps-3">
                     <h6>{{ $salesToday }}</h6> <!-- Display sales for today -->
+                    @if($averageSalesLastWeek > 0)
+                    @php
+                        $percentageChange = (($salesToday - $averageSalesLastWeek) / $averageSalesLastWeek) * 100;
+                    @endphp
+                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-</div><!-- End Sales Card -->
+</div>
+<!-- End Sales Card -->
+
 
 <!-- Revenue Card -->
 <div class="col-xxl-4 col-md-6">
@@ -55,15 +62,23 @@
             <h5 class="card-title">{{ date('F') }} <span> | This Month</span></h5> <!-- Display current month name -->
             <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                <i class="bi bi-exclamation-diamond-fill"></i>
+                    <i class="bi bi-exclamation-diamond-fill"></i>
                 </div>
                 <div class="ps-3">
                     <h6>{{ $revenueThisMonth }}</h6> <!-- Display revenue for this month -->
+                    @if($previousMonthRevenue > 0)
+                    @php
+                        $percentageChange = (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100;
+                    @endphp
+                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-</div><!-- End Revenue Card -->
+</div>
+<!-- End Revenue Card -->
+
 
 <!-- Customers Card -->
 <div class="col-xxl-4 col-xl-12">
@@ -72,15 +87,23 @@
             <h5 class="card-title">{{ date('Y') }}<span> | This Year</span></h5> <!-- Display current year -->
             <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                <i class="bi bi-exclamation-triangle"></i>
+                    <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <div class="ps-3">
                     <h6>{{ $customersThisYear }}</h6> <!-- Display customers for this year -->
+                    @if($previousYearCustomers > 0)
+                    @php
+                        $percentageChange = (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100;
+                    @endphp
+                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-</div><!-- End Customers Card -->
+</div>
+<!-- End Customers Card -->
+
 
 
 <!-- Reports -->
