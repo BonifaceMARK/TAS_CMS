@@ -113,6 +113,17 @@
                                 Please enter a valid password (at least 8 characters).
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-control" id="role" name="role" required>
+                                <option selected="selected" disabled="disabled">Select Role</option>
+                                <option value="1">Employee</option>
+                                <option value="2">Administrator</option>
+                            </select>
+                            <div class="invalid-tooltip">
+                                Please select a role.
+                            </div>
+                        </div>
                         <button type="button" id="addUserBtn" class="btn btn-primary">Add User</button>
                     </form>
                                  
@@ -125,9 +136,68 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script>
-$(document).ready(function() {$("#addUserBtn").click(function(event) {event.preventDefault();if ($("#fullname").val() === '' || $("#username").val() === '' || $("#email").val() === '' || $("#password").val() === '') {if ($("#fullname").val() === '') {$("#fullname").addClass("is-invalid");$("#fullname").next(".invalid-tooltip").text("Please enter a valid full name.");}if ($("#username").val() === '') {$("#username").addClass("is-invalid");$("#username").next(".invalid-tooltip").text("Please enter a valid username.");}if ($("#email").val() === '') {$("#email").addClass("is-invalid");$("#email").next(".invalid-tooltip").text("Please enter a valid email address.");}if ($("#password").val() === '') {$("#password").addClass("is-invalid");$("#password").next(".invalid-tooltip").text("Please enter a valid password (at least 8 characters).");}return false; }var formData = {fullname: $("#fullname").val(),username: $("#username").val(),email: $("#email").val(),password: $("#password").val(),_token: $('input[name="_token"]').val()};$.ajax({url: "/store-user",type: 'POST',data: formData,
-success: function(response) {$('#addUserModal').modal('hide');alert('User added successfully!');location.reload();},error: function(xhr, status, error) {alert('An error occurred while adding the user.');}});});$("#fullname, #username, #email, #password").focus(function() {$(this).removeClass("is-invalid").next(".invalid-tooltip").text("");});});
+    $(document).ready(function() {
+        $("#addUserBtn").click(function(event) {
+            event.preventDefault();
+
+            // Validation for required fields
+            if ($("#fullname").val() === '' || $("#username").val() === '' || $("#email").val() === '' || $("#password").val() === '' || $("#role").val() === '') {
+                if ($("#fullname").val() === '') {
+                    $("#fullname").addClass("is-invalid");
+                    $("#fullname").next(".invalid-tooltip").text("Please enter a valid full name.");
+                }
+                if ($("#username").val() === '') {
+                    $("#username").addClass("is-invalid");
+                    $("#username").next(".invalid-tooltip").text("Please enter a valid username.");
+                }
+                if ($("#email").val() === '') {
+                    $("#email").addClass("is-invalid");
+                    $("#email").next(".invalid-tooltip").text("Please enter a valid email address.");
+                }
+                if ($("#password").val() === '') {
+                    $("#password").addClass("is-invalid");
+                    $("#password").next(".invalid-tooltip").text("Please enter a valid password (at least 8 characters).");
+                }
+                if ($("#role").val() === '') {
+                    $("#role").addClass("is-invalid");
+                    $("#role").next(".invalid-tooltip").text("Please select a role.");
+                }
+                return false;
+            }
+
+            var formData = {
+                fullname: $("#fullname").val(),
+                username: $("#username").val(),
+                email: $("#email").val(),
+                password: $("#password").val(),
+                role: $("#role").val(),
+                _token: $('input[name="_token"]').val()
+            };
+
+            $.ajax({
+                url: "/administrator/store-user",
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    $('#addUserModal').modal('hide');
+                    alert('User added successfully!');
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    // Show the error message from the server
+                    var errorMessage = xhr.responseJSON.message;
+                    alert('Error: ' + errorMessage);
+                }
+            });
+        });
+
+        // Clear validation classes and messages on focus
+        $("#fullname, #username, #email, #password, #role").focus(function() {
+            $(this).removeClass("is-invalid").next(".invalid-tooltip").text("");
+        });
+    });
 </script>
+
 
 
 

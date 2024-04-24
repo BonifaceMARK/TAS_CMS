@@ -9,21 +9,33 @@
         </a>
       </li><!-- End Dashboard Nav -->
       <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
+      <li class="nav-heading">Contested Case</li>
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.manage')}}">
           <i class="bi bi-layout-text-window-reverse"></i><span>Manage TAS</span>
         </a>
       </li><!-- End Tables Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.view')}}">
+          <i class="bi bi-layout-text-window-reverse"></i><span>View TAS</span>
+        </a>
+      </li><!-- End Tables Nav -->
       <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
+      <li class="nav-heading">Admitted Case</li>
 
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.manage')}}">
+          <i class="bi bi-layout-text-window-reverse"></i><span>Manage TAS</span>
+        </a>
+      </li><!-- End Tables Nav -->
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.view')}}">
           <i class="bi bi-layout-text-window-reverse"></i><span>View TAS</span>
         </a>
       </li><!-- End Tables Nav -->
    
-
+      <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
       <li class="nav-heading">Manage Users</li>
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('profile', ['id' => Auth::id()]) }}">

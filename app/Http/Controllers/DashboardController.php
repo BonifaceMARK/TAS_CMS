@@ -247,6 +247,7 @@ public function getChartData()
                 'fullname' => $request->input('fullname'),
                 'username' => $request->input('username'),
                 'email' => $request->input('email'),
+                'role' => $request->input('role'),
                 'password' => bcrypt($request->input('password')),
             ]);
     
