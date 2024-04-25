@@ -12,6 +12,8 @@ use App\Models\admitted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\TrafficViolation;
+use App\Models\fileviolation;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -28,10 +30,10 @@ class DashboardController extends Controller
         // Fetch revenue for the previous month
         $previousMonthRevenue = TasFile::whereMonth('created_at', Carbon::now()->subMonth())->count();
     
-        // Calculate the percentage change
-        $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
+        // // Calculate the percentage change
+        // $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
     
-        $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
+        // $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
 
         // Fetch recent activity
         $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
@@ -48,12 +50,12 @@ class DashboardController extends Controller
         // Calculate average violations for the previous week
         $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])
                                 ->count() / 7;
-    
-        return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
+
+        return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+       // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
         public function getRecentViolationsToday()
         {
-            // Retrieve all recent violations, regardless of the date
             $recentViolationsToday = TasFile::orderBy('transaction_date', 'desc')
                 ->get();
         
@@ -73,6 +75,17 @@ class DashboardController extends Controller
     public function tasView()
     {
         $tasFiles = TasFile::paginate(10);
+
+        foreach ($tasFiles as $tasFile) {
+            // Decode the JSON data representing violations
+            $violations = json_decode($tasFile->violation);
+        
+            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+        
+            $tasFile->relatedViolations = $relatedViolations;
+        }
+        // dd($relatedViolations);
+        
         return view('tas.view', compact('tasFiles'));
     }
     public function admitmanage()
@@ -81,10 +94,20 @@ class DashboardController extends Controller
     }
 
     public function admitview()
-    {
-        $tasFiles = TasFile::paginate(10);
-        return view('admitted.view', compact('tasFiles'));
+{
+    // Retrieve admitted data
+    $admitted = Admitted::paginate(10);
+    foreach ($admitted as $admit) {
+        $violations = json_decode($admit->violation);
+    
+        $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+    
+        $admit->relatedViolations = $relatedViolations;
     }
+
+    // Pass the modified admitted data to the view
+    return view('admitted.view', compact('admitted'));
+}
 
     public function saveRemarks(Request $request)
     {
@@ -92,46 +115,108 @@ class DashboardController extends Controller
             'remarks' => 'required|string|max:255',
             'tas_file_id' => 'required|exists:tas_files,id', 
         ]);
-
         try {
             $id = $request->input('tas_file_id');
+            $remarks = $request->input('remarks');
             $tasFile = TasFile::findOrFail($id);
-            $tasFile->REMARKS = $request->input('remarks');
-            $tasFile->save();
-            return back()->with('success', 'Remarks saved successfully!');
+            $existingRemarks = json_decode($tasFile->remarks, true) ?? [];
+            $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
+            $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
+            $existingRemarks[] = $newRemark;
+            $updatedRemarksJson = json_encode($existingRemarks);
+            DB::beginTransaction();
+            $tasFile->update(['remarks' => $updatedRemarksJson]);
+            DB::commit();
+            return redirect()->back()->with('success', 'Remarks Updated');
         } catch (\Throwable $th) {
+            DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
             return back()->with('error', 'Failed to save remarks. Please try again later.');
         }
     }
 
-    public function submitForm(Request $request)
+    public function submitForm(Request $request) // contest manage
     {
-        try {
+        // dd($request->all());
+         try {
+        $validatedData = $request->validate([
+            'case_no' => 'required|string',
+            'top' => 'nullable|string',
+            'name' => 'required|string',
+            'violation' => 'required|string',
+            'transaction_no' => 'nullable|string',
+            'contact_no' => 'required|string',
+            'plate_no' => 'required|string',
+            'file_attachment' => 'nullable|array',
+            'file_attachment.*' => 'nullable|file|max:5120',
+        ]);
+        DB::beginTransaction();
+        $existingTasFile = TasFile::where('case_no', $validatedData['case_no'])->first();
+        if (!$existingTasFile) {
+            $tasFile = new TasFile([
+                'case_no' => $validatedData['case_no'],
+                'top' => $validatedData['top'],
+                'name' => $validatedData['name'],
+                'violation' => json_encode(explode(', ', $validatedData['violation'])),
+                'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
+                'plate_no' => $validatedData['plate_no'],
+                'contact_no' => $validatedData['contact_no'],
+            ]);
+            if ($request->hasFile('file_attachment')) {
+                $filePaths = [];
+                $cx = 1;
+                foreach ($request->file('file_attachment') as $file) {
+                    $x = $validatedData['case_no'] . "_documents_" . $cx . "_";
+                    $fileName = $x . time();
+                    $file->storeAs('attachments', $fileName, 'public');
+                    $filePaths[] = 'attachments/' . $fileName;
+                    $cx++;
+                }
+                $tasFile->file_attach = json_encode($filePaths);
+            }
+            $tasFile->save();
+        } else {
+            return redirect()->back()->with('error', 'Case no. already exists.');
+        }
+        DB::commit();
+        return redirect()->back()->with('success', 'Form submitted successfully!');
+    } catch (ValidationException $e) {
+        return redirect()->back()->with('error', $e->getMessage());
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', $e->getMessage());
+    }
+    }
+    public function admittedsubmit(Request $request) // admitted
+    {
+         // dd($request->all());
+         try {
             $validatedData = $request->validate([
-                'case_no' => 'required|string',
-                'top' => 'required|string',
+                'top' => 'nullable|string',
+                'resolution_no' => 'nullable|string',
                 'name' => 'required|string',
                 'violation' => 'required|string',
-                'transaction_no' => 'required|string',
+                'transaction_no' => 'nullable|string',
                 'contact_no' => 'required|string',
-                'transaction_date' => 'required|date',
+                'plate_no' => 'required|string',
                 'file_attachment' => 'nullable|array',
                 'file_attachment.*' => 'nullable|file|max:5120',
             ]);
-    
             DB::beginTransaction();
-            $existingTasFile = TasFile::where('case_no', $validatedData['case_no'])->first();
-            if (!$existingTasFile) {
-                $tasFile = new TasFile([
-                    'case_no' => $validatedData['case_no'],
+            $existingadmitted = admitted::where('resolution_no', $validatedData['resolution_no'])->first();
+            if (!$existingadmitted) {
+                $admitted = new admitted([
+                    'resolution_no' => $validatedData['resolution_no'],
                     'top' => $validatedData['top'],
                     'name' => $validatedData['name'],
-                    'violation' => $validatedData['violation'],
-                    'transaction_no' => $validatedData['transaction_no'],
+                    'violation' => json_encode(explode(', ', $validatedData['violation'])),
+                    'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
+                    'plate_no' => $validatedData['plate_no'],
                     'contact_no' => $validatedData['contact_no'],
-                    'transaction_date' => $validatedData['transaction_date'],
+                    
                 ]);
+                
                 if ($request->hasFile('file_attachment')) {
                     $filePaths = [];
                     $cx = 1;
@@ -142,57 +227,43 @@ class DashboardController extends Controller
                         $filePaths[] = 'attachments/' . $fileName;
                         $cx++;
                     }
-                    $tasFile->file_attach = json_encode($filePaths);
+                    $admitted->file_attach = json_encode($filePaths);
                 }
     
-                $tasFile->save();
+                $admitted->save();
             } else {
-                return redirect()->back()->with('error', 'Case no. already exists.');
+                return redirect()->back()->with('error', 'resolution no. already exists.');
             }
-    
             DB::commit();
             return redirect()->back()->with('success', 'Form submitted successfully!');
         } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors());
+            return redirect()->back()->with('error', $e->getMessage());
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
 public function getChartData()
 {
-    // Fetch data from the database
     $tasFiles = TasFile::all();
-
-    // Transform the data into the format expected by ApexCharts
     $chartData = $tasFiles->map(function ($tasFile) {
         return [
             'name' => $tasFile->violation,
-            'data' => [$tasFile->case_no], // Use the case_no field as the value
-        ];
-    });
-
-        return response()->json($chartData);
+            'data' => [$tasFile->case_no], 
+        ];});return response()->json($chartData);
     }
 
     private function getTodayData()
     {
-        // Fetch data for today
         $chartData = TasFile::whereDate('created_at', today())->get();
-
-        // Process the data as needed for the chart
         $formattedData = $this->formatChartData($chartData);
-
         return $formattedData;
     }
 
     private function getThisMonthData()
     {
-        // Fetch data for this month
         $chartData = TasFile::whereMonth('created_at', today())->get();
-
-        // Process the data as needed for the chart
         $formattedData = $this->formatChartData($chartData);
 
         return $formattedData;
@@ -200,18 +271,13 @@ public function getChartData()
 
     private function getThisYearData()
     {
-        // Fetch data for this year
         $chartData = TasFile::whereYear('created_at', today())->get();
-
-        // Process the data as needed for the chart
         $formattedData = $this->formatChartData($chartData);
-
         return $formattedData;
     }
 
     private function formatChartData($chartData)
     {
-        // Process the fetched data into the format expected by ApexCharts
         $formattedData = [
             'categories' => $chartData->pluck('name')->toArray(),
             'series' => [[
@@ -319,6 +385,7 @@ public function getChartData()
                 'username' => $request->input('username'),
                 'email' => $request->input('email'),
                 'role' => $request->input('role'),
+                'email_verified_at' => now(),
                 'password' => bcrypt($request->input('password')),
             ]);
     

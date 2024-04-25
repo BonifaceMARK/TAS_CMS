@@ -80,10 +80,10 @@
                         <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
                             <td>{{ $tasFile->name }}</td>
                             <td>{{ $tasFile->case_no }}</td>
-                            <td>{{ $tasFile->top }}</td>
+                            <td>{{ $tasFile->top ? $tasFile->top : 'N/A' }}</td>
                             <td>{{ $tasFile->violation }}</td>
-                            <td>{{ $tasFile->transaction_no }}</td>
-                            <td>{{ $tasFile->transaction_date }}</td>
+                            <td>{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</td>
+                            <td>{{ $tasFile->created_at }}</td>
                             <td>
                                 @if ($tasFile->file_attach)
                                     <ul class="list-unstyled">
@@ -217,52 +217,121 @@
 
 @foreach($tasFiles as $tasFile)
 <div class="modal fade" id="exampleModal{{ $tasFile->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Case No: <strong>{{ $tasFile->case_no }}</strong> </h5><span> | Details for: <strong>{{ $tasFile->name }}</strong></span>
+                <h5 class="modal-title" id="exampleModalLabel">Case No: <strong>{{ $tasFile->case_no }}</strong> | Details for: <strong>{{ $tasFile->name }}</strong></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="/save-remarks" method="POST">
+            
+@if (Auth::user()->role == 1)
+<form action="{{ route('save.remarks') }}" method="POST">
+
                 @csrf
                 <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Basic Information</h6>
-                            <hr>
-                            <p><strong>Name:</strong> {{ $tasFile->name }}</p>
                             <p><strong>Case No:</strong> {{ $tasFile->case_no }}</p>
-                            <p><strong>Top:</strong> {{ $tasFile->top }}</p>
+                            <p><strong>Name:</strong> {{ $tasFile->name }}</p>
+                            <p><strong>Top:</strong> {{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
+                            <p><strong>Contact No:</strong> {{ $tasFile->contact_no }}</p>
+                            <hr>
+                            <h5>Violation Details</h5>
+                            <p><strong>Plate No:</strong> {{ $tasFile->plate_no }}</p>
+                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
+                            <p><strong>Violations:</strong></p>
+                            
+                                @foreach ($tasFile->relatedViolations as $violation)
+                                <ul>
+                                    <li>
+                                        {{ $violation->id }} - {{ $violation->violation }}
+                                    </li>
+                                </ul>
+                                @endforeach
+                            
+                            <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                         </div>
                         <div class="col-md-6">
-                            <h6>Violation Details</h6>
-                            <hr>
-                            <p><strong>Violation:</strong> {{ $tasFile->violation }}</p>
-                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no }}</p>
-                            <p><strong>Violation:</strong> {{ $tasFile->violation }}</p>
-                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no }}</p>
-                            <p><strong>Transaction Date:</strong> {{ $tasFile->transaction_date }}</p>
+                            <h6>Remarks</h6>
+                            @if ($tasFile->remarks)
+                                <ul>
+                                    @php
+                                        $remarks = json_decode($tasFile->remarks);
+                                        $remarks = array_reverse($remarks);
+                                    @endphp
+                                    @foreach ($remarks as $remark)
+                                        <li>{{ $remark }}</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p>No remarks available.</p>
+                            @endif
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-12">
-                            <h6>Remarks</h6>
+                            <h6>Add Remark</h6>
                             <hr>
-                            <textarea class="form-control" name="remarks" rows="5">{{ $tasFile->remarks }}</textarea>
+                            <textarea class="form-control" name="remarks" rows="5"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Save Remarks</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <!-- Add action buttons here if needed -->
                 </div>
             </form>
+@else
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Case No:</strong> {{ $tasFile->case_no }}</p>
+                            <p><strong>Name:</strong> {{ $tasFile->name }}</p>
+                            <p><strong>Top:</strong> {{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
+                            <p><strong>Contact No:</strong> {{ $tasFile->contact_no }}</p>
+                            <hr>
+                            <h5>Violation Details</h5>
+                            <p><strong>Plate No:</strong> {{ $tasFile->plate_no }}</p>
+                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
+                            <p><strong>Violations:</strong></p>
+                            
+                                @foreach ($tasFile->relatedViolations as $violation)
+                                <ul>
+                                    <li>
+                                        {{ $violation->id }} - {{ $violation->violation }}
+                                    </li>
+                                </ul>
+                                @endforeach
+                            
+                            <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Remarks</h6>
+                            @if ($tasFile->remarks)
+                                <ul>
+                                    @php
+                                        $remarks = json_decode($tasFile->remarks);
+                                        $remarks = array_reverse($remarks);
+                                    @endphp
+                                    @foreach ($remarks as $remark)
+                                        <li>{{ $remark }}</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p>No remarks available.</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
         </div>
     </div>
 </div>
 @endforeach
+
+
 </div>
 </section>
 

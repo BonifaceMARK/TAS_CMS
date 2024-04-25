@@ -41,12 +41,12 @@
                 </div>
                 <div class="ps-3">
                     <h6>{{ $salesToday }}</h6> <!-- Display sales for today -->
-                    @if($averageSalesLastWeek > 0)
+                    {{-- @if($averageSalesLastWeek > 0)
                     @php
                         $percentageChange = (($salesToday - $averageSalesLastWeek) / $averageSalesLastWeek) * 100;
                     @endphp
                     <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif
+                    @endif --}}
                 </div>
             </div>
         </div>
@@ -66,12 +66,12 @@
                 </div>
                 <div class="ps-3">
                     <h6>{{ $revenueThisMonth }}</h6> <!-- Display revenue for this month -->
-                    @if($previousMonthRevenue > 0)
+                    {{-- @if($previousMonthRevenue > 0)
                     @php
                         $percentageChange = (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100;
                     @endphp
                     <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif
+                    @endif --}}
                 </div>
             </div>
         </div>
@@ -91,12 +91,12 @@
                 </div>
                 <div class="ps-3">
                     <h6>{{ $customersThisYear }}</h6> <!-- Display customers for this year -->
-                    @if($previousYearCustomers > 0)
+                    {{-- @if($previousYearCustomers > 0)
                     @php
                         $percentageChange = (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100;
                     @endphp
                     <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif
+                    @endif --}}
                 </div>
             </div>
         </div>
@@ -228,7 +228,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($recentViolationsToday as $violation)
+                    {{-- @forelse($recentViolationsToday as $violation)
                     <tr>
                         <th scope="row"><a href="#">{{ $violation->id }}</a></th>
                         <td>{{ $violation->name }}</td>
@@ -241,7 +241,7 @@
                     <tr>
                         <td colspan="6" class="text-center">No recent Violations for today.</td>
                     </tr>
-                    @endforelse
+                    @endforelse --}}
                 </tbody>
             </table>
 

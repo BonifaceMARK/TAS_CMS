@@ -115,8 +115,8 @@
                             <label for="role" class="form-label">Role</label>
                             <select class="form-control" id="role" name="role" required>
                                 <option selected="selected" disabled="disabled">Select Role</option>
-                                <option value="1">Employee</option>
-                                <option value="2">Administrator</option>
+                                <option value="0">Employee</option>
+                                <option value="1">Administrator</option>
                             </select>
                             <div class="invalid-tooltip">
                                 Please select a role.
