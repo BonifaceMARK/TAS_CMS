@@ -89,6 +89,11 @@ class DashboardController extends Controller
         return view('tas.manage');
     }
 
+    public function caseIndex()
+    {
+        return view('case_archives');
+    }
+
     public function tasView()
     {
         $tasFiles = TasFile::paginate(10);
