@@ -51,17 +51,20 @@
                         <form method="POST" action="{{ route('submitForm.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
                             @csrf
                             <div class="col-md-6 position-relative">
+                                <label for="validationTooltipdate" class="form-label">Date Received</label>
+                                <input type="date" name="date_received" class="form-control" id="validationTooltipdate" required>
+                                <div class="invalid-tooltip">
+                                    Please input date.
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
                                 <label for="validationTooltipCaseno" class="form-label">Case no.</label>
                                 <input type="number" name="case_no" class="form-control" id="validationTooltipCaseno" min="1" max="9999999" required>
                                 <div class="invalid-tooltip">
                                     Please enter a valid Case no. (Number only)
                                 </div>
                             </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipTOP" class="form-label">TOP</label>
-                                <input type="text" name="top" class="form-control" id="validationTooltipTOP">
-                                
-                            </div>
+                            
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipofficer" class="form-label">Apprehending Officer</label>
                                 <input type="text" name="apprehending_officer" class="form-control" id="validationTooltipofficer" required>
@@ -77,13 +80,19 @@
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
+                                <label for="validationTooltipplate" class="form-label">Plate no.</label>
+                                <input type="text" name="plate_no" class="form-control" id="validationTooltipplate" required>
+                                <div class="invalid-tooltip">
+                                    Please provide a Plate no.
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
                                 <label for="validationTooltipViolation" class="form-label">Violation</label>
                                 <input type="text" name="violation" class="form-control" id="validationTooltipViolation" required>
                                 <div class="invalid-tooltip">
                                     Please provide a violation.
                                 </div>
                             </div>
-
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipTransac" class="form-label">Transaction No.</label>
                                 <input type="text" name="transaction_no" class="form-control" id="validationTooltipTransac">
@@ -92,19 +101,18 @@
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
+                                <label for="validationTooltipTOP" class="form-label">TOP</label>
+                                <input type="text" name="top" class="form-control" id="validationTooltipTOP">
+                            </div>
+                            
+                            <div class="col-md-6 position-relative">
                                 <label for="validationTooltipContac" class="form-label">Contact no.</label>
-                                <input type="text" name="contact_no" class="form-control" id="validationTooltipContac" required>
+                                <input type="text" name="contact_no" class="form-control" id="validationTooltipContac" value="N/A" required>
                                 <div class="invalid-tooltip">
                                     Please provide a Contact no.
                                 </div>
                             </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipplate" class="form-label">Plate no.</label>
-                                <input type="text" name="plate_no" class="form-control" id="validationTooltipplate" required>
-                                <div class="invalid-tooltip">
-                                    Please provide a Plate no.
-                                </div>
-                            </div>
+                            
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipFile" class="form-label">File Attachment (optional)</label>
                                 <input type="file" name="file_attachment[]" class="form-control" id="validationTooltipFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>

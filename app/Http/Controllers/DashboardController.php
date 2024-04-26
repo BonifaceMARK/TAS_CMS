@@ -200,6 +200,7 @@ class DashboardController extends Controller
             'apprehending_officer' => 'required|string',
             'violation' => 'required|string',
             'transaction_no' => 'nullable|string',
+            'date_received' => 'required|date',
             'contact_no' => 'required|string',
             'plate_no' => 'required|string',
             'file_attachment' => 'nullable|array',
@@ -216,6 +217,7 @@ class DashboardController extends Controller
                 'violation' => json_encode(explode(', ', $validatedData['violation'])),
                 'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                 'plate_no' => $validatedData['plate_no'],
+                'date_received' => $validatedData['date_received'],
                 'contact_no' => $validatedData['contact_no'],
             ]);
             if ($request->hasFile('file_attachment')) {
@@ -257,6 +259,7 @@ class DashboardController extends Controller
                 'transaction_no' => 'nullable|string',
                 'contact_no' => 'required|string',
                 'plate_no' => 'required|string',
+                'date_received' => 'required|date',
                 'file_attachment' => 'nullable|array',
                 'file_attachment.*' => 'nullable|file|max:5120',
             ]);
@@ -270,6 +273,7 @@ class DashboardController extends Controller
                     'driver' => $validatedData['driver'],
                     'apprehending_officer' => $validatedData['apprehending_officer'],
                     'violation' => json_encode(explode(', ', $validatedData['violation'])),
+                    'date_received' => $validatedData['date_received'],
                     'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                     'plate_no' => $validatedData['plate_no'],
                     'contact_no' => $validatedData['contact_no'],

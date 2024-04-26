@@ -18,7 +18,7 @@ class TasFile extends Model
         'apprehending_officer',
         'violation',
         'transaction_no',
-        'transaction_date',
+        'date_received',
         'contact_no', 
         'plate_no',
         'remarks',

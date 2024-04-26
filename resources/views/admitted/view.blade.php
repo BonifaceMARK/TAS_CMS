@@ -246,7 +246,7 @@
                             <p><strong>Contact No:</strong> {{ $admit->contact_no}}</p>
                             <p><strong>Top:</strong> {{ $admit->top ? $admit->top : 'N/A' }}</p>
                             <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
-                            <p><strong>Transaction Date:</strong> {{ $admit->created_at }}</p>
+                            <p><strong>Received Date:</strong> {{ $admit->date_received }}</p>
                             <hr>
                             <h6>Violation Details</h6>
                             <p><strong>Plate No: {{$admit->plate_no}}</strong></p>

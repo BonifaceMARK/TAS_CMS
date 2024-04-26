@@ -18,7 +18,7 @@ class admitted extends Model
         'apprehending_officer',
         'violation',
         'transaction_no',
-        'transaction_date',
+        'date_received',
         'plate_no',
         'contact_no', 
         'remarks',

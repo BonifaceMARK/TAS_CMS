@@ -328,7 +328,8 @@
                 <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
                 <div class="activity-content">
                     <p><strong>Case No:</strong> {{ $activity->case_no }}</p>
-                    <p><strong>Name:</strong> {{ $activity->name }}</p>
+                    <p><strong>Driver:</strong> {{ $activity->driver }}</p>
+                    <p><strong>Apprehending Officer:</strong> {{ $activity->apprehending_officer }}</p>
                     <p><strong>Violation:</strong> {{ $activity->violation }}</p>
                     <p><strong>Transaction No:</strong> {{ $activity->transaction_no }}</p>
                     <!-- Add more details as needed -->
