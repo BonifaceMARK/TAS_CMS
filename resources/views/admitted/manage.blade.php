@@ -100,10 +100,10 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ $admitted->id }}">Edit</button>
+                                        <button type="button" class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal{{$admitted->id}}" data-id="{{ $admitted->id }}">Edit</button>
                                     </td>
                                 </tr>
-                            @endforeach
+                       
                         </tbody>
                     </table>
                 </div>
@@ -114,74 +114,77 @@
         </div>
     </div>
 </div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Edit Admitted Case</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
+    <!-- Edit Modal for Admitted Case {{$admitted->id}} -->
+    <div class="modal fade" id="editModal{{$admitted->id}}" tabindex="-1" aria-labelledby="editModalLabel{{$admitted->id}}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel{{$admitted->id}}">Resolution No:  {{$admitted->id}}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
                     <!-- Edit Form -->
-                    <form id="editForm">
-                    <div class="row g-3">
-                        <!-- Top -->
-                        <div class="col-md-6">
-                            <label for="editTop" class="form-label">Top</label>
-                            <input type="text" class="form-control" id="editTop" name="editTop">
+                    <form action="{{ route('admitted-cases.update', ['id' => $admitted->id]) }}" method="POST" class="editForm">
+                        @csrf
+                        @method('PUT') <!-- Add this method spoofing for PUT request -->
+                        <div class="row g-3">
+                            <!-- Top -->
+                            <div class="col-md-6">
+                                <label for="editTop{{$admitted->id}}" class="form-label">Top</label>
+                                <input type="text" class="form-control" id="editTop{{$admitted->id}}" name="editTop" value="{{$admitted->top}}">
+                            </div>
+                            <!-- Name -->
+                            <div class="col-md-6">
+                                <label for="editName{{$admitted->id}}" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="editName{{$admitted->id}}" name="editName" value="{{$admitted->name}}">
+                            </div>
+                            <!-- Violation -->
+                            <div class="col-md-6">
+                                <label for="editViolation{{$admitted->id}}" class="form-label">Violation</label>
+                                <input type="text" class="form-control" id="editViolation{{$admitted->id}}" name="editViolation" value="{{$admitted->violation}}">
+                            </div>
+                            <!-- Transaction No -->
+                            <div class="col-md-6">
+                                <label for="editTransactionNo{{$admitted->id}}" class="form-label">Transaction No</label>
+                                <input type="text" class="form-control" id="editTransactionNo{{$admitted->id}}" name="editTransactionNo" value="{{$admitted->transaction_no}}">
+                            </div>
+                            <!-- Transaction Date -->
+                            <div class="col-md-6">
+                                <label for="editTransactionDate{{$admitted->id}}" class="form-label">Transaction Date</label>
+                                <input type="date" class="form-control" id="editTransactionDate{{$admitted->id}}" name="editTransactionDate" value="{{$admitted->transaction_date}}">
+                            </div>
+                            <!-- Plate No -->
+                            <div class="col-md-6">
+                                <label for="editPlateNo{{$admitted->id}}" class="form-label">Plate No</label>
+                                <input type="text" class="form-control" id="editPlateNo{{$admitted->id}}" name="editPlateNo" value="{{$admitted->plate_no}}">
+                            </div>
+                            <!-- Contact No -->
+                            <div class="col-md-6">
+                                <label for="editContactNo{{$admitted->id}}" class="form-label">Contact No</label>
+                                <input type="text" class="form-control" id="editContactNo{{$admitted->id}}" name="editContactNo" value="{{$admitted->contact_no}}">
+                            </div>
+                            <!-- Remarks -->
+                            <div class="col-12">
+                                <label for="editRemarks{{$admitted->id}}" class="form-label">Remarks</label>
+                                <textarea class="form-control" id="editRemarks{{$admitted->id}}" name="editRemarks" rows="3">{{$admitted->remarks}}</textarea>
+                            </div>
                         </div>
-                        <!-- Name -->
-                        <div class="col-md-6">
-                            <label for="editName" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="editName" name="editName">
-                        </div>
-                        <!-- Violation -->
-                        <div class="col-md-6">
-                            <label for="editViolation" class="form-label">Violation</label>
-                            <input type="text" class="form-control" id="editViolation" name="editViolation">
-                        </div>
-                        <!-- Transaction No -->
-                        <div class="col-md-6">
-                            <label for="editTransactionNo" class="form-label">Transaction No</label>
-                            <input type="text" class="form-control" id="editTransactionNo" name="editTransactionNo">
-                        </div>
-                        <!-- Transaction Date -->
-                        <div class="col-md-6">
-                            <label for="editTransactionDate" class="form-label">Transaction Date</label>
-                            <input type="date" class="form-control" id="editTransactionDate" name="editTransactionDate">
-                        </div>
-                        <!-- Plate No -->
-                        <div class="col-md-6">
-                            <label for="editPlateNo" class="form-label">Plate No</label>
-                            <input type="text" class="form-control" id="editPlateNo" name="editPlateNo">
-                        </div>
-                        <!-- Contact No -->
-                        <div class="col-md-6">
-                            <label for="editContactNo" class="form-label">Contact No</label>
-                            <input type="text" class="form-control" id="editContactNo" name="editContactNo">
-                        </div>
-                        <!-- Remarks -->
-                        <div class="col-12">
-                            <label for="editRemarks" class="form-label">Remarks</label>
-                            <textarea class="form-control" id="editRemarks" name="editRemarks" rows="3"></textarea>
-                        </div>
-                    </div>
+              
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary saveChangesBtn" data-modalid="{{$admitted->id}}">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="saveChangesBtn">Save Changes</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
-</div>
+@endforeach
 
 <script>
     $(document).ready(function() {
         // Initialize draggable behavior when modal is shown
-        $('#editModal').on('shown.bs.modal', function() {
+        $('#editModal{{$admitted->id}}').on('shown.bs.modal', function() {
             $(this).find('.modal-dialog').draggable({
                 handle: ".modal-header" // Define the draggable handle
             });
@@ -198,7 +201,7 @@
                             @csrf
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipRC" class="form-label">Resolution No.</label>
-                                <input type="text" name="resolution_no" class="form-control" id="validationTooltipRC" >
+                                <input type="text" name="resolution_no" class="form-control" id="validationTooltipRC">
                                 <div class="invalid-tooltip">
                                     Please provide a Resolution Case no.
                                 </div>
@@ -211,17 +214,10 @@
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
-                                <label for="validationTooltipofficer" class="form-label">Apprehending Officer</label>
-                                <input type="text" name="apprehending_officer" class="form-control" id="validationTooltipofficer" required>
+                                <label for="validationTooltipName" class="form-label">Name</label>
+                                <input type="text" name="name" class="form-control" id="validationTooltipName" required>
                                 <div class="invalid-tooltip">
-                                    Please provide a Apprehending Officer.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipdriver" class="form-label">Driver</label>
-                                <input type="text" name="driver" class="form-control" id="validationTooltipdriver" required>
-                                <div class="invalid-tooltip">
-                                    Please provide a Driver.
+                                    Please provide a name.
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">

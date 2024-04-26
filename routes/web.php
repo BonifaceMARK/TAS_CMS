@@ -32,6 +32,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
         Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');
         Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view');
+        Route::get('/archives', [DashboardController::class, 'caseIndex'])->name('case.view');
+
         Route::post('/manageTAS', [DashboardController::class, 'submitForm'])->name('submitForm.tas');
        
         Route::get('/admitTAS', [DashboardController::class, 'admitview'])->name('admitted.view');
@@ -53,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/add-user', [DashboardController::class, 'add_user'])->name('add.user');
         Route::post('/store-user', [DashboardController::class, 'store_user'])->name('store.user');
 
-        Route::post('/update-admitted', [DashboardController::class, 'updateAdmitted'])->name('admitted.update');
+        Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
     
 });
 

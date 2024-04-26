@@ -45,12 +45,12 @@
 
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.manage')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>Add Contested Case</span>
+      <i class="bi bi-menu-button"></i><span>Add Contested Case</span>
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.view')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>View Contested Cases</span>
+      <i class="bi bi-menu-button"></i><span>View Contested Cases</span>
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
@@ -58,12 +58,12 @@
 
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('admitted.manage')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>Add Admitted Case</span>
+      <i class="bi bi-file-earmark-check"></i><span>Add Admitted Case</span>
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('admitted.view')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>View Admitted Cases</span>
+      <i class="bi bi-file-earmark-check"></i><span>View Admitted Cases</span>
       </a>
     </li><!-- End Tables Nav -->
  
@@ -79,6 +79,14 @@
       <a class="nav-link collapsed" href="{{route('user_management')}}">
         <i class="bi bi-person-fill-add"></i>
         <span>User Management</span>
+      </a>
+    </li><!-- End Profile Page Nav -->
+
+    <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="{{route('case.view')}}">
+      <i class="bi bi-file-earmark-zip-fill"></i>
+        <span>Case Archives</span>
       </a>
     </li><!-- End Profile Page Nav -->
   </ul>

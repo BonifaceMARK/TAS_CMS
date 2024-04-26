@@ -88,6 +88,44 @@ class DashboardController extends Controller
     {
         return view('tas.manage');
     }
+    public function updateAdmittedCase(Request $request, $id)
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'editTop' => 'required|string',
+            'editName' => 'required|string',
+            'editViolation' => 'required|string',
+            'editTransactionNo' => 'required|string',
+            'editTransactionDate' => 'required|date',
+            'editPlateNo' => 'required|string',
+            'editContactNo' => 'required|string',
+            'editRemarks' => 'nullable|string',
+        ]);
+
+        // Find the admitted case by id
+        $admittedCase = AdmittedCase::findOrFail($id);
+
+        // Update attributes
+        $admittedCase->update([
+            'top' => $request->input('editTop'),
+            'name' => $request->input('editName'),
+            'violation' => $request->input('editViolation'),
+            'transaction_no' => $request->input('editTransactionNo'),
+            'transaction_date' => $request->input('editTransactionDate'),
+            'plate_no' => $request->input('editPlateNo'),
+            'contact_no' => $request->input('editContactNo'),
+            'remarks' => $request->input('editRemarks'),
+            // Add other attributes if needed
+        ]);
+
+        // Redirect back or to a success page
+        return redirect()->back()->with('success', 'Admitted case updated successfully');
+    }
+
+    public function caseIndex()
+    {
+        return view('case_archives');
+    }
 
     public function tasView()
     {
