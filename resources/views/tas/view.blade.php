@@ -228,10 +228,7 @@
             </div>
             
 @if (Auth::user()->role == 1)
-<form action="{{ route('save.remarks') }}" method="POST">
 
-                @csrf
-                <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
