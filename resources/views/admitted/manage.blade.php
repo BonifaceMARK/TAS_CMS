@@ -43,9 +43,77 @@
                         
                         <h5 class="card-title">Admitted Case - Input     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
                             View Violations
-                        </button></h5>
+                        </button>                       <!-- Button to trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admittedModal">
+    Edit Admitted Cases
+</button></h5>
                            
-                        
+ <!-- Modal -->
+<div class="modal fade" id="admittedModal" tabindex="-1" aria-labelledby="admittedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl custom-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="admittedModalLabel">Admitted Cases</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="custom-table-header">
+                            <tr>
+                                <th>Top</th>
+                                <th>Name</th>
+                                <th>Violation</th>
+                                <th>Transaction No</th>
+                                <th>Transaction Date</th>
+                                <th>Plate No</th>
+                                <th>Contact No</th>
+                                <th>Remarks</th>
+                                <th>File Attach</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($admitteds as $admitted)
+                                <tr>
+                                    <td>{{ $admitted->top }}</td>
+                                    <td>{{ $admitted->name }}</td>
+                                    <td>{{ $admitted->violation }}</td>
+                                    <td>{{ $admitted->transaction_no }}</td>
+                                    <td>{{ $admitted->transaction_date }}</td>
+                                    <td>{{ $admitted->plate_no }}</td>
+                                    <td>{{ $admitted->contact_no }}</td>
+                                    <td>{{ $admitted->remarks }}</td>
+                                    <td>
+                @if ($admitted->file_attach)
+                    @php
+                        $filePaths = json_decode($admitted->file_attach);
+                    @endphp
+                    @if ($filePaths)
+                        <ul class="list-unstyled">
+                            @foreach ($filePaths as $filePath)
+                                <li>
+                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                @endif
+            </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
                     
                            
                         <!-- Form Start -->

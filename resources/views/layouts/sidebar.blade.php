@@ -39,12 +39,12 @@
 
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.manage')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>Contest Manage</span>
+        <i class="bi bi-layout-text-window-reverse"></i><span>Add Contested Case</span>
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.view')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>Contest View</span>
+        <i class="bi bi-layout-text-window-reverse"></i><span>View Contested Cases</span>
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
@@ -52,12 +52,12 @@
 
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('admitted.manage')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>Admitted Manage</span>
+        <i class="bi bi-layout-text-window-reverse"></i><span>Add Admitted Case</span>
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('admitted.view')}}">
-        <i class="bi bi-layout-text-window-reverse"></i><span>Admitted View</span>
+        <i class="bi bi-layout-text-window-reverse"></i><span>View Admitted Cases</span>
       </a>
     </li><!-- End Tables Nav -->
  

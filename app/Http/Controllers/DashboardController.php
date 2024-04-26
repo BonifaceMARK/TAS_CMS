@@ -50,8 +50,25 @@ class DashboardController extends Controller
         // Calculate average violations for the previous week
         $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])
                                 ->count() / 7;
+    // Retrieve data for the chart
+    $admittedData = Admitted::all();
 
-        return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+    // Prepare data for chart
+    $chartData = $admittedData->map(function ($item) {
+        $violationCount = 0;
+        if ($item->violation) {
+            $violations = json_decode($item->violation);
+            $violationCount = is_array($violations) ? count($violations) : 0;
+        }
+
+        return [
+            'name' => $item->name,
+            'violation_count' => $violationCount,
+            'transaction_date' => $item->transaction_date,
+        ];
+    });
+
+        return view('index', compact('chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
         public function getRecentViolationsToday()
@@ -75,34 +92,49 @@ class DashboardController extends Controller
     public function tasView()
     {
         $tasFiles = TasFile::paginate(10);
-
+    
         foreach ($tasFiles as $tasFile) {
             // Decode the JSON data representing violations
             $violations = json_decode($tasFile->violation);
-        
-            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
-        
+            
+            if ($violations !== null && is_array($violations) && count($violations) > 0) {
+                $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            } else {
+                $relatedViolations = [];
+            }
+            
             $tasFile->relatedViolations = $relatedViolations;
+            
+            // Reverse remarks array if it exists
+            $remarks = json_decode($tasFile->remarks);
+            $tasFile->remarks = is_array($remarks) ? array_reverse($remarks) : [];
         }
-        // dd($relatedViolations);
         
         return view('tas.view', compact('tasFiles'));
     }
+    
+    
     public function admitmanage()
     {
-        return view('admitted.manage');
+        $admitteds = Admitted::all(); // Retrieve all admitted cases
+        return view('admitted.manage', compact('admitteds'));
     }
 
     public function admitview()
 {
     // Retrieve admitted data
     $admitted = Admitted::paginate(10);
+
     foreach ($admitted as $admit) {
         $violations = json_decode($admit->violation);
-    
-        $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
-    
-        $admit->relatedViolations = $relatedViolations;
+
+        // Check if $violations is not null
+        if ($violations !== null) {
+            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            $admit->relatedViolations = $relatedViolations;
+        } else {
+            $admit->relatedViolations = []; // Set an empty array if $violations is null
+        }
     }
 
     // Pass the modified admitted data to the view
@@ -243,50 +275,6 @@ class DashboardController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
-    }
-public function getChartData()
-{
-    $tasFiles = TasFile::all();
-    $chartData = $tasFiles->map(function ($tasFile) {
-        return [
-            'name' => $tasFile->violation,
-            'data' => [$tasFile->case_no], 
-        ];});return response()->json($chartData);
-    }
-
-    private function getTodayData()
-    {
-        $chartData = TasFile::whereDate('created_at', today())->get();
-        $formattedData = $this->formatChartData($chartData);
-        return $formattedData;
-    }
-
-    private function getThisMonthData()
-    {
-        $chartData = TasFile::whereMonth('created_at', today())->get();
-        $formattedData = $this->formatChartData($chartData);
-
-        return $formattedData;
-    }
-
-    private function getThisYearData()
-    {
-        $chartData = TasFile::whereYear('created_at', today())->get();
-        $formattedData = $this->formatChartData($chartData);
-        return $formattedData;
-    }
-
-    private function formatChartData($chartData)
-    {
-        $formattedData = [
-            'categories' => $chartData->pluck('name')->toArray(),
-            'series' => [[
-                'name' => 'Bar Chart',
-                'data' => $chartData->pluck('value')->toArray()
-            ]]
-        ];
-
-        return $formattedData;
     }
 
 

@@ -1308,3 +1308,19 @@ h6 {
 .calendar-date:hover {
     background-color: #e0e0e0;
 }
+/* Custom CSS */
+.custom-modal {
+  width: 100vw; /* 100% of the viewport width */
+  max-width: none; /* Remove max-width to allow full width */
+  margin: 0; /* Remove default margin */
+}
+
+.custom-modal .modal-content {
+  height: 100vh; /* 100% of the viewport height */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds viewport height */
+}
+/* Custom CSS */
+.custom-table-header {
+  background-color: #343a40; /* Example color */
+  color: #ffffff; /* Text color */
+}
