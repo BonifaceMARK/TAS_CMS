@@ -26,9 +26,10 @@ class TasFileFactory extends Factory
             'top' => $this->faker->sentence(),
             'apprehending_officer' => $this->faker->name(),
             'driver' => $this->faker->name(),
-            'violation' => $this->faker->word(),
+            'violation' => $this->faker->numberBetween(1, 10), // Update to generate a number between 1 and 10
+
             'transaction_no' => $this->faker->uuid(),
-            'transaction_date' => $this->faker->date(),
+            'date_received' => $this->faker->date(), // Changed to 'date_received' to match the migration
             'contact_no' => $this->faker->phoneNumber(), // Added contact_no field
             'plate_no' => $this->faker->bothify('???-####'),
             'remarks' => $this->faker->sentence(),

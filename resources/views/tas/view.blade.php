@@ -265,20 +265,28 @@
                         </div>
                         <div class="col-md-6">
                             <h6>Remarks</h6>
-                            @if ($tasFile->remarks)
-                                <ul>
-                                    @php
-                                        $remarks = json_decode($tasFile->remarks);
-                                        $remarks = array_reverse($remarks);
-                                    @endphp
-                                    @foreach ($remarks as $remark)
-                                        <li>{{ $remark }}</li>
-                                        <br><br>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
+                            @if ($tasFile->remarks !== null)
+    <ul>
+        @php
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+        @endphp
+
+        @foreach ($remarks as $remark)
+            <li>{{ $remark }}</li>
+            <br><br>
+        @endforeach
+    </ul>
+@else
+    <p>No remarks available.</p>
+@endif
+
                         </div>
                     </div>
                     <div class="row mt-3">
