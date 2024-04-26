@@ -96,13 +96,14 @@ class DashboardController extends Controller
         foreach ($tasFiles as $tasFile) {
             // Decode the JSON data representing violations
             $violations = json_decode($tasFile->violation);
-            
-            if ($violations !== null && is_array($violations) && count($violations) > 0) {
+        
+            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            if ($violations) {
                 $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
             } else {
+                // If $violations is null, set $relatedViolations to an empty collection
                 $relatedViolations = [];
             }
-            
             $tasFile->relatedViolations = $relatedViolations;
             
             // Reverse remarks array if it exists
@@ -127,14 +128,15 @@ class DashboardController extends Controller
 
     foreach ($admitted as $admit) {
         $violations = json_decode($admit->violation);
-
-        // Check if $violations is not null
-        if ($violations !== null) {
+    
+        if ($violations) {
             $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
-            $admit->relatedViolations = $relatedViolations;
         } else {
-            $admit->relatedViolations = []; // Set an empty array if $violations is null
+            // If $violations is null, set $relatedViolations to an empty collection
+            $relatedViolations = [];
         }
+    
+        $admit->relatedViolations = $relatedViolations;
     }
 
     // Pass the modified admitted data to the view
