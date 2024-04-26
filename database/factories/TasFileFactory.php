@@ -1,6 +1,5 @@
 <?php
 // database/factories/TasFileFactory.php
-
 namespace Database\Factories;
 
 use App\Models\TasFile;
@@ -23,14 +22,19 @@ class TasFileFactory extends Factory
     public function definition()
     {
         return [
-            'CASE_NO' => $this->faker->randomNumber(5),
-            'TOP' => $this->faker->sentence(),
-            'NAME' => $this->faker->name(),
-            'VIOLATION' => $this->faker->word(),
-            'TRANSACTION_NO' => $this->faker->uuid(),
+            'case_no' => $this->faker->randomNumber(5),
+            'top' => $this->faker->sentence(),
+            'apprehending_officer' => $this->faker->name(),
+            'driver' => $this->faker->name(),
+            'violation' => $this->faker->word(),
+            'transaction_no' => $this->faker->uuid(),
             'transaction_date' => $this->faker->date(),
-            'REMARKS' => $this->faker->sentence(),
+            'contact_no' => $this->faker->phoneNumber(), // Added contact_no field
+            'plate_no' => $this->faker->bothify('???-####'),
+            'remarks' => $this->faker->sentence(),
+            'file_attach' => $this->faker->imageUrl(), 
+            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
         ];
     }
 }
-

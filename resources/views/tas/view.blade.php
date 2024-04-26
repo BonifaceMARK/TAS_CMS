@@ -88,15 +88,20 @@
                             <td>{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</td>
                             <td>{{ $tasFile->created_at }}</td>
                             <td>
-                                @if ($tasFile->file_attach)
-                                    <ul class="list-unstyled">
-                                        @foreach (json_decode($tasFile->file_attach) as $filePath)
-                                            <li>
-                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                            @if (!is_null($tasFile->file_attach))
+    @php
+        $decodedFiles = json_decode($tasFile->file_attach, true);
+    @endphp
+
+    @if (!is_null($decodedFiles))
+        @foreach ($decodedFiles as $filePath)
+            <li>
+                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+            </li>
+        @endforeach
+    @endif
+@endif
+</ul>
                             </td>
                         </tr>
                     @endforeach

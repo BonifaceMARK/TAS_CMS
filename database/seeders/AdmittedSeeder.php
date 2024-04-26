@@ -1,6 +1,6 @@
 <?php
-
 namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use App\Models\Admitted;
 use Faker\Factory as Faker;
@@ -18,8 +18,10 @@ class AdmittedSeeder extends Seeder
 
         foreach (range(1, 10) as $index) {
             Admitted::create([
+                'resolution_no' => $faker->randomNumber(5),
                 'top' => $faker->randomElement(['A', 'B', 'C']),
-                'name' => $faker->name,
+                'apprehending_officer' => $faker->name,
+                'driver' => $faker->name,
                 'violation' => $faker->sentence(3),
                 'transaction_no' => $faker->uuid,
                 'transaction_date' => $faker->date,
