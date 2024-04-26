@@ -88,6 +88,13 @@
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
+                                <label for="validationTooltipdate" class="form-label">Date Received</label>
+                                <input type="date" name="date_received" class="form-control" id="validationTooltipdate" required>
+                                <div class="invalid-tooltip">
+                                    Please input date.
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
                                 <label for="validationTooltipplate" class="form-label">Plate no.</label>
                                 <input type="text" name="plate_no" class="form-control" id="validationTooltipplate" required>
                                 <div class="invalid-tooltip">

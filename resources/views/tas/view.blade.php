@@ -245,7 +245,7 @@
                             <p><strong>Contact No:</strong> {{ $tasFile->contact_no }}</p>
                             <p><strong>TOP:</strong> {{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
                             <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
-                            <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
+                            <p><strong>Received Date:</strong> {{ $tasFile->date_received }}</p>
                             <hr>
                             <h5>Violation Details</h5>
                             <p><strong>Plate No:</strong> {{ $tasFile->plate_no }}</p>
