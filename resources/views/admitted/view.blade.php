@@ -65,7 +65,8 @@
             <thead class="thead-light">
                 <tr>
                     <th>Resolution No.</th>
-                    <th>Name</th>
+                    <th>Apprehending Officer</th>
+                    <th>Driver</th>
                     <th>Top</th>
                     <th>Violation</th>
                     <th>Transaction No</th>
@@ -76,11 +77,12 @@
             </thead>
             <!-- Table body -->
             <tbody>
-            @if ($admitted)
+           @if ($admitted)
     @foreach ($admitted as $admit)
         <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
             <td>{{ $admit->resolution_no }}</td>
-            <td>{{ $admit->name }}</td>
+            <td>{{ $admit->apprehending_officer }}</td>
+            <td>{{ $admit->driver }}</td>
             <td>{{ $admit->top }}</td>
             <td>{{ $admit->violation }}</td>
             <td>{{ $admit->transaction_no }}</td>
@@ -100,35 +102,12 @@
                             @endforeach
                         </ul>
                     @endif
-                @if ($admitted)
-                    @foreach ($admitted as $admit)
-                        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
-                            <td>{{ $admit->resolution_no }}</td>
-                            <td>{{ $admit->name }}</td>
-                            <td>{{ $admit->top }}</td>
-                            <td>{{ $admit->violation }}</td>
-                            <td>{{ $admit->transaction_no }}</td>
-                            <td>{{ $admit->created_at }}</td>
-                            <td>
-                                @if ($admit->file_attach)
-                                    <ul class="list-unstyled">
-                                        @foreach (json_decode($admit->file_attach) as $filePath)
-                                            <li>
-                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                    @else
-                    <td>No Admitted Files.</td>
                 @endif
             </td>
         </tr>
     @endforeach
 @endif
+
 
             </tbody>
         </table>
@@ -255,7 +234,7 @@
                 <h5 class="modal-title" id="exampleModalLabel">Resolution No: <strong>{{ $admit->resolution_no }}</strong> | Details for: <strong>{{ $admit->name }}</strong></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('save.remarks') }}" method="POST">
+            <form action="{{ route('admitremark') }}" method="POST">
                 @csrf
                 <input type="hidden" name="tas_file_id" value="{{ $admit->id }}">
                 <div class="modal-body">
@@ -263,14 +242,15 @@
                         <div class="col-md-6">
                             <hr>
                             <p><strong>Resolution No:</strong> {{ $admit->resolution_no }}</p>
-                            <p><strong>Name:</strong> {{ $admit->name }}</p>
-                            <p><strong>Top:</strong> {{ $admit->top ? $admit->top : 'N/A' }}</p>
+                            <p><strong>Driver:</strong> {{ $admit->driver }}</p>
                             <p><strong>Contact No:</strong> {{ $admit->contact_no}}</p>
+                            <p><strong>Top:</strong> {{ $admit->top ? $admit->top : 'N/A' }}</p>
+                            <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
+                            <p><strong>Transaction Date:</strong> {{ $admit->created_at }}</p>
                             <hr>
                             <h6>Violation Details</h6>
                             <p><strong>Plate No: {{$admit->plate_no}}</strong></p>
-                            <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
-                            <p><strong>Contact No:</strong><td> {{ $admit->contact_no }}</td>
+                            <p><strong>Apprehending Officer:</strong><td> {{ $admit->apprehending_officer }}</td>
                             <p><strong>Violations:</strong></p>
                             <ul>
                                 @foreach ($admit->relatedViolations as $violation)
@@ -279,30 +259,30 @@
                                     </li>
                                 @endforeach
                             </ul>
-                            <p><strong>Transaction Date:</strong> {{ $admit->created_at }}</p>
+                            
                         </div>
                         <div class="col-md-6">
-    <h6>Remarks</h6>
-    @if ($admit->remarks)
-        @php
-            $remarks = json_decode($admit->remarks);
-            // Check if $remarks is not null before reversing
-            $remarks = ($remarks !== null) ? array_reverse($remarks) : [];
-        @endphp
-        @if (!empty($remarks))
-            <ul>
-                @foreach ($remarks as $remark)
-                    <li>{{ $remark }}</li>
-                @endforeach
-            </ul>
-        @else
-            <p>No remarks available.</p>
-        @endif
-    @else
-        <p>No remarks available.</p>
-    @endif
-</div>
-
+                            <h6>Remarks</h6>
+                            @if ($admit->remarks)
+                                @php
+                                    $remarks = json_decode($admit->remarks);
+                                    // Check if $remarks is not null before reversing
+                                    $remarks = ($remarks !== null) ? array_reverse($remarks) : [];
+                                @endphp
+                                @if (!empty($remarks))
+                                    <ul>
+                                        @foreach ($remarks as $remark)
+                                            <li>{{ $remark }}</li>
+                                            <br><br>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p>No remarks available.</p>
+                                @endif
+                            @else
+                                <p>No remarks available.</p>
+                            @endif
+                        </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-12">

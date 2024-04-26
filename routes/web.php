@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admitTAS', [DashboardController::class, 'admitview'])->name('admitted.view');
         Route::get('/admit.manageform', [DashboardController::class, 'admitmanage'])->name('admitted.manage');
         Route::post('/admit.manageform', [DashboardController::class, 'admittedsubmit'])->name('admittedsubmit.tas');
+        
+        Route::post('/admit-remarks', [DashboardController::class, 'admitremark'])->name('admitremark');
         Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
         Route::get('/getChartData', [DashboardController::class, 'getChartData']);
         Route::get('/{id}/profile', [DashboardController::class, 'profile'])->name('profile');

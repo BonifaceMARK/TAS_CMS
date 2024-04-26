@@ -211,10 +211,17 @@
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">
-                                <label for="validationTooltipName" class="form-label">Name</label>
-                                <input type="text" name="name" class="form-control" id="validationTooltipName" required>
+                                <label for="validationTooltipofficer" class="form-label">Apprehending Officer</label>
+                                <input type="text" name="apprehending_officer" class="form-control" id="validationTooltipofficer" required>
                                 <div class="invalid-tooltip">
-                                    Please provide a name.
+                                    Please provide a Apprehending Officer.
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="validationTooltipdriver" class="form-label">Driver</label>
+                                <input type="text" name="driver" class="form-control" id="validationTooltipdriver" required>
+                                <div class="invalid-tooltip">
+                                    Please provide a Driver.
                                 </div>
                             </div>
                             <div class="col-md-6 position-relative">

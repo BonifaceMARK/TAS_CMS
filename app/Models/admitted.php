@@ -14,7 +14,8 @@ class admitted extends Model
     protected $fillable = [
         'resolution_no',
         'top',
-        'name',
+        'driver',
+        'apprehending_officer',
         'violation',
         'transaction_no',
         'transaction_date',
@@ -58,7 +59,14 @@ class admitted extends Model
     {
         $this->attributes['contact_no'] = strtoupper($value);
     }
-
+    public function setdriverAttribute($value)
+    {
+        $this->attributes['driver'] = strtoupper($value);
+    }
+    public function setofficerAttribute($value)
+    {
+        $this->attributes['apprehending_officer'] = strtoupper($value);
+    }
     // Define mutator for 'plate_no' field
     public function setPlateNoAttribute($value)
     {

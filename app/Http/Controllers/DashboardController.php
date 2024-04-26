@@ -106,14 +106,10 @@ class DashboardController extends Controller
             if ($violations) {
                 $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
             } else {
-                // If $violations is null, set $relatedViolations to an empty collection
                 $relatedViolations = [];
             }
             $tasFile->relatedViolations = $relatedViolations;
             
-            // Reverse remarks array if it exists
-            $remarks = json_decode($tasFile->remarks);
-            $tasFile->remarks = is_array($remarks) ? array_reverse($remarks) : [];
         }
         
         return view('tas.view', compact('tasFiles'));
@@ -148,10 +144,10 @@ class DashboardController extends Controller
     return view('admitted.view', compact('admitted'));
 }
 
-    public function saveRemarks(Request $request)
+    public function saveRemarks(Request $request) //contested case
     {
         $request->validate([
-            'remarks' => 'required|string|max:255',
+            'remarks' => 'required|string',
             'tas_file_id' => 'required|exists:tas_files,id', 
         ]);
         try {
@@ -173,7 +169,31 @@ class DashboardController extends Controller
             return back()->with('error', 'Failed to save remarks. Please try again later.');
         }
     }
-
+    public function admitremark(Request $request) //admitted remarks
+    {
+        $request->validate([
+            'remarks' => 'required|string',
+            'tas_file_id' => 'required|exists:tas_files,id', 
+        ]);
+        try {
+            $id = $request->input('tas_file_id');
+            $remarks = $request->input('remarks');
+            $admitted = admitted::findOrFail($id);
+            $existingRemarks = json_decode($admitted->remarks, true) ?? [];
+            $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
+            $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
+            $existingRemarks[] = $newRemark;
+            $updatedRemarksJson = json_encode($existingRemarks);
+            DB::beginTransaction();
+            $admitted->update(['remarks' => $updatedRemarksJson]);
+            DB::commit();
+            return redirect()->back()->with('success', 'Remarks Updated');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            logger()->error('Error saving remarks: ' . $th->getMessage());
+            return back()->with('error', 'Failed to save remarks. Please try again later.');
+        }
+    }
     public function submitForm(Request $request) // contest manage
     {
         // dd($request->all());
@@ -181,7 +201,8 @@ class DashboardController extends Controller
         $validatedData = $request->validate([
             'case_no' => 'required|string',
             'top' => 'nullable|string',
-            'name' => 'required|string',
+            'driver' => 'required|string',
+            'apprehending_officer' => 'required|string',
             'violation' => 'required|string',
             'transaction_no' => 'nullable|string',
             'contact_no' => 'required|string',
@@ -195,7 +216,8 @@ class DashboardController extends Controller
             $tasFile = new TasFile([
                 'case_no' => $validatedData['case_no'],
                 'top' => $validatedData['top'],
-                'name' => $validatedData['name'],
+                'driver' => $validatedData['driver'],
+                'apprehending_officer' => $validatedData['apprehending_officer'],
                 'violation' => json_encode(explode(', ', $validatedData['violation'])),
                 'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                 'plate_no' => $validatedData['plate_no'],
@@ -234,7 +256,8 @@ class DashboardController extends Controller
             $validatedData = $request->validate([
                 'top' => 'nullable|string',
                 'resolution_no' => 'nullable|string',
-                'name' => 'required|string',
+                'driver' => 'required|string',
+                'apprehending_officer' => 'required|string',
                 'violation' => 'required|string',
                 'transaction_no' => 'nullable|string',
                 'contact_no' => 'required|string',
@@ -249,7 +272,8 @@ class DashboardController extends Controller
                 $admitted = new admitted([
                     'resolution_no' => 'CS-' . $currentYear .'-'. $validatedData['resolution_no'],
                     'top' => $validatedData['top'],
-                    'name' => $validatedData['name'],
+                    'driver' => $validatedData['driver'],
+                    'apprehending_officer' => $validatedData['apprehending_officer'],
                     'violation' => json_encode(explode(', ', $validatedData['violation'])),
                     'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                     'plate_no' => $validatedData['plate_no'],

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('resolution_no')->nullable();
             $table->string('top')->nullable();
-            $table->string('name')->nullable();
+            $table->string('apprehending_officer')->nullable();
+            $table->string('driver')->nullable();
             $table->string('violation')->nullable();
             $table->string('transaction_no')->nullable();
             $table->date('transaction_date')->nullable();
