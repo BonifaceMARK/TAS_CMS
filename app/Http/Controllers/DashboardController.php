@@ -81,7 +81,12 @@ class DashboardController extends Controller
             $violations = json_decode($tasFile->violation);
         
             $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
-        
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            } else {
+                // If $violations is null, set $relatedViolations to an empty collection
+                $relatedViolations = [];
+            }
             $tasFile->relatedViolations = $relatedViolations;
         }
         // dd($relatedViolations);
@@ -100,7 +105,12 @@ class DashboardController extends Controller
     foreach ($admitted as $admit) {
         $violations = json_decode($admit->violation);
     
-        $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+        if ($violations) {
+            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+        } else {
+            // If $violations is null, set $relatedViolations to an empty collection
+            $relatedViolations = [];
+        }
     
         $admit->relatedViolations = $relatedViolations;
     }
@@ -222,7 +232,7 @@ class DashboardController extends Controller
                     $filePaths = [];
                     $cx = 1;
                     foreach ($request->file('file_attachment') as $file) {
-                        $x = $validatedData['case_no'] . "_documents_" . $cx . "_";
+                        $x = $validatedData['resolution_no'] . "_documents_" . $cx . "_";
                         $fileName = $x . time();
                         $file->storeAs('attachments', $fileName, 'public');
                         $filePaths[] = 'attachments/' . $fileName;

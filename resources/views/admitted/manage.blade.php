@@ -53,7 +53,7 @@
                             @csrf
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipRC" class="form-label">Resolution No.</label>
-                                <input type="text" name="resolution_no" class="form-control" id="validationTooltipRC">
+                                <input type="text" name="resolution_no" class="form-control" id="validationTooltipRC" >
                                 <div class="invalid-tooltip">
                                     Please provide a Resolution Case no.
                                 </div>
