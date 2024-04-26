@@ -7,6 +7,12 @@
         <span>Dashboard</span>
       </a>
     </li><!-- End Dashboard Nav -->
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{ route('tas.view', [], false) }}">
+          <i class="bi bi-file-earmark-text"></i><span> Add Violation</span>
+      </a>
+  </li>
+  </li><!-- End Tables Nav -->
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">Contested Case</li>
     <li class="nav-item">

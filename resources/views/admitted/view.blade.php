@@ -97,6 +97,8 @@
                             </td>
                         </tr>
                     @endforeach
+                    @else
+                    <td>No Admitted Files.</td>
                 @endif
             </tbody>
         </table>
@@ -230,12 +232,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <hr>
-                            <h6>Basic Information</h6>
                             <p><strong>Resolution No:</strong> {{ $admit->resolution_no }}</p>
                             <p><strong>Name:</strong> {{ $admit->name }}</p>
                             <p><strong>Top:</strong> {{ $admit->top ? $admit->top : 'N/A' }}</p>
+                            <p><strong>Contact No:</strong> {{ $admit->contact_no}}</p>
                             <hr>
                             <h6>Violation Details</h6>
+                            <p><strong>Plate No: {{$admit->plate_no}}</strong></p>
                             <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
                             <p><strong>Violations:</strong></p>
                             <ul>
