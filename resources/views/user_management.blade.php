@@ -173,7 +173,7 @@
             };
 
             $.ajax({
-                url: "/administrator/store-user",
+                url: "{{route('store.user')}}",
                 type: 'POST',
                 data: formData,
                 success: function(response) {

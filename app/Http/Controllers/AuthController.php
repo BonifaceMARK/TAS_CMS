@@ -37,13 +37,16 @@ public function login(Request $request)
         if ($validatedData && Auth::attempt($validatedData) ) {
             $user = Auth::user();
             $user->update(['isactive' => 1]);
-
-            if ($user->role == 1) {
-                return redirect()->to('/administrator/dashboard');
-            }  else {
-                return redirect()->to('/employee/dashboard');
-            }
             
+            // if ($user->role == 1) {
+            //     $dash = redirect()->to('/administrator/dashboard');
+            //     // dd($dash);
+            //     return $dash;
+
+            // }  else {
+            //     return redirect()->to('/employee/dashboard');
+            // }
+            return redirect()->to('/dashboard');
         } else {
             throw new \Exception('Invalid credentials. Please try again.');
         }

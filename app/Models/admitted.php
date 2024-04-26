@@ -12,6 +12,7 @@ class admitted extends Model
     protected $table = 'admitteds';
 
     protected $fillable = [
+        'resolution_no',
         'top',
         'name',
         'violation',
@@ -30,7 +31,10 @@ class admitted extends Model
     {
         $this->attributes['top'] = strtoupper($value);
     }
-
+    public function setResolutionnoAttribute($value)
+    {
+        $this->attributes['resolution_no'] = strtoupper($value);
+    }
     // Define mutator for 'name' field
     public function setNameAttribute($value)
     {

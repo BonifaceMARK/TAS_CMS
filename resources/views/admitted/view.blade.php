@@ -100,6 +100,30 @@
                             @endforeach
                         </ul>
                     @endif
+                @if ($admitted)
+                    @foreach ($admitted as $admit)
+                        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
+                            <td>{{ $admit->resolution_no }}</td>
+                            <td>{{ $admit->name }}</td>
+                            <td>{{ $admit->top }}</td>
+                            <td>{{ $admit->violation }}</td>
+                            <td>{{ $admit->transaction_no }}</td>
+                            <td>{{ $admit->created_at }}</td>
+                            <td>
+                                @if ($admit->file_attach)
+                                    <ul class="list-unstyled">
+                                        @foreach (json_decode($admit->file_attach) as $filePath)
+                                            <li>
+                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    @else
+                    <td>No Admitted Files.</td>
                 @endif
             </td>
         </tr>
@@ -238,12 +262,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <hr>
-                            <h6>Basic Information</h6>
                             <p><strong>Resolution No:</strong> {{ $admit->resolution_no }}</p>
                             <p><strong>Name:</strong> {{ $admit->name }}</p>
                             <p><strong>Top:</strong> {{ $admit->top ? $admit->top : 'N/A' }}</p>
+                            <p><strong>Contact No:</strong> {{ $admit->contact_no}}</p>
                             <hr>
                             <h6>Violation Details</h6>
+                            <p><strong>Plate No: {{$admit->plate_no}}</strong></p>
                             <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
                             <p><strong>Contact No:</strong><td> {{ $admit->contact_no }}</td>
                             <p><strong>Violations:</strong></p>
