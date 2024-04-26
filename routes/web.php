@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/add-user', [DashboardController::class, 'add_user'])->name('add.user');
         Route::post('/store-user', [DashboardController::class, 'store_user'])->name('store.user');
 
-        Route::post('/update-admitted', [DashboardController::class, 'updateAdmitted'])->name('admitted.update');
+        Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
     
 });
 
