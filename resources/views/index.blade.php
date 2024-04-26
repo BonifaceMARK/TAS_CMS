@@ -104,95 +104,68 @@
 </div>
 <!-- End Customers Card -->
 
-
-
-<!-- Reports -->
-<div class="col-12">
-  <div class="card">
-    <div class="filter">
-      <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-      <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-        <li class="dropdown-header text-start">
-          <h6>Filter</h6>
-        </li>
-        <li><a class="dropdown-item" href="#" onclick="fetchChartData('today')">Today</a></li>
-        <li><a class="dropdown-item" href="#" onclick="fetchChartData('this_month')">This Month</a></li>
-        <li><a class="dropdown-item" href="#" onclick="fetchChartData('this_year')">This Year</a></li>
-      </ul>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div style="display: grid; place-items: center;">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reportsModal" style="background-image: url('{{ asset('assets/img/admittedreports.jpg') }}'); background-color: rgba(0, 0, 0, 0.7); background-size: cover; background-position: center; width: 300px; height: 300px;">
+          <span style="font-size: 1.5rem; font-weight: bold; color: rgba(255, 255, 255, 0.9);">Admitted Case Number of Violation Reports</span>
+        </button>
+      </div>
     </div>
-
-    <div class="card-body">
-      <h5 class="card-title">Reports <span id="filterType">/ Today</span></h5>
-
-      <!-- Bar Chart -->
-      <div id="reportsChart"></div>
-
-      <script>
-        function fetchChartData(filterType) {
-          fetch(`/getChartData?filter=${filterType}`)
-            .then(response => response.json())
-            .then(data => {
-              const categories = data.map(item => item.name);
-              const chartData = data.map(item => item.data);
-
-              renderChart(categories, chartData);
-              document.getElementById('filterType').innerText = `/ ${filterType.charAt(0).toUpperCase() + filterType.slice(1)}`;
-            })
-            .catch(error => console.error('Error fetching chart data:', error));
-        }
-
-        function renderChart(categories, chartData) {
-          new ApexCharts(document.querySelector("#reportsChart"), {
-            series: [{
-              name: 'Bar Chart',
-              data: chartData
-            }],
-            chart: {
-              height: 350,
-              type: 'bar',
-              toolbar: {
-                show: false
-              },
-            },
-            plotOptions: {
-              bar: {
-                horizontal: false,
-              }
-            },
-            dataLabels: {
-              enabled: false
-            },
-            xaxis: {
-              categories: categories,
-            },
-            yaxis: {
-              labels: {
-                formatter: function(val) {
-                  return val;
-                }
-              }
-            },
-            tooltip: {
-              y: {
-                formatter: function(val) {
-                  return val;
-                }
-              }
-            }
-          }).render();
-        }
-
-        // Fetch data for today initially
-        fetchChartData('today');
-      </script>
-      <!-- End Bar Chart -->
-
-    </div>
-
   </div>
 </div>
-<!-- End Reports -->
 
+
+
+
+
+<div class="modal fade" id="reportsModal" tabindex="-1" aria-labelledby="reportsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportsModalLabel">Violators Count Reports</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="chart"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var chartData = @json($chartData);
+
+  var options = {
+      chart: {
+          type: 'line',
+          height: 350
+      },
+      series: [{
+          name: 'Violation Count', // Change series name
+          data: chartData.map(item => item.violation_count) // Use violation count data
+      }],
+      xaxis: {
+          categories: chartData.map(item => item.name),
+          title: {
+              text: 'Name'
+          }
+      },
+      yaxis: {
+          title: {
+              text: 'Number of Violations' // Change y-axis title
+          }
+      }
+  };
+
+  var chart = new ApexCharts(document.querySelector("#chart"), options);
+  chart.render();
+</script>
 
 
 
@@ -214,7 +187,7 @@
         </div>
 
         <div class="card-body">
-            <h5 class="card-title">Recent Violations <span></span></h5>
+            <h5 class="card-title">Recent Contested Cases Added <span></span></h5>
 
             <table class="table table-borderless datatable">
                 <thead>

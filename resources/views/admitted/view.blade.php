@@ -69,12 +69,37 @@
                     <th>Top</th>
                     <th>Violation</th>
                     <th>Transaction No</th>
+                    <th>Contact No</th>
                     <th>Transaction Date</th>
                     <th>Attachment</th>
                 </tr>
             </thead>
             <!-- Table body -->
             <tbody>
+            @if ($admitted)
+    @foreach ($admitted as $admit)
+        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
+            <td>{{ $admit->resolution_no }}</td>
+            <td>{{ $admit->name }}</td>
+            <td>{{ $admit->top }}</td>
+            <td>{{ $admit->violation }}</td>
+            <td>{{ $admit->transaction_no }}</td>
+            <td>{{ $admit->contact_no }}</td>
+            <td>{{ $admit->created_at }}</td>
+            <td>
+                @if ($admit->file_attach)
+                    @php
+                        $filePaths = json_decode($admit->file_attach);
+                    @endphp
+                    @if ($filePaths)
+                        <ul class="list-unstyled">
+                            @foreach ($filePaths as $filePath)
+                                <li>
+                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 @if ($admitted)
                     @foreach ($admitted as $admit)
                         <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
@@ -100,6 +125,11 @@
                     @else
                     <td>No Admitted Files.</td>
                 @endif
+            </td>
+        </tr>
+    @endforeach
+@endif
+
             </tbody>
         </table>
     </div>
@@ -240,6 +270,7 @@
                             <h6>Violation Details</h6>
                             <p><strong>Plate No: {{$admit->plate_no}}</strong></p>
                             <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
+                            <p><strong>Contact No:</strong><td> {{ $admit->contact_no }}</td>
                             <p><strong>Violations:</strong></p>
                             <ul>
                                 @foreach ($admit->relatedViolations as $violation)
@@ -251,21 +282,27 @@
                             <p><strong>Transaction Date:</strong> {{ $admit->created_at }}</p>
                         </div>
                         <div class="col-md-6">
-                            <h6>Remarks</h6>
-                            @if ($admit->remarks)
-                                <ul>
-                                    @php
-                                        $remarks = json_decode($admit->remarks);
-                                        $remarks = array_reverse($remarks);
-                                    @endphp
-                                    @foreach ($remarks as $remark)
-                                        <li>{{ $remark }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
-                        </div>
+    <h6>Remarks</h6>
+    @if ($admit->remarks)
+        @php
+            $remarks = json_decode($admit->remarks);
+            // Check if $remarks is not null before reversing
+            $remarks = ($remarks !== null) ? array_reverse($remarks) : [];
+        @endphp
+        @if (!empty($remarks))
+            <ul>
+                @foreach ($remarks as $remark)
+                    <li>{{ $remark }}</li>
+                @endforeach
+            </ul>
+        @else
+            <p>No remarks available.</p>
+        @endif
+    @else
+        <p>No remarks available.</p>
+    @endif
+</div>
+
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-12">
