@@ -207,7 +207,7 @@ class DashboardController extends Controller
             $existingadmitted = admitted::where('resolution_no', $validatedData['resolution_no'])->first();
             if (!$existingadmitted) {
                 $admitted = new admitted([
-                    'resolution_no' => $validatedData['resolution_no'],
+                    'resolution_no' => 'CS-'.$validatedData['resolution_no'],
                     'top' => $validatedData['top'],
                     'name' => $validatedData['name'],
                     'violation' => json_encode(explode(', ', $validatedData['violation'])),

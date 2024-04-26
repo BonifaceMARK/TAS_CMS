@@ -12,27 +12,20 @@
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
 
-<!-- Your existing HTML code -->
-<li class="nav-item">
-    <span class="nav-link calendar-date" id="calendarDate">{{ date('l, F j, Y h:i:s A') }}</span>
-</li>
+        <div>
+          Time&ensp;: <span class="badge badge-primary"style="background-color: white; color: black;" id="horas">NULL</span>
+          </div>
 
         <li class="nav-item dropdown">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+        <script>
+          var myVar=setInterval(function(){myTimer()},1000);
+          function myTimer() {
+              var d = new Date();
+              document.getElementById("horas").innerHTML = d.toLocaleTimeString();
+          }
+          </script>
 
-<script>
-    // Initialize Bootstrap Datepicker
-    $(document).ready(function() {
-        $('#calendarDate').datepicker({
-            format: 'yyyy-mm-dd', // Change the format as needed
-            autoclose: true,
-            todayHighlight: true
-        });
-
-        // Add custom class to the Datepicker element
-        $('#calendarDate').datepicker('widget').addClass('datepicker');
-    });
-</script>
 
 
           <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
