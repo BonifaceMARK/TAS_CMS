@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * php artisan migrate:fresh && php artisan db:seed
+     *
      * @return void
      */
     public function up()
@@ -35,7 +35,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('tas_files');
     }

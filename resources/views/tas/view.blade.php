@@ -88,15 +88,20 @@
                             <td>{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</td>
                             <td>{{ $tasFile->created_at }}</td>
                             <td>
-                                @if ($tasFile->file_attach)
-                                    <ul class="list-unstyled">
-                                        @foreach (json_decode($tasFile->file_attach) as $filePath)
-                                            <li>
-                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                            @if (!is_null($tasFile->file_attach))
+    @php
+        $decodedFiles = json_decode($tasFile->file_attach, true);
+    @endphp
+
+    @if (!is_null($decodedFiles))
+        @foreach ($decodedFiles as $filePath)
+            <li>
+                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+            </li>
+        @endforeach
+    @endif
+@endif
+</ul>
                             </td>
                         </tr>
                     @endforeach
@@ -257,20 +262,28 @@
                         </div>
                         <div class="col-md-6">
                             <h6>Remarks</h6>
-                            @if ($tasFile->remarks)
-                                <ul>
-                                    @php
-                                        $remarks = json_decode($tasFile->remarks);
-                                        $remarks = array_reverse($remarks);
-                                    @endphp
-                                    @foreach ($remarks as $remark)
-                                        <li>{{ $remark }}</li>
-                                        <br><br>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
+                            @if ($tasFile->remarks !== null)
+    <ul>
+        @php
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+        @endphp
+
+        @foreach ($remarks as $remark)
+            <li>{{ $remark }}</li>
+            <br><br>
+        @endforeach
+    </ul>
+@else
+    <p>No remarks available.</p>
+@endif
+
                         </div>
                     </div>
                     <div class="row mt-3">

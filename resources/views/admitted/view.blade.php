@@ -114,41 +114,8 @@
     </div>
 </div>
 
-    <!-- Pagination -->
-    <div class="datatable-bottom">
-    <div class="datatable-info">
-    Showing {{ $admitted->firstItem() }} to {{ $admitted->lastItem() }} of {{ $admitted->total() }} entries
-</div>
-<nav class="datatable-pagination">
-    <ul class="datatable-pagination-list">
-        <!-- Previous Page Button -->
-        <li class="datatable-pagination-list-item">
-            @if ($admitted->onFirstPage())
-                <button class="datatable-pagination-list-item-link" disabled aria-label="Previous Page">‹</button>
-            @else
-                <a href="{{ $admitted->previousPageUrl() }}" class="datatable-pagination-list-item-link" aria-label="Previous Page">‹</a>
-            @endif
-        </li>
 
-        <!-- Page Numbers -->
-        @for ($i = 1; $i <= $admitted->lastPage(); $i++)
-            <li class="datatable-pagination-list-item">
-                <a href="{{ $admitted->url($i) }}" class="datatable-pagination-list-item-link" aria-label="Page {{ $i }}">{{ $i }}</a>
-            </li>
-        @endfor
 
-        <!-- Next Page Button -->
-        <li class="datatable-pagination-list-item">
-            @if ($admitted->hasMorePages())
-                <a href="{{ $admitted->nextPageUrl() }}" class="datatable-pagination-list-item-link" aria-label="Next Page">›</a>
-            @else
-                <button class="datatable-pagination-list-item-link" disabled aria-label="Next Page">›</button>
-            @endif
-        </li>
-    </ul>
-</nav>
-
-</div>
 
                     </div>
                     <!-- End Table with stripped rows -->

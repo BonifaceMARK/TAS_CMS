@@ -129,8 +129,9 @@ class DashboardController extends Controller
 
     public function tasView()
     {
-        $tasFiles = TasFile::paginate(10);
-    
+        $pageSize = 15; // Define the default page size
+        $tasFiles = TasFile::paginate($pageSize);
+        
         foreach ($tasFiles as $tasFile) {
             // Decode the JSON data representing violations
             $violations = json_decode($tasFile->violation);
