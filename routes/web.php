@@ -50,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/users/{user}', [DashboardController::class, 'userdestroy'])->name('users.destroy');
         Route::get('/add-user', [DashboardController::class, 'add_user'])->name('add.user');
         Route::post('/store-user', [DashboardController::class, 'store_user'])->name('store.user');
+
+        Route::post('/update-admitted', [DashboardController::class, 'updateAdmitted'])->name('admitted.update');
     
 });
 

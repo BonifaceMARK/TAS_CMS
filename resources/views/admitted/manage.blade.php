@@ -47,8 +47,7 @@
 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admittedModal">
     Edit Admitted Cases
 </button></h5>
-                           
- <!-- Modal -->
+<!-- Modal -->
 <div class="modal fade" id="admittedModal" tabindex="-1" aria-labelledby="admittedModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl custom-modal">
         <div class="modal-content">
@@ -70,6 +69,7 @@
                                 <th>Contact No</th>
                                 <th>Remarks</th>
                                 <th>File Attach</th>
+                                <th>Edit</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,26 +79,29 @@
                                     <td>{{ $admitted->name }}</td>
                                     <td>{{ $admitted->violation }}</td>
                                     <td>{{ $admitted->transaction_no }}</td>
-                                    <td>{{ $admitted->transaction_date }}</td>
+                                    <td>{{ $admitted->created_at }}</td>
                                     <td>{{ $admitted->plate_no }}</td>
                                     <td>{{ $admitted->contact_no }}</td>
                                     <td>{{ $admitted->remarks }}</td>
                                     <td>
-                @if ($admitted->file_attach)
-                    @php
-                        $filePaths = json_decode($admitted->file_attach);
-                    @endphp
-                    @if ($filePaths)
-                        <ul class="list-unstyled">
-                            @foreach ($filePaths as $filePath)
-                                <li>
-                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                @endif
-            </td>
+                                        @if ($admitted->file_attach)
+                                            @php
+                                                $filePaths = json_decode($admitted->file_attach);
+                                            @endphp
+                                            @if ($filePaths)
+                                                <ul class="list-unstyled">
+                                                    @foreach ($filePaths as $filePath)
+                                                        <li>
+                                                            <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ $admitted->id }}">Edit</button>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -111,6 +114,80 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Admitted Case</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                    <!-- Edit Form -->
+                    <form id="editForm">
+                    <div class="row g-3">
+                        <!-- Top -->
+                        <div class="col-md-6">
+                            <label for="editTop" class="form-label">Top</label>
+                            <input type="text" class="form-control" id="editTop" name="editTop">
+                        </div>
+                        <!-- Name -->
+                        <div class="col-md-6">
+                            <label for="editName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="editName" name="editName">
+                        </div>
+                        <!-- Violation -->
+                        <div class="col-md-6">
+                            <label for="editViolation" class="form-label">Violation</label>
+                            <input type="text" class="form-control" id="editViolation" name="editViolation">
+                        </div>
+                        <!-- Transaction No -->
+                        <div class="col-md-6">
+                            <label for="editTransactionNo" class="form-label">Transaction No</label>
+                            <input type="text" class="form-control" id="editTransactionNo" name="editTransactionNo">
+                        </div>
+                        <!-- Transaction Date -->
+                        <div class="col-md-6">
+                            <label for="editTransactionDate" class="form-label">Transaction Date</label>
+                            <input type="date" class="form-control" id="editTransactionDate" name="editTransactionDate">
+                        </div>
+                        <!-- Plate No -->
+                        <div class="col-md-6">
+                            <label for="editPlateNo" class="form-label">Plate No</label>
+                            <input type="text" class="form-control" id="editPlateNo" name="editPlateNo">
+                        </div>
+                        <!-- Contact No -->
+                        <div class="col-md-6">
+                            <label for="editContactNo" class="form-label">Contact No</label>
+                            <input type="text" class="form-control" id="editContactNo" name="editContactNo">
+                        </div>
+                        <!-- Remarks -->
+                        <div class="col-12">
+                            <label for="editRemarks" class="form-label">Remarks</label>
+                            <textarea class="form-control" id="editRemarks" name="editRemarks" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveChangesBtn">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialize draggable behavior when modal is shown
+        $('#editModal').on('shown.bs.modal', function() {
+            $(this).find('.modal-dialog').draggable({
+                handle: ".modal-header" // Define the draggable handle
+            });
+        });
+    });
+</script>
 
 
 

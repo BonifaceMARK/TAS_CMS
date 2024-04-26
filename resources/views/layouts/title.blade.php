@@ -3,9 +3,12 @@
 
 <head>
   <meta charset="utf-8">
+  
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>@yield('title', config('app.name'))</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -31,6 +34,9 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<!-- jQuery UI (Make sure to include jQuery as well) -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
   <!-- Template Main CSS File -->
   <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">

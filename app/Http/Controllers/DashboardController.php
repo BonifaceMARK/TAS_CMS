@@ -254,7 +254,7 @@ class DashboardController extends Controller
                     $filePaths = [];
                     $cx = 1;
                     foreach ($request->file('file_attachment') as $file) {
-                        $x = $validatedData['case_no'] . "_documents_" . $cx . "_";
+                        $x = $validatedData['resolution_no'] . "_documents_" . $cx . "_";
                         $fileName = $x . time();
                         $file->storeAs('attachments', $fileName, 'public');
                         $filePaths[] = 'attachments/' . $fileName;
@@ -278,7 +278,37 @@ class DashboardController extends Controller
         }
     }
 
+    public function updateAdmitted(Request $request)
+    {
+        // Validate the incoming request data if needed
+        // $request->validate([...]);
 
+        // Extract data from the request
+        $data = $request->only([
+            'resolution_no',
+            'top',
+            'name',
+            'violation',
+            'transaction_no',
+            'transaction_date',
+            'plate_no',
+            'contact_no',
+            'remarks',
+            'file_attach',
+        ]);
+
+        try {
+            // Find the admitted case by ID
+            $admitted = Admitted::findOrFail($request->id);
+
+            // Update the admitted case with the provided data
+            $admitted->update($data);
+
+            return response()->json(['message' => 'Admitted case updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update admitted case', 'message' => $e->getMessage()], 500);
+        }
+    }
 
     public function profile(Request $request)
     {
