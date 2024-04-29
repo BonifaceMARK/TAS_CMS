@@ -34,25 +34,31 @@ public function login(Request $request)
 
         $validatedData = $request->only('username', 'password');
 
-        if ($validatedData && Auth::attempt($validatedData) ) {
+        if ($validatedData && Auth::attempt($validatedData)) {
             $user = Auth::user();
             $user->update(['isactive' => 1]);
-            
-            // if ($user->role == 1) {
-            //     $dash = redirect()->to('/administrator/dashboard');
-            //     // dd($dash);
-            //     return $dash;
 
-            // }  else {
-            //     return redirect()->to('/employee/dashboard');
-            // }
-            return redirect()->to('/dashboard');
+            // Redirect based on user role
+            return redirect($this->redirectDash());
         } else {
             throw new \Exception('Invalid credentials. Please try again.');
         }
     } catch (\Exception $e) {
         return redirect()->back()->withInput()->with('error', $e->getMessage());
     }
+}
+
+public function redirectDash()
+{
+    $redirect = '';
+
+    if (Auth::user() && Auth::user()->role == 0) {
+        $redirect = '/user/dashboard';
+    } else {
+        $redirect = '/administrator/dashboard'; // Assuming this is the admin dashboard URL
+    }
+
+    return $redirect;
 }
 
 public function register(Request $request)
