@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -76,8 +77,9 @@ Route::middleware(['auth'])->group(function () {
 //         Route::post('/{id}/profile/update_password', [DashboardController::class, 'updatePassword'])->name('profile.update_password');
 //     });
 // });
+Route::group(['prefix' => 'user','middleware'=>['web','isUser']],function(){
 
 
 
 
-
+});

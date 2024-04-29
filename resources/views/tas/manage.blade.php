@@ -37,15 +37,17 @@
         {{ session('error') }}
     </div>
 @endif
+<button type="button" class="btn btn-primary" style="background-image: url('{{ asset('assets/img/image.jpg') }}');" data-bs-toggle="modal" data-bs-target="#violationsModal">
+    View Violations
+</button>
+
 
     <div class="container-fluid"> <!-- Make the container wider -->
         <div class="row justify-content-center">
-            <div class="col-lg-8"> <!-- Adjusted the width of the column -->
+            <div class="col-lg-12"> <!-- Adjusted the width of the column -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Contest Case - Input <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
-                            View Violations
-                          </button></h5>
+                        <h5 class="card-title">Contest Case - Input </h5>
     
                         <!-- Form Start -->
                         <form method="POST" action="{{ route('submitForm.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
@@ -125,16 +127,65 @@
                                 <button class="btn btn-primary" type="submit">Submit form</button>
                             </div>
                         </form>
-                        
-                        
-                        
                         <!-- Form End -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+    <!-- Recent Violations -->
+<div class="col-12">
+    <div class="card recent-violations overflow-auto">
+
+        <div class="card-body">
+            <h5 class="card-title">Recent Contested Cases Added <span></span></h5>
+
+            <table class="table table-borderless datatable">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Resolution No.</th>
+                        <th scope="col">TOP</th>
+                        <th scope="col">Driver</th>
+                        <th scope="col">Apprehending Officer</th>
+                        <th scope="col">Violation</th>
+                        <th scope="col">Transaction No:</th>
+                        <th scope="col">Date Received</th>
+                        <th scope="col">Plate No.</th>
+                        <th scope="col">Contact No.</th>
+                        <th scope="col">Remarks</th>
+                        <th scope="col">File Attachment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentViolationsToday as $violation)
+                    <tr>
+                        <th scope="row"><a href="#">{{ $violation->id }}</a></th>
+                        <td>{{ $violation->resolution_no }}</td>
+                        <td>{{ $violation->top }}</td>
+                        <td>{{ $violation->driver }}</td>
+                        <td>{{ $violation->apprehending_officer }}</td>
+                        <td>{{ $violation->violation }}</td>
+                        <td>{{ $violation->transaction_no }}</td>
+                        <td>{{ $violation->date_received }}</td>
+                        <td>{{ $violation->plate_no }}</td>
+                        <td>{{ $violation->contact_no }}</td>
+                        <td>{{ $violation->remarks }}</td>
+                        <td>{{ $violation->file_attach }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="12" class="text-center">No recent Violations for today.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+</div><!-- End Recent Violations -->
+
 <!-- Modal -->
 <div class="modal fade" id="violationsModal" tabindex="-1" aria-labelledby="violationsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">

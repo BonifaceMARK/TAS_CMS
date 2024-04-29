@@ -170,58 +170,7 @@
 
 
 
-<!-- Recent Violations -->
-<div class="col-12">
-    <div class="card recent-violations overflow-auto">
 
-        <div class="filter">
-            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                    <h6>Filter</h6>
-                </li>
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-            </ul>
-        </div>
-
-        <div class="card-body">
-            <h5 class="card-title">Recent Contested Cases Added <span></span></h5>
-
-            <table class="table table-borderless datatable">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Violation</th>
-                        <th scope="col">Transaction No:</th>
-                        <th scope="col">TOP</th>
-                        <th scope="col">Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{-- @forelse($recentViolationsToday as $violation)
-                    <tr>
-                        <th scope="row"><a href="#">{{ $violation->id }}</a></th>
-                        <td>{{ $violation->name }}</td>
-                        <td><a href="#" class="text-primary">{{ $violation->violation }}</a></td>
-                        <td>{{ $violation->transaction_no }}</td>
-                        <td><span class="badge bg-secondary">{{ $violation->top }}</span></td>
-                        <td>{{ $violation->remarks }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="text-center">No recent Violations for today.</td>
-                    </tr>
-                    @endforelse --}}
-                </tbody>
-            </table>
-
-        </div>
-
-    </div>
-</div><!-- End Recent Violations -->
 
 
             <!-- Top Selling -->

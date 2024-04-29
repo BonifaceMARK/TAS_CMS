@@ -86,7 +86,9 @@ class DashboardController extends Controller
 
     public function tasManage()
     {
-        return view('tas.manage');
+
+        $recentViolationsToday = Admitted::latest()->take(10)->get();
+        return view('tas.manage', compact('recentViolationsToday'));
     }
     public function updateAdmittedCase(Request $request, $id)
     {
@@ -152,8 +154,14 @@ class DashboardController extends Controller
     
     public function admitmanage()
     {
+         // Retrieve data: count of traffic violations per plate number
+    $trafficData = Admitted::select('violation', DB::raw('COUNT(*) as total'))
+                           ->groupBy('violation')
+                           ->get();
+
+
         $admitteds = Admitted::all(); // Retrieve all admitted cases
-        return view('admitted.manage', compact('admitteds'));
+        return view('admitted.manage', compact('admitteds','trafficData'));
     }
 
     public function admitview()

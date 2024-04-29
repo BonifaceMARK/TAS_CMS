@@ -34,6 +34,60 @@
         {{ session('error') }}
     </div>
 @endif
+ <!-- Button to trigger the modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trafficChartModal">
+    Open Traffic Chart
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="trafficChartModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Traffic Chart</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Canvas for the chart -->
+                <canvas id="trafficChart" width="800" height="800"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Extract data from PHP variable to JavaScript
+    const trafficData = {!! json_encode($trafficData) !!};
+
+    // Extract violation types and total counts for chart labels and data
+    const violations = trafficData.map(data => data.violation);
+    const violationCounts = trafficData.map(data => data.total);
+
+    // Create chart
+    const ctx = document.getElementById('trafficChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: violations,
+            datasets: [{
+                label: 'Total Violations',
+                data: violationCounts,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
     <div class="container-fluid"> <!-- Make the container wider -->
         <div class="row justify-content-center">
@@ -48,80 +102,84 @@
     Edit Admitted Cases
 </button></h5>
                   
-                        <!-- Form Start -->
-                        <form method="POST" action="{{ route('admittedsubmit.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
-                            @csrf
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipRC" class="form-label">Resolution No.</label>
-                                <input type="text" name="resolution_no" class="form-control" id="validationTooltipRC">
-                                <div class="invalid-tooltip">
-                                    Please provide a Resolution Case no.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipTOP" class="form-label">TOP</label>
-                                <input type="text" name="top" class="form-control" id="validationTooltipTOP">
-                                <div class="invalid-tooltip">
-                                    Please provide a T.O.P.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipName" class="form-label">Name</label>
-                                <input type="text" name="name" class="form-control" id="validationTooltipName" required>
-                                <div class="invalid-tooltip">
-                                    Please provide a name.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-    <label for="validationTooltipViolation" class="form-label">Violation</label>
-    <input type="text" name="violation" class="form-control" id="validationTooltipViolation">
-    <div class="invalid-tooltip">
-        Please provide a violation.
+<form method="POST" action="{{ route('admittedsubmit.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
+    @csrf
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipRC" class="form-label">Resolution No.</label>
+        <input type="text" name="resolution_no" class="form-control" id="validationTooltipRC">
+        <div class="invalid-tooltip">
+            Please provide a Resolution Case no.
+        </div>
     </div>
-</div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipTOP" class="form-label">TOP</label>
+        <input type="text" name="top" class="form-control" id="validationTooltipTOP">
+        <div class="invalid-tooltip">
+            Please provide a T.O.P.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipViolation" class="form-label">Violation</label>
+        <input type="text" name="violation" class="form-control" id="validationTooltipViolation">
+        <div class="invalid-tooltip">
+            Please provide a violation.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipTransac" class="form-label">Transaction No.</label>
+        <input type="text" name="transaction_no" class="form-control" id="validationTooltipTransac">
+        <div class="invalid-tooltip">
+            Please provide a Transaction No.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipDateReceived" class="form-label">Date Received</label>
+        <input type="date" name="date_received" class="form-control" id="validationTooltipDateReceived" required>
+        <div class="invalid-tooltip">
+            Please input date.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipPlateNo" class="form-label">Plate no.</label>
+        <input type="text" name="plate_no" class="form-control" id="validationTooltipPlateNo" required>
+        <div class="invalid-tooltip">
+            Please provide a Plate no.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipContactNo" class="form-label">Contact no.</label>
+        <input type="text" name="contact_no" class="form-control" id="validationTooltipContactNo" required>
+        <div class="invalid-tooltip">
+            Please provide a Contact no.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipDriver" class="form-label">Driver</label>
+        <input type="text" name="driver" class="form-control" id="validationTooltipDriver">
+        <div class="invalid-tooltip">
+            Please provide a Driver.
+        </div>
+    </div>
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipOfficer" class="form-label">Apprehending Officer</label>
+        <input type="text" name="apprehending_officer" class="form-control" id="validationTooltipOfficer">
+        <div class="invalid-tooltip">
+            Please provide an Apprehending Officer.
+        </div>
+    </div>
 
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipTransac" class="form-label">Transaction No.</label>
-                                <input type="text" name="transaction_no" class="form-control" id="validationTooltipTransac">
-                                <div class="invalid-tooltip">
-                                    Please provide a Transaction No.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipdate" class="form-label">Date Received</label>
-                                <input type="date" name="date_received" class="form-control" id="validationTooltipdate" required>
-                                <div class="invalid-tooltip">
-                                    Please input date.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipplate" class="form-label">Plate no.</label>
-                                <input type="text" name="plate_no" class="form-control" id="validationTooltipplate" required>
-                                <div class="invalid-tooltip">
-                                    Please provide a Plate no.
-                                </div>
-                            </div>
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipContac" class="form-label">Contact no.</label>
-                                <input type="text" name="contact_no" class="form-control" id="validationTooltipContac" required>
-                                <div class="invalid-tooltip">
-                                    Please provide a Contact no.
-                                </div>
-                            </div>  
-                            
-                            <div class="col-md-6 position-relative">
-                                <label for="validationTooltipFile" class="form-label">File Attachment (optional)</label>
-                                <input type="file" name="file_attachment[]" class="form-control" id="validationTooltipFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
-                                <div class="invalid-tooltip">
-                                    Please attach a file (Max size: 5MB).
-                                </div>
-                            </div>
-                            
-                            <div class="col-12">
-                                <button class="btn btn-primary" type="submit">Submit form</button>
-                            </div>
-                        </form>
-                        
+    <div class="col-md-6 position-relative">
+        <label for="validationTooltipFile" class="form-label">File Attachment (optional)</label>
+        <input type="file" name="file_attachment[]" class="form-control" id="validationTooltipFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
+        <div class="invalid-tooltip">
+            Please attach a file (Max size: 5MB).
+        </div>
+    </div>
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Submit form</button>
+    </div>
+</form>
+
                         {{-- <a href="{{ asset('storage\attachments\1713858878_WIN_20230717_13_27_01_Pro.jpg') }}">Download PDF</a> --}}
                         
                         <!-- Form End -->
@@ -191,7 +249,7 @@
 </td>
 
                                 </tr>
-                                @endforeach
+                              
                         </tbody>
                     </table>
                 </div>
@@ -394,7 +452,7 @@
             }
         });
     </script>
-    
+      @endforeach
   </main><!-- End #main -->
 
  @include('layouts.footer')
