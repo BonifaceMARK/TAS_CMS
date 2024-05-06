@@ -104,6 +104,136 @@
 </div>
 <!-- End Customers Card -->
 
+
+          <!-- Website Traffic -->
+          <div class="card">
+            <div class="filter">
+              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <li class="dropdown-header text-start">
+                  <h6>Filter</h6>
+                </li>
+
+                <li><a class="dropdown-item" href="#">Today</a></li>
+                <li><a class="dropdown-item" href="#">This Month</a></li>
+                <li><a class="dropdown-item" href="#">This Year</a></li>
+              </ul>
+            </div>
+
+            <div class="card-body pb-0">
+            <h5 class="card-title">Apprehending Offices <span id="todaySpan">| Chart</span></h5>
+
+            <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        var trafficChart = echarts.init(document.querySelector("#trafficChart"));
+
+        // Assuming $departmentsData is available as a JavaScript variable.
+        var departmentsData = {!! json_encode($departmentsData) !!};
+
+        // Process the data to calculate the total count for each department
+        var departmentCounts = {};
+        departmentsData.forEach(function(department) {
+            if (department.department in departmentCounts) {
+                departmentCounts[department.department]++;
+            } else {
+                departmentCounts[department.department] = 1;
+            }
+        });
+
+        // Convert the departmentCounts object into an array of objects
+        var data = Object.keys(departmentCounts).map(function(key) {
+            return { name: key, value: departmentCounts[key] };
+        });
+
+        trafficChart.setOption({
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: '5%',
+                left: 'center'
+            },
+            series: [{
+                name: 'Total Officers From:',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                label: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: '18',
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: data
+            }]
+        });
+    });
+</script>
+
+            </div>
+          </div><!-- End Website Traffic -->
+
+<!-- Modal -->
+<div class="modal fade" id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="departmentModalLabel">Officers from <span id="modalDepartmentName"></span> Department</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Officer names will be displayed here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    var trafficChart = echarts.init(document.querySelector("#trafficChart"));
+
+    // Your existing chart initialization code
+
+    // Add event listener to chart
+    trafficChart.on('click', function (params) {
+      if (params.componentType === 'series') {
+        // Fetch officers from the clicked department
+        var departmentName = params.name;
+        fetch('/officers/' + encodeURIComponent(departmentName))
+          .then(response => response.json())
+          .then(data => {
+            // Populate modal with officer names
+            var modalDepartmentName = document.getElementById('modalDepartmentName');
+            var modalBody = document.getElementById('modalBody');
+            modalDepartmentName.textContent = departmentName;
+            modalBody.innerHTML = '';
+            data.forEach(officer => {
+              var officerName = document.createElement('div');
+              officerName.textContent = officer.officer;
+              modalBody.appendChild(officerName);
+            });
+            // Display modal
+            var departmentModal = new bootstrap.Modal(document.getElementById('departmentModal'));
+            departmentModal.show();
+          })
+          .catch(error => console.error('Error fetching officers:', error));
+      }
+    });
+  });
+</script>
+
             <!-- Top Selling -->
             <div class="col-12">
               <div class="card top-selling overflow-auto">
@@ -225,212 +355,33 @@
 
 
 
-          <!-- Budget Report -->
+
           <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
-
-            <div class="card-body pb-0">
-              <h5 class="card-title">Budget Report <span>| This Month</span></h5>
-              <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        var budgetChart = echarts.init(document.querySelector("#budgetChart"));
-
-        // Assuming $admittedData and $tasFileData are available as JavaScript variables.
-        var admittedViolationsData = {!! json_encode($admittedData->pluck('violation')->toArray()) !!};
-        var tasFileViolationsData = {!! json_encode($tasFileData->pluck('violation')->toArray()) !!};
-
-        // Function to count the occurrences of each violation
-        function countOccurrences(array) {
-            var counts = {};
-            array.forEach(function (violation) {
-                counts[violation] = (counts[violation] || 0) + 1;
-            });
-            return counts;
-        }
-
-        // Calculate the number of occurrences for each violation
-        var admittedViolationsCounts = countOccurrences(admittedViolationsData);
-        var tasFileViolationsCounts = countOccurrences(tasFileViolationsData);
-
-        // Get the unique violation names
-        var allViolations = Object.keys({ ...admittedViolationsCounts, ...tasFileViolationsCounts });
-
-        // Define indicator names based on violation names and counts
-        var indicatorNames = allViolations.map(function (violation) {
-            return {
-                name: violation,
-                max: Math.max(admittedViolationsCounts[violation] || 0, tasFileViolationsCounts[violation] || 0)
-            };
-        });
-
-        budgetChart.setOption({
-            legend: {
-                data: ['Allocated Budget', 'Actual Spending']
-            },
-            radar: {
-                indicator: indicatorNames
-            },
-            series: [{
-                name: 'Budget vs spending',
-                type: 'radar',
-                data: [
-                    { value: Object.values(admittedViolationsCounts), name: 'Allocated Budget' },
-                    { value: Object.values(tasFileViolationsCounts), name: 'Actual Spending' }
-                ]
-            }]
-        });
-    });
-</script>
-
-
-
-            </div>
-          </div><!-- End Budget Report -->
-
-          <!-- Website Traffic -->
-          <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
-
-            <div class="card-body pb-0">
-              <h5 class="card-title">Website Traffic <span>| Today</span></h5>
-
-              <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-
-              <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                  echarts.init(document.querySelector("#trafficChart")).setOption({
-                    tooltip: {
-                      trigger: 'item'
-                    },
-                    legend: {
-                      top: '5%',
-                      left: 'center'
-                    },
-                    series: [{
-                      name: 'Access From',
-                      type: 'pie',
-                      radius: ['40%', '70%'],
-                      avoidLabelOverlap: false,
-                      label: {
-                        show: false,
-                        position: 'center'
-                      },
-                      emphasis: {
-                        label: {
-                          show: true,
-                          fontSize: '18',
-                          fontWeight: 'bold'
-                        }
-                      },
-                      labelLine: {
-                        show: false
-                      },
-                      data: [{
-                          value: 1048,
-                          name: 'Search Engine'
-                        },
-                        {
-                          value: 735,
-                          name: 'Direct'
-                        },
-                        {
-                          value: 580,
-                          name: 'Email'
-                        },
-                        {
-                          value: 484,
-                          name: 'Union Ads'
-                        },
-                        {
-                          value: 300,
-                          name: 'Video Ads'
-                        }
-                      ]
-                    }]
-                  });
-                });
-              </script>
-
-            </div>
-          </div><!-- End Website Traffic -->
-
-          <!-- News & Updates Traffic -->
-          <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
-
-            <div class="card-body pb-0">
-              <h5 class="card-title">News &amp; Updates <span>| Today</span></h5>
-
-              <div class="news">
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-1.jpg" alt="">
-                  <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                  <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
+    <div class="card-body">
+        <h5 class="card-title">News &amp; Updates</h5>
+        <div class="news" id="news-feed">
+            @foreach($articles as $article)
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-12">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $article['title'] }}</h5>
+                          
+                            <p class="card-text">{{ $article['description'] }}</p>
+                            <a href="{{ $article['url'] }}" class="btn btn-primary">Read more</a>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">{{ $article['publishedAt'] }}</small>
+                            <small class="text-muted">{{ $article['source']['name'] }}</small>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-2.jpg" alt="">
-                  <h4><a href="#">Quidem autem et impedit</a></h4>
-                  <p>Illo nemo neque maiores vitae officiis cum eum turos elan dries werona nande...</p>
-                </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-3.jpg" alt="">
-                  <h4><a href="#">Id quia et et ut maxime similique occaecati ut</a></h4>
-                  <p>Fugiat voluptas vero eaque accusantium eos. Consequuntur sed ipsam et totam...</p>
-                </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-4.jpg" alt="">
-                  <h4><a href="#">Laborum corporis quo dara net para</a></h4>
-                  <p>Qui enim quia optio. Eligendi aut asperiores enim repellendusvel rerum cuder...</p>
-                </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-5.jpg" alt="">
-                  <h4><a href="#">Et dolores corrupti quae illo quod dolor</a></h4>
-                  <p>Odit ut eveniet modi reiciendis. Atque cupiditate libero beatae dignissimos eius...</p>
-                </div>
-
-              </div><!-- End sidebar recent posts-->
-
             </div>
-          </div><!-- End News & Updates -->
+            @endforeach
+        </div>
+    </div>
+</div>
+
 
         </div><!-- End Right side columns -->
 

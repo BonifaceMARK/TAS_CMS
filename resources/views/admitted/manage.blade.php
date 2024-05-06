@@ -34,60 +34,7 @@
         {{ session('error') }}
     </div>
 @endif
- <!-- Button to trigger the modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trafficChartModal">
-    Open Traffic Chart
-</button>
 
-<!-- Modal -->
-<div class="modal fade" id="trafficChartModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Traffic Chart</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Canvas for the chart -->
-                <canvas id="trafficChart" width="800" height="800"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Extract data from PHP variable to JavaScript
-    const trafficData = {!! json_encode($trafficData) !!};
-
-    // Extract violation types and total counts for chart labels and data
-    const violations = trafficData.map(data => data.violation);
-    const violationCounts = trafficData.map(data => data.total);
-
-    // Create chart
-    const ctx = document.getElementById('trafficChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: violations,
-            datasets: [{
-                label: 'Total Violations',
-                data: violationCounts,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-</script>
 
     <div class="container-fluid"> <!-- Make the container wider -->
         <div class="row justify-content-center">

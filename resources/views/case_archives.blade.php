@@ -38,8 +38,40 @@
     </div>
 @endif
 
-    
-    
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <button class="btn btn-lg btn-block btn-custom d-flex flex-column align-items-center">
+                    <i class="bi bi-file-text"></i>
+                    <span>Add Case Archive</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <button class="btn btn-lg btn-block btn-custom d-flex flex-column align-items-center">
+                    <i class="bi bi-check-all"></i>
+                    <span>View Archive</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <button class="btn btn-lg btn-block btn-custom d-flex flex-column align-items-center">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Activity History</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
   </main><!-- End #main -->
 
  @include('layouts.footer')

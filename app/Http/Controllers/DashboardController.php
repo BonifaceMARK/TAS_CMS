@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\ApprehendingOfficer;
 use App\Models\TrafficViolation;
 use App\Models\fileviolation;
+use App\Models\G5ChatMessage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -68,19 +69,60 @@ class DashboardController extends Controller
             'violation_count' => $violationCount,
             'transaction_date' => $item->transaction_date,
         ];
-    });
+    });      $departmentsData = ApprehendingOfficer::all();
 
-        return view('index', compact('tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+       // Replace 'YOUR_API_KEY' with your actual News API key
+       $apiKey = '014d72b0e8ae42aeab34e2163a269a83';
+       $newsApiUrl = 'https://newsapi.org/v2/top-headlines?country=ph&apiKey=' . $apiKey;
+
+       // Fetch news articles from the News API
+       $response = Http::get($newsApiUrl);
+
+       // Extract news articles from the response
+       $articles = $response->json()['articles'];
+       $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
+       $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
+            $user = Auth::user();
+            $name = $user->name;
+            $department = $user->department;
+      
+        return view('index', compact('unreadMessageCount','messages', 'name', 'department','articles','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
-        public function getRecentViolationsToday()
+       
+
+        public function chatIndex()
         {
-            $recentViolationsToday = TasFile::orderBy('transaction_date', 'desc')
-                ->get();
-        
-            return $recentViolationsToday;
+            $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
+            $user = Auth::user();
+            $name = $user->name;
+            $department = $user->department;
+            $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
+            return view('chat',compact('unreadMessageCount','messages', 'name', 'department'));
         }
-        
+        public function storeMessage(Request $request)
+        {
+            $request->validate([
+                'message' => 'required|string',
+            ]);
+    
+            $message = new G5ChatMessage();
+            $message->message = $request->input('message');
+    
+            $message->user_id = Auth::id();
+    
+            $message->save();
+    
+            return redirect()->back()->with('success', 'Message sent successfully.');
+        }
+        public function getByDepartmentName($departmentName)
+        {
+            // Assuming you have a column named 'department' in the 'apprehending_officers' table
+            $officers = ApprehendingOfficer::where('department', $departmentName)->get();
+    
+            return response()->json($officers);
+        }
+
     public function tables()
     {
         return view('layout');
@@ -89,8 +131,10 @@ class DashboardController extends Controller
     public function tasManage()
     {
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
-        
-        return view('tas.manage', compact('officers'));
+        $recentViolationsToday = TasFile::orderBy('date_received', 'desc')
+        ->get();
+
+        return view('tas.manage', compact('officers','recentViolationsToday'));
     }
     public function updateAdmittedCase(Request $request, $id)
     {

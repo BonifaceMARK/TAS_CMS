@@ -58,8 +58,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/add-user', [DashboardController::class, 'add_user'])->name('add.user');
         Route::post('/store-user', [DashboardController::class, 'store_user'])->name('store.user');
 
+        Route::get('/chat', [DashboardController::class, 'chatIndex'])->name('chat.index');
+        Route::post('/storeChat', [DashboardController::class, 'storeMessage'])->name('chat.store');
+
         Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
     
+        Route::get('/officers/{departmentName}', [DashboardController::class, 'getByDepartmentName']);
 });
 
 
