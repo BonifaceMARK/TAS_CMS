@@ -16,7 +16,7 @@ class AdmittedSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach (range(1, 10) as $index) {
+        foreach (range(1, 1000) as $index) {
             Admitted::create([
                 'resolution_no' => $faker->randomNumber(5),
                 'top' => $faker->randomElement(['A', 'B', 'C']),
@@ -24,7 +24,7 @@ class AdmittedSeeder extends Seeder
                 'driver' => $faker->name,
                 'violation' => $faker->sentence(3),
                 'transaction_no' => $faker->uuid,
-                'transaction_date' => $faker->date,
+                'date_received' => $faker->date,
                 'contact_no' => $faker->phoneNumber,
                 'plate_no' => $faker->regexify('[A-Z]{3}-[0-9]{3}'), // Example pattern for license plate format
                 'remarks' => $faker->sentence(6),

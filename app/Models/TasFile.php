@@ -24,6 +24,10 @@ class TasFile extends Model
         'remarks',
         'file_attach',
     ];
+    public function relatedofficer()
+    {
+        return $this->hasOne(ApprehendingOfficer::class, 'apprehending_officer');
+    }
     public function trafficViolations()
     {
         return $this->hasMany(TrafficViolation::class, 'violation');

@@ -45,79 +45,78 @@
                         <!-- Datatable top section -->
                         <div class="datatable-top">
                             <div class="datatable-dropdown">
-                            <label>
- 
-                                <select class="datatable-selector" id="datatable-selector">
-                                    <option value="5">5</option>
-                                    <option value="10" selected>10</option>
-                                    <option value="15">15</option>
-                                    <option value="-1">All</option>
-                                </select> entries per page
-                            </label>
-
+                                <label>
+                                    <select class="datatable-selector" id="datatable-selector">
+                                        <option value="5">5</option>
+                                        <option value="10" selected>10</option>
+                                        <option value="15">15</option>
+                                        <option value="100" selected>100</option>
+                                        <option value="-1">All</option>
+                                    </select> entries per page
+                                </label>
                             </div>
-                        
                         </div>
                         <div class="datatable-container">
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover datatable datatable-table" id="dataTable">
-            <!-- Table header -->
-            <thead class="thead-light">
-                <tr>
-                    <th>Resolution No.</th>
-                    <th>Apprehending Officer</th>
-                    <th>Driver</th>
-                    <th>Top</th>
-                    <th>Violation</th>
-                    <th>Transaction No</th>
-                    <th>Contact No</th>
-                    <th>Transaction Date</th>
-                    <th>Attachment</th>
-                </tr>
-            </thead>
-            <!-- Table body -->
-            <tbody>
-           @if ($admitted)
-    @foreach ($admitted as $admit)
-        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
-            <td>{{ $admit->resolution_no }}</td>
-            <td>{{ $admit->apprehending_officer }}</td>
-            <td>{{ $admit->driver }}</td>
-            <td>{{ $admit->top }}</td>
-            <td>{{ $admit->violation }}</td>
-            <td>{{ $admit->transaction_no }}</td>
-            <td>{{ $admit->contact_no }}</td>
-            <td>{{ $admit->created_at }}</td>
-            <td>
-                @if ($admit->file_attach)
-                    @php
-                        $filePaths = json_decode($admit->file_attach);
-                    @endphp
-                    @if ($filePaths)
-                        <ul class="list-unstyled">
-                            @foreach ($filePaths as $filePath)
-                                <li>
-                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                @endif
-            </td>
-        </tr>
-    @endforeach
-@endif
-
-
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-
-
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover datatable datatable-table" id="dataTable">
+                                    <!-- Table header -->
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Resolution No.</th>
+                                            <th>Department</th>
+                                            <th>Apprehending Officer</th>
+                                            <th>Driver</th>
+                                            <th>Top</th>
+                                            <th>Violation</th>
+                                            <th>Transaction No</th>
+                                            <th>Contact No</th>
+                                            <th>Transaction Date</th>
+                                            <th>Attachment</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- Table body -->
+                                    <tbody>
+                                        @if ($admitted)
+                                            @foreach ($admitted as $admit)
+                                                <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
+                                                    <td>{{ $admit->resolution_no }}</td>
+                                                    <td>{{ $admit->apprehending_officer }}</td>
+                                                    <td>{{ $admit->driver }}</td>
+                                                    <td>{{ $admit->top }}</td>
+                                                    <td>{{ $admit->violation }}</td>
+                                                    <td>{{ $admit->transaction_no }}</td>
+                                                    <td>{{ $admit->contact_no }}</td>
+                                                    <td>{{ $admit->created_at }}</td>
+                                                    <td>
+                                                        @if ($admit->file_attach)
+                                                            @php
+                                                                $filePaths = json_decode($admit->file_attach);
+                                                            @endphp
+                                                            @if ($filePaths)
+                                                                <ul class="list-unstyled">
+                                                                    @foreach ($filePaths as $filePath)
+                                                                        <li>
+                                                                            <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endif
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="datatable-bottom">
+                            <div class="datatable-info">
+                                Showing {{ $admit->count() }} entries
+                            </div>
+                        </div>
                     </div>
+                    
                     <!-- End Table with stripped rows -->
                 </div>
             </div>

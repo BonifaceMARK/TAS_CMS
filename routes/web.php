@@ -41,6 +41,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admit.manageform', [DashboardController::class, 'admitmanage'])->name('admitted.manage');
         Route::post('/admit.manageform', [DashboardController::class, 'admittedsubmit'])->name('admittedsubmit.tas');
         
+        Route::get('/violation', [DashboardController::class, 'violationadd'])->name('see.vio');
+        Route::post('/save.violation', [DashboardController::class, 'addvio'])->name('add.violation');
         Route::post('/admit-remarks', [DashboardController::class, 'admitremark'])->name('admitremark');
         Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
         Route::get('/getChartData', [DashboardController::class, 'getChartData']);

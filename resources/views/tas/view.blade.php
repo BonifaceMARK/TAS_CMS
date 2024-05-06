@@ -45,78 +45,85 @@
                         <!-- Datatable top section -->
                         <div class="datatable-top">
                             <div class="datatable-dropdown">
-                            <label>
- 
-                                <select class="datatable-selector" id="datatable-selector">
-                                    <option value="5">5</option>
-                                    <option value="10" selected>10</option>
-                                    <option value="15">15</option>
-                                    <option value="-1">All</option>
-                                </select> entries per page
-                            </label>
-
+                                <label>
+                                    <select class="datatable-selector" id="datatable-selector">
+                                        <option value="5">5</option>
+                                        <option value="10" selected>10</option>
+                                        <option value="15">15</option>
+                                        <option value="100">100</option>
+                                        <option value="-1">All</option>
+                                    </select> entries per page
+                                </label>
                             </div>
-                        
                         </div>
                         <div class="datatable-container">
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover datatable datatable-table" id="dataTable">
-            <!-- Table header -->
-            <thead class="thead-light">
-                <tr>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover datatable datatable-table" id="dataTable">
+                                    <!-- Table header -->
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Case No</th>
+                                            <th>Department</th>
+                                            <th>Apprehending Officer</th>
+                                            <th>Driver</th>
+                                            <th>Top</th>
+                                            <th>Violation</th>
+                                            <th>Transaction No</th>
+                                            <th>Transaction Date</th>
+                                            <th>Attachment</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- Table body -->
+                                    <tbody>
+                                        @foreach ($tasFiles as $tasFile)
+                                        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
+                                            <td>{{ $tasFile->case_no }}</td>
+                                            <td>
+                                                @if ($tasFile->relatedofficer->isNotEmpty())
+                                                    @foreach ($tasFile->relatedofficer as $officer)
+                                                        {{ $officer->department }}
+                                                    @endforeach
+                                                @endif
+                                            </td>
+                                            
+
+                                            <td>{{ $tasFile->apprehending_officer ?? 'N/A' }}</td>
+                                            <td>{{ $tasFile->driver }}</td>
+                                            <td>{{ $tasFile->top ?? 'N/A' }}</td>
+                                            <td>{{ $tasFile->violation }}</td>
+                                            <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
+                                            <td>{{ $tasFile->created_at }}</td>
+                                            <td>
+                                                @if (!is_null($tasFile->file_attach))
+                                                @php
+                                                $decodedFiles = json_decode($tasFile->file_attach, true);
+                                                @endphp
                     
-                    <th>Case No</th>
-                    <th>Apprehending Officer</th>
-                    <th>Driver</th>
-                    <th>Top</th>
-                    <th>Violation</th>
-                    <th>Transaction No</th>
-                    <th>Transaction Date</th>
-                    <th>Attachment</th>
-                </tr>
-            </thead>
-            <!-- Table body -->
-            <tbody>
-                @if ($tasFiles)
-                    @foreach ($tasFiles as $tasFile)
-                        <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
-                            <td>{{ $tasFile->case_no }}</td>
-                            <td>{{$tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A'}}</td>
-                            <td>{{ $tasFile->driver }}</td>
-                            <td>{{ $tasFile->top ? $tasFile->top : 'N/A' }}</td>
-                            <td>{{ $tasFile->violation }}</td>
-                            <td>{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</td>
-                            <td>{{ $tasFile->created_at }}</td>
-                            <td>
-                            @if (!is_null($tasFile->file_attach))
-    @php
-        $decodedFiles = json_decode($tasFile->file_attach, true);
-    @endphp
-
-    @if (!is_null($decodedFiles))
-        @foreach ($decodedFiles as $filePath)
-            <li>
-                <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-            </li>
-        @endforeach
-    @endif
-@endif
-</ul>
-                            </td>
-                        </tr>
-                    @endforeach
-                @endif
-            </tbody>
-        </table>
-    </div>
-</div>
-
-    <!-- Pagination -->
-    <div class="datatable-bottom">
-    <div class="datatable-info">
-    Showing {{ $tasFiles->firstItem() }} to {{ $tasFiles->lastItem() }} of {{ $tasFiles->total() }} entries
-</div>
-<nav class="datatable-pagination">
+                                                @if (!is_null($decodedFiles))
+                                                @foreach ($decodedFiles as $filePath)
+                                                <li>
+                                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                                </li>
+                                                @endforeach
+                                                @endif
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    
+                        <!-- Pagination -->
+                        <div class="datatable-bottom">
+                            <div class="datatable-info">
+                                Showing {{ $tasFiles->count() }} entries
+                            </div>
+                        </div>
+                    </div>
+                    
+{{-- <nav class="datatable-pagination">
     <ul class="datatable-pagination-list">
         <!-- Previous Page Button -->
         <li class="datatable-pagination-list-item">
@@ -143,7 +150,7 @@
             @endif
         </li>
     </ul>
-</nav>
+</nav> --}}
 
 </div>
 
@@ -250,13 +257,26 @@
                             <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                             <p><strong>Violations:</strong></p>
                             
-                                @foreach ($tasFile->relatedViolations as $violation)
+                            @foreach ($tasFile->relatedViolations as $relatedViolation)
+                            @if(isset($relatedViolation->id) && isset($relatedViolation->violation))
                                 <ul>
                                     <li>
-                                        {{ $violation->id }} - {{ $violation->violation }}
+                                        {{ $relatedViolation->id }} - {{ $relatedViolation->violation }}
                                     </li>
                                 </ul>
-                                @endforeach
+                            @else
+                                @if(isset($violationArray) && is_array($violationArray) && count($violationArray) > 0)
+                                    <ul>
+                                        @foreach($violationArray as $violation)
+                                            <li>{{ $violation }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p>No data available.</p>
+                                @endif
+                            @endif
+                        @endforeach
+                        
                             
                             
                         </div>
