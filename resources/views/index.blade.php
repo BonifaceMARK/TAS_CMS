@@ -104,75 +104,6 @@
 </div>
 <!-- End Customers Card -->
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div style="display: grid; place-items: center;">
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reportsModal" style="background-image: url('{{ asset('assets/img/admittedreports.jpg') }}'); background-color: rgba(0, 0, 0, 0.7); background-size: cover; background-position: center; width: 300px; height: 300px;">
-          <span style="font-size: 1.5rem; font-weight: bold; color: rgba(255, 255, 255, 0.9);">Admitted Case Number of Violation Reports</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-<div class="modal fade" id="reportsModal" tabindex="-1" aria-labelledby="reportsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reportsModalLabel">Violators Count Reports</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="chart"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  var chartData = @json($chartData);
-
-  var options = {
-      chart: {
-          type: 'line',
-          height: 350
-      },
-      series: [{
-          name: 'Violation Count', // Change series name
-          data: chartData.map(item => item.violation_count) // Use violation count data
-      }],
-      xaxis: {
-          categories: chartData.map(item => item.name),
-          title: {
-              text: 'Name'
-          }
-      },
-      yaxis: {
-          title: {
-              text: 'Number of Violations' // Change y-axis title
-          }
-      }
-  };
-
-  var chart = new ApexCharts(document.querySelector("#chart"), options);
-  chart.render();
-</script>
-
-
-
-
-
-
-
             <!-- Top Selling -->
             <div class="col-12">
               <div class="card top-selling overflow-auto">
@@ -311,59 +242,60 @@
 
             <div class="card-body pb-0">
               <h5 class="card-title">Budget Report <span>| This Month</span></h5>
-
               <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
 
-              <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                  var budgetChart = echarts.init(document.querySelector("#budgetChart")).setOption({
-                    legend: {
-                      data: ['Allocated Budget', 'Actual Spending']
-                    },
-                    radar: {
-                      // shape: 'circle',
-                      indicator: [{
-                          name: 'Sales',
-                          max: 6500
-                        },
-                        {
-                          name: 'Administration',
-                          max: 16000
-                        },
-                        {
-                          name: 'Information Technology',
-                          max: 30000
-                        },
-                        {
-                          name: 'Customer Support',
-                          max: 38000
-                        },
-                        {
-                          name: 'Development',
-                          max: 52000
-                        },
-                        {
-                          name: 'Marketing',
-                          max: 25000
-                        }
-                      ]
-                    },
-                    series: [{
-                      name: 'Budget vs spending',
-                      type: 'radar',
-                      data: [{
-                          value: [4200, 3000, 20000, 35000, 50000, 18000],
-                          name: 'Allocated Budget'
-                        },
-                        {
-                          value: [5000, 14000, 28000, 26000, 42000, 21000],
-                          name: 'Actual Spending'
-                        }
-                      ]
-                    }]
-                  });
-                });
-              </script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        var budgetChart = echarts.init(document.querySelector("#budgetChart"));
+
+        // Assuming $admittedData and $tasFileData are available as JavaScript variables.
+        var admittedViolationsData = {!! json_encode($admittedData->pluck('violation')->toArray()) !!};
+        var tasFileViolationsData = {!! json_encode($tasFileData->pluck('violation')->toArray()) !!};
+
+        // Function to count the occurrences of each violation
+        function countOccurrences(array) {
+            var counts = {};
+            array.forEach(function (violation) {
+                counts[violation] = (counts[violation] || 0) + 1;
+            });
+            return counts;
+        }
+
+        // Calculate the number of occurrences for each violation
+        var admittedViolationsCounts = countOccurrences(admittedViolationsData);
+        var tasFileViolationsCounts = countOccurrences(tasFileViolationsData);
+
+        // Get the unique violation names
+        var allViolations = Object.keys({ ...admittedViolationsCounts, ...tasFileViolationsCounts });
+
+        // Define indicator names based on violation names and counts
+        var indicatorNames = allViolations.map(function (violation) {
+            return {
+                name: violation,
+                max: Math.max(admittedViolationsCounts[violation] || 0, tasFileViolationsCounts[violation] || 0)
+            };
+        });
+
+        budgetChart.setOption({
+            legend: {
+                data: ['Allocated Budget', 'Actual Spending']
+            },
+            radar: {
+                indicator: indicatorNames
+            },
+            series: [{
+                name: 'Budget vs spending',
+                type: 'radar',
+                data: [
+                    { value: Object.values(admittedViolationsCounts), name: 'Allocated Budget' },
+                    { value: Object.values(tasFileViolationsCounts), name: 'Actual Spending' }
+                ]
+            }]
+        });
+    });
+</script>
+
+
 
             </div>
           </div><!-- End Budget Report -->

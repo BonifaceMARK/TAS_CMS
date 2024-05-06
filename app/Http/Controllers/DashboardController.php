@@ -52,7 +52,8 @@ class DashboardController extends Controller
                                 ->count() / 7;
     // Retrieve data for the chart
     $admittedData = Admitted::all();
-
+    $tasFileData = TasFile::all();
+    
     // Prepare data for chart
     $chartData = $admittedData->map(function ($item) {
         $violationCount = 0;
@@ -68,7 +69,7 @@ class DashboardController extends Controller
         ];
     });
 
-        return view('index', compact('chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+        return view('index', compact('tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
         public function getRecentViolationsToday()

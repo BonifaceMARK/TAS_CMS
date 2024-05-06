@@ -53,9 +53,9 @@ public function redirectDash()
     $redirect = '';
 
     if (Auth::user() && Auth::user()->role == 0) {
-        $redirect = '/user/dashboard';
+        $redirect = '/user/index';
     } else {
-        $redirect = '/administrator/dashboard'; // Assuming this is the admin dashboard URL
+        $redirect = '/dashboard'; // Assuming this is the admin dashboard URL
     }
 
     return $redirect;
