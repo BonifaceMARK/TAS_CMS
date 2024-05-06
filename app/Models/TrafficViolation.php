@@ -12,6 +12,7 @@ class TrafficViolation extends Model
     protected $table = 'traffic_violations';
 
     protected $fillable = ['id','violation'];
+    
     public function tasFiles()
     {
         return $this->belongsToMany(TasFile::class, 'id');

@@ -67,10 +67,16 @@
                             
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipofficer" class="form-label">Apprehending Officer</label>
-                                <input type="text" name="apprehending_officer" class="form-control" id="validationTooltipofficer" required>
+                                <input type="text" name="apprehending_officer" class="form-control" id="validationTooltipofficer"  list="nameList" required autocomplete="off">
                                 <div class="invalid-tooltip">
                                     Please provide a Apprehending Officer.
                                 </div>
+                                <datalist id="nameList">
+                                    @foreach($officers as $officer)
+                                    <option value="{{ $officer->officer }}">
+                                        @endforeach
+                                </datalist>
+
                             </div>
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipdriver" class="form-label">Driver</label>

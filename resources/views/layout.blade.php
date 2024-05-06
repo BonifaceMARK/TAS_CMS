@@ -10,30 +10,14 @@
 
   <main id="main" class="main">
     <div class="container">
-      <h1>Add User</h1>
+      <h1>Add Violation</h1>
 
-      <form action="{{ route('users.store') }}" method="POST">
-          @csrf
-
-          <div class="form-group">
-              <label for="name">Name</label>
-              <input type="text" class="form-control" id="name" name="name" required>
-          </div>
-
-          <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" class="form-control" id="email" name="email" required>
-          </div>
-
-          <div class="form-group">
-              <label for="password">Password</label>
-              <input type="password" class="form-control" id="password" name="password" required>
-          </div>
-
-          <!-- Add more fields as needed -->
-
-          <button type="submit" class="btn btn-primary">Create User</button>
-      </form>
+      <form action="{{route('add.violation')}}" method="POST">
+        @csrf
+        <label for="violation">Violation:</label><br>
+        <input type="text" id="violation" name="violation"><br><br>
+        <input type="submit" value="Submit">
+    </form>
   </div>
   </main>
 

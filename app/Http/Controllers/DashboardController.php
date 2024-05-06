@@ -12,6 +12,7 @@ use App\Models\admitted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\ApprehendingOfficer;
 use App\Models\TrafficViolation;
 use App\Models\fileviolation;
 use Illuminate\Validation\ValidationException;
@@ -86,7 +87,9 @@ class DashboardController extends Controller
 
     public function tasManage()
     {
-        return view('tas.manage');
+        $officers = ApprehendingOfficer::select('officer', 'department')->get();
+        
+        return view('tas.manage', compact('officers'));
     }
     public function updateAdmittedCase(Request $request, $id)
     {
@@ -130,10 +133,25 @@ class DashboardController extends Controller
     public function tasView()
     {
         $pageSize = 15; // Define the default page size
-        $tasFiles = TasFile::paginate($pageSize);
-        
+        $tasFiles = TasFile::all()->sortByDesc('case_no');
+        $officers = collect();
+
         foreach ($tasFiles as $tasFile) {
-            // Decode the JSON data representing violations
+            $officerName = $tasFile->apprehending_officer;
+        
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+        
+            // Merge the results into the $officers collection
+            $officers = $officers->merge($officersForFile);
+        
+            // Assign the related officers to the $tasFile object
+            $tasFile->relatedofficer = $officersForFile;
+        }
+        
+        // dd($officers);
+        foreach ($tasFiles as $tasFile) {
+            // $tasFile->relatedofficer = $officer;
             $violations = json_decode($tasFile->violation);
         
             $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
@@ -145,7 +163,6 @@ class DashboardController extends Controller
             $tasFile->relatedViolations = $relatedViolations;
             
         }
-        
         return view('tas.view', compact('tasFiles'));
     }
     
@@ -159,11 +176,13 @@ class DashboardController extends Controller
     public function admitview()
 {
     // Retrieve admitted data
-    $admitted = Admitted::paginate(10);
+    $admitted = Admitted::all()->sortByDesc('resolution_no');
 
     foreach ($admitted as $admit) {
         $violations = json_decode($admit->violation);
-    
+        $officerName = $admit->apprehending_officer;
+            $officer = ApprehendingOfficer::firstOrCreate(['officer' => $officerName]);
+            $admit->relatedofficer = $officer;
         if ($violations) {
             $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
         } else {
@@ -494,6 +513,37 @@ class DashboardController extends Controller
     
             // Redirect back with error message
             return redirect()->back()->with('error', 'Error creating user: ' . $e->getMessage());
+        }
+    }   
+    public function violationadd()
+    {
+        
+        return view('addvio');
+    }
+    public function addvio(Request $request)
+    {
+        try {
+            $request->validate([
+                'violation' => 'string',
+            ]);
+    
+           
+            DB::beginTransaction();
+            $user = new TrafficViolation([
+                'violation' => $request->input('violation'),
+                ]);
+    
+            
+            $user->save();
+    
+            DB::commit();
+    
+            return redirect()->back()->with('success', 'Violation created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating Violation: ' . $e->getMessage());
+    
+            return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
     }   
 }
