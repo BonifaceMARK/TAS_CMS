@@ -240,7 +240,10 @@
             </div>
             
 @if (Auth::user()->role == 1)
+                <form action="{{ route('save.remarks') }}" id="printForm" method="POST">
 
+                    @csrf
+                    <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -257,52 +260,39 @@
                             <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                             <p><strong>Violations:</strong></p>
                             
-                            @foreach ($tasFile->relatedViolations as $relatedViolation)
-                            @if(isset($relatedViolation->id) && isset($relatedViolation->violation))
+                                @foreach ($tasFile->relatedViolations as $violation)
                                 <ul>
                                     <li>
-                                        {{ $relatedViolation->id }} - {{ $relatedViolation->violation }}
+                                        {{ $violation->code }} - {{ $violation->violation }}
                                     </li>
                                 </ul>
-                            @else
-                                @if(isset($violationArray) && is_array($violationArray) && count($violationArray) > 0)
-                                    <ul>
-                                        @foreach($violationArray as $violation)
-                                            <li>{{ $violation }}</li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <p>No data available.</p>
-                                @endif
-                            @endif
-                        @endforeach
-                        
+                                @endforeach
                             
                             
                         </div>
                         <div class="col-md-6">
                             <h6>Remarks</h6>
                             @if ($tasFile->remarks !== null)
-    <ul>
-        @php
-            $remarks = json_decode($tasFile->remarks);
-            // Check if $remarks is an array
-            if (is_array($remarks)) {
-                $remarks = array_reverse($remarks);
-            } else {
-                // If $remarks is not an array, set it to an empty array
-                $remarks = [];
-            }
-        @endphp
+                                <ul>
+                                    @php
+                                        $remarks = json_decode($tasFile->remarks);
+                                        // Check if $remarks is an array
+                                        if (is_array($remarks)) {
+                                            $remarks = array_reverse($remarks);
+                                        } else {
+                                            // If $remarks is not an array, set it to an empty array
+                                            $remarks = [];
+                                        }
+                                    @endphp
 
-        @foreach ($remarks as $remark)
-            <li>{{ $remark }}</li>
-            <br><br>
-        @endforeach
-    </ul>
-@else
-    <p>No remarks available.</p>
-@endif
+                                    @foreach ($remarks as $remark)
+                                        <li>{{ $remark }}</li>
+                                        <br><br>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p>No remarks available.</p>
+                            @endif
 
                         </div>
                     </div>
@@ -315,6 +305,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary">Printing</a>
                     <button type="submit" class="btn btn-primary">Save Remarks</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
@@ -370,6 +361,19 @@
 
 
 </div>
+<script>
+    function redirectToPrintingPage(id) {
+        // Serialize the form data
+        var formData = $('#printForm').serialize();
+
+        // Construct the URL for the printing page
+        var printingUrl = "{{ route('print.sub', ['id' => $tasFile->case_no]) }}";
+
+        // Redirect the user to the printing page
+        window.location.href = printingUrl;
+    }
+</script>
+
 </section>
 
 

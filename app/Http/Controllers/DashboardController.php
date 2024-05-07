@@ -88,8 +88,8 @@ class DashboardController extends Controller
     public function tasManage()
     {
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
-        
-        return view('tas.manage', compact('officers'));
+        $violations = TrafficViolation::all();
+        return view('tas.manage', compact('officers','violations'));
     }
     public function updateAdmittedCase(Request $request, $id)
     {
@@ -153,16 +153,17 @@ class DashboardController extends Controller
         foreach ($tasFiles as $tasFile) {
             // $tasFile->relatedofficer = $officer;
             $violations = json_decode($tasFile->violation);
-        
-            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            
+            // $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             if ($violations) {
-                $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             } else {
                 $relatedViolations = [];
             }
             $tasFile->relatedViolations = $relatedViolations;
             
         }
+        // dd($relatedViolations);
         return view('tas.view', compact('tasFiles'));
     }
     
@@ -520,6 +521,11 @@ class DashboardController extends Controller
         
         return view('addvio');
     }
+    public function officergg()
+    {
+        
+        return view('addoffi');
+    }
     public function addvio(Request $request)
     {
         try {
@@ -546,4 +552,72 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
     }   
+    public function save_offi(Request $request)
+    {
+        try {
+            $request->validate([
+                'officer' => 'required|string|max:255',
+                'department' => 'required|string|max:255'
+            ]);
+    
+           
+            DB::beginTransaction();
+            $user = new ApprehendingOfficer([
+                'officer' => $request->input('officer'),
+                'department' => $request->input('department'),
+                ]);
+    
+            
+            $user->save();
+    
+            DB::commit();
+                // dd($user);
+            return redirect()->back()->with('success', 'Officer created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating Officer: ' . $e->getMessage());
+    
+            return redirect()->back()->with('error', 'Error creating Officer: ' . $e->getMessage());
+        }
+    }   
+    public function printsub($id)
+    {
+        $tasFile = TasFile::findOrFail($id); // Fetch TasFile using ID
+        
+        // Fetch related data (similar to your existing code)
+        $changes = $tasFile;
+        $officerName = $changes->apprehending_officer;
+        $officers = ApprehendingOfficer::where('officer', $officerName)->get();
+        $violations = json_decode($changes->violation);
+        
+        $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+        
+        $compactData = [
+            'changes' => $changes,
+            'officers' => $officers,
+            'relatedViolations' => $relatedViolations,
+            'date' => date('F j, Y'),
+        ];
+        // dd($compactData);
+        $holidays = [
+            // Regular Holidays
+            '01-01', // New Year's Day
+            '04-09', // Araw ng Kagitingan
+            '05-01', // Labor Day
+            '06-12', // Independence Day
+            '08-26', // National Heroes Day
+            '11-30', // Bonifacio Day
+            '12-25', // Christmas Day
+            // Special Non-Working Holidays
+            '02-25', // EDSA People Power Revolution Anniversary
+            '08-21', // Ninoy Aquino Day
+            '11-01', // All Saints' Day
+            '12-30', // Rizal Day
+            // Additional holidays may be declared by the government
+        ];
+        // Pass data to the view along with $tasFile
+        
+        return view('sub.print', compact('tasFile', 'compactData'));
+    }
+
 }

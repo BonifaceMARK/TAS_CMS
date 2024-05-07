@@ -13,7 +13,9 @@ use App\Http\Controllers\DashboardController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+// Route::middleware(['auth', 'session.expiry'])->group(function () {
+//     // Your routes requiring authentication and session expiry check
+// });
 Route::get('/', function () {
     return view('welcome');
 });
@@ -39,7 +41,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admitTAS', [DashboardController::class, 'admitview'])->name('admitted.view');
         Route::get('/admit.manageform', [DashboardController::class, 'admitmanage'])->name('admitted.manage');
         Route::post('/admit.manageform', [DashboardController::class, 'admittedsubmit'])->name('admittedsubmit.tas');
-        
+
+        Route::get('/apprehending.officer', [DashboardController::class, 'officergg'])->name('see.offi');
+        Route::post('/store.officer', [DashboardController::class, 'save_offi'])->name('save.offi');
         Route::get('/violation', [DashboardController::class, 'violationadd'])->name('see.vio');
         Route::post('/save.violation', [DashboardController::class, 'addvio'])->name('add.violation');
         Route::post('/admit-remarks', [DashboardController::class, 'admitremark'])->name('admitremark');
@@ -58,10 +62,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/store-user', [DashboardController::class, 'store_user'])->name('store.user');
 
         Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
-    
+        
+        Route::get('/print.subpoena/{id}', [DashboardController::class, 'printsub'])->name('print.sub');
 });
 
-
+Route::get('/subpoena', function () {
+    return view('sub.print');
+});
 // create for staff
 // Route::middleware(['auth'])->group(function () {
 //     Route::prefix('employee')->group(function () {

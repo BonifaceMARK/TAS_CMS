@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\TasFile;
 class admitted extends Model
 {
-    use HasFactory;
 
     protected $table = 'admitted_files';
 
