@@ -37,9 +37,7 @@
         {{ session('error') }}
     </div>
 @endif
-<button type="button" class="btn btn-primary" style="background-image: url('{{ asset('assets/img/image.jpg') }}');" data-bs-toggle="modal" data-bs-target="#violationsModal">
-    View Violations
-</button>
+
 
 
     <div class="container-fluid"> <!-- Make the container wider -->
@@ -187,6 +185,7 @@
         </div>
     </div>
 </div><!-- End Recent Violations -->
+
 <!-- Modal -->
 @foreach($recentViolationsToday as $violation)
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
@@ -196,7 +195,9 @@
                 <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">Edit Violation</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editViolationForm{{ $violation->id }}">
+            <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    @method('PUT')
     <div class="modal-body">
         <div class="row">
             <div class="col-md-6">
@@ -252,17 +253,13 @@
                 </div>
             </div>
         </div>
-        <div class="mb-3">
-                        <label for="history{{ $violation->id }}" class="form-label">History/Changes</label>
-                        <textarea class="form-control" id="history{{ $violation->id }}" name="history" rows="4"></textarea>
-                    </div>
+      
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-primary">Save changes</button>
     </div>
 </form>
-
         </div>
     </div>
 </div>

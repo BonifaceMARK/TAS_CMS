@@ -619,48 +619,40 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
     }   
-
     public function updateTas(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'resolution_no' => 'required|string',
-            'top' => 'required|string',
-            'driver' => 'required|string',
-            'apprehending_officer' => 'required|string',
-            'tas_files_id' => 'required|exists:tas_files,id', 
-            'transaction_no' => 'required|string',
-            'date_received' => 'required|date',
-            'plate_no' => 'required|string',
-            'contact_no' => 'required|string',
-            'remarks' => 'nullable|string',
-            'file_attach' => 'nullable|file',
-            'history' => 'nullable|string',
-        ]);
-    
         try {
-            $tasFile = TasFile::findOrFail($validatedData['tas_files_id']);
-            
-            // Get the previous history
-            $previousHistory = $tasFile->history ?? '';
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'resolution_no' => 'nullable|string|max:255',
+                'top' => 'nullable|string|max:255',
+                'driver' => 'nullable|string|max:255',
+                'apprehending_officer' => 'nullable|string|max:255',
+                'violation' => 'nullable|string|max:255',
+                'transaction_no' => 'nullable|string|max:255',
+                'date_received' => 'nullable|date',
+                'plate_no' => 'nullable|string|max:255',
+                'contact_no' => 'nullable|string|max:255',
+                'remarks' => 'nullable|string|max:255',
+            ]);
     
-            // Concatenate the new history with the previous history
-            $newHistory = $previousHistory . ($previousHistory ? "\n" : '') . $validatedData['history'];
+            // Find the violation by ID
+            $violation = TasFile::findOrFail($id);
     
-            // Update the TAS file record with the validated data including the new history
-            $tasFile->update(array_merge($validatedData, ['history' => $newHistory]));
+            // Update the violation with validated data
+            $violation->update($validatedData);
     
-            // Debugging statement
-            dd('Update successful');
-    
-            // Set success message in session
-            Session::flash('success', 'TAS file updated successfully');
-    
-            return redirect()->back();
+            // Set success message
+            return redirect()->back()->with('success', 'Violation updated successfully');
         } catch (\Exception $e) {
-            // Set error message in session
-            Session::flash('error', 'Failed to update TAS file: ' . $e->getMessage());
+            // Rollback any database transactions if necessary
+            // DB::rollBack();
     
-            return redirect()->back();
+            // Log the error
+            Log::error('Error updating Violation: ' . $e->getMessage());
+    
+            // Set error message
+            return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
-}
+    }
 }

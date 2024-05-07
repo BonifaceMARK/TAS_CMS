@@ -357,32 +357,7 @@
 
 
 
-          <div class="card">
-    <div class="card-body">
-        <h5 class="card-title">News &amp; Updates</h5>
-        <div class="news" id="news-feed">
-            @foreach($articles as $article)
-            <div class="card mb-3">
-                <div class="row g-0">
-                    <div class="col-md-12">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $article['title'] }}</h5>
-                          
-                            <p class="card-text">{{ $article['description'] }}</p>
-                            <a href="{{ $article['url'] }}" class="btn btn-primary">Read more</a>
-                        </div>
-                        <div class="card-footer">
-                            <small class="text-muted">{{ $article['publishedAt'] }}</small>
-                            <small class="text-muted">{{ $article['source']['name'] }}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</div>
-
+      
 
         </div><!-- End Right side columns -->
 

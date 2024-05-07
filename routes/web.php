@@ -64,8 +64,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
     
         Route::get('/officers/{departmentName}', [DashboardController::class, 'getByDepartmentName']);
-      
-        Route::put('/tas/{id}', [DashboardController::class, 'updateTas']);
+        
+
+        Route::put('/violations/{id}', [DashboardController::class, 'updateTas'])->name('violations.updateTas');
+
 
 
         
