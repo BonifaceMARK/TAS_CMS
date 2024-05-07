@@ -305,7 +305,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary">Printing</a>
+                    {{-- <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" target="_blank">Printing</a> --}}
+                    <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">Print the Subpeona</a>
                     <button type="submit" class="btn btn-primary">Save Remarks</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
@@ -362,15 +363,11 @@
 
 </div>
 <script>
-    function redirectToPrintingPage(id) {
-        // Serialize the form data
-        var formData = $('#printForm').serialize();
-
-        // Construct the URL for the printing page
-        var printingUrl = "{{ route('print.sub', ['id' => $tasFile->case_no]) }}";
-
-        // Redirect the user to the printing page
-        window.location.href = printingUrl;
+    function openInNewTabAndPrint(url) {
+        var win = window.open(url, '_blank');
+        win.onload = function() {
+            win.print();
+        };
     }
 </script>
 

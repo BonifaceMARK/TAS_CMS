@@ -18,7 +18,7 @@ use App\Models\fileviolation;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
-
+use DateTime;
 
 
 class DashboardController extends Controller
@@ -582,25 +582,23 @@ class DashboardController extends Controller
     }   
     public function printsub($id)
     {
-        $tasFile = TasFile::findOrFail($id); // Fetch TasFile using ID
-        
-        // Fetch related data (similar to your existing code)
+        $tasFile = TasFile::findOrFail($id);
         $changes = $tasFile;
         $officerName = $changes->apprehending_officer;
         $officers = ApprehendingOfficer::where('officer', $officerName)->get();
-        $violations = json_decode($changes->violation);
-        
-        $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-        
-        $compactData = [
-            'changes' => $changes,
-            'officers' => $officers,
-            'relatedViolations' => $relatedViolations,
-            'date' => date('F j, Y'),
-        ];
-        // dd($compactData);
+        if (!empty($changes->violation)) {
+            $violations = json_decode($changes->violation);
+            if ($violations !== null) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            } else {
+                $relatedViolations = [];
+            }
+        } else {
+            $relatedViolations = [];
+        }
+
         $holidays = [
-            // Regular Holidays
+            // List of holidays, format: 'MM-DD' or 'YYYY-MM-DD'
             '01-01', // New Year's Day
             '04-09', // Araw ng Kagitingan
             '05-01', // Labor Day
@@ -608,15 +606,42 @@ class DashboardController extends Controller
             '08-26', // National Heroes Day
             '11-30', // Bonifacio Day
             '12-25', // Christmas Day
-            // Special Non-Working Holidays
             '02-25', // EDSA People Power Revolution Anniversary
             '08-21', // Ninoy Aquino Day
             '11-01', // All Saints' Day
+            '11-02', // All Souls' Day
             '12-30', // Rizal Day
-            // Additional holidays may be declared by the government
+            '02-14', // Valentine's Day
+            '03-08', // International Women's Day
+            '10-31', // Halloween
+            '04-20', // 420 (Cannabis Culture)
+            '07-04', // Independence Day (United States)
+            '10-31', // Halloween
+            '05-14', // Additional holiday declared by the government
+            '11-15', // Regional holiday
         ];
-        // Pass data to the view along with $tasFile
+        // Get the current date and format it as "Month Day, Year"
+        $startDate = date('F j, Y'); // Example output: "May 6, 2024"
+        $date = new DateTime($startDate);
+        $numDays = 4;
         
+        while ($numDays > 0) {
+            $date->modify('+1 day');
+            if ($date->format('N') >= 6 || in_array($date->format('m-d'), $holidays)) {
+                continue; 
+            }
+            
+            $numDays--;
+        }
+        $endDate = $date->format('F j, Y');
+        $compactData = [
+            'changes' => $changes,
+            'officers' => $officers,
+            'relatedViolations' => $relatedViolations,
+            'date' => date('F j, Y'),
+            'hearing' => $endDate,
+        ];
+        // dd($compactData);
         return view('sub.print', compact('tasFile', 'compactData'));
     }
 

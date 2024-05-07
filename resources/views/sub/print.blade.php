@@ -125,19 +125,17 @@
             </span></b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>Co<i>mplainants,</i><b>
                 </b></span></p>
 
-                <p class="MsoNoSpacing" style="margin-left: 3.0in; text-align: right;">
-    <b><span style="font-size: 12.0pt; font-family: 'Arial', sans-serif;"></span></b>
-    <span style="font-size: 12.0pt; font-family: 'Arial', sans-serif;">
-        FOR: 
-        <ol>
-            @foreach ($compactData['relatedViolations'] as $violation)
-                <li>{{ $violation->code }} - {{ $violation->violation }}</li>
-            @endforeach
-        </ol>
-    </span>
-</p>
+                <p class=MsoNoSpacing style='margin-left:3.0in'><b><span style='font-size:12.0pt;
+                font-family:"Arial",sans-serif'> 
+                </span></b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>FOR:<br>
 
-                    
+                    <?php $counter = 1; ?>
+                    @foreach ($compactData['relatedViolations'] as $violation)
+                        {{ $counter }}. {{ $violation->code }} - {{ $violation->violation }} <br>
+                        <?php $counter++; ?>
+                    @endforeach
+                    </p>
+
         <p class=MsoNoSpacing style='margin-left:3.0in'><span style='font-size:12.0pt;
                 font-family:"Arial",sans-serif'> </span></p>
 
@@ -165,8 +163,7 @@
                 the authority vested in the Traffic Adjudication Service (TAS) by Section 3 of
                 Executive Order No. 266 dated July 25,1987, you are hereby ordered to <b>submit
                     Position Paper</b> before the Traffic Adjudication Service, LTO Central Office,
-                East Avenue, Quezon City, Philippines, on <b><span style='background:yellow'>January
-                        8</span>, 2024 at 2:00 p.m.</b> in connection with the charge/s involving motor
+                East Avenue, Quezon City, Philippines, on <b><span >{{$compactData['hearing']}} at 2:00 p.m.</b> in connection with the charge/s involving motor
                 vehicle with Plate No<b>. <span>{{$compactData['changes']['plate_no']}}.</span></b></span></p>
 
         <p class=MsoNoSpacing style='text-align:justify'><b><span style='font-size:

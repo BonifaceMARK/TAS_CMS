@@ -14,24 +14,112 @@ class TrafficViolationSeeder extends Seeder
     {
         $violations = [
             [
-                'code' => '1A',
-                'violation' => 'DRIVING WITHOUT DL, DRIVING WITH INVALID, FAKE, EXPIRED, WITHOUT CONDUCTOR’S LICENSE'
+                'code' => '1A.a',
+                'violation' => 'DRIVING WITHOUT DL'
+            ],
+            [
+                'code' => '1A.b',
+                'violation' => 'DRIVING WITH INVALID, FAKE, EXPIRED, WITHOUT CONDUCTOR’S LICENSE'
             ],
             [
                 'code' => '1D',
                 'violation' => 'DRIVING UNDER THE INFLUENCE OF ALCOHOL/DRUGS'
             ],
             [
-                'code' => '1E',
-                'violation' => 'RECKLESS, UNSAFE LOAD, OPEN DOOR, SWERVING, BEATING THE RED LIGHT, ACCIDENT, UNSAFE MV, BACKING, TAIL GATING, OVER SPEEDING, BACKING AGAINST TRAFFIC, COUNTERFLOW(EXPRESSWAY)'
+                'code' => '1E.1a',
+                'violation' => 'RECKLESS DRIVING'
             ],
             [
-                'code' => '1E.1',
-                'violation' => 'NON-PRO'
+                'code' => '1E.1b',
+                'violation' => 'UNSAFE LOAD'
             ],
             [
-                'code' => '1E.2',
-                'violation' => 'PRO'
+                'code' => '1E.1c',
+                'violation' => 'OPEN DOOR'
+            ],
+            [
+                'code' => '1E.1d',
+                'violation' => 'SWERVING'
+            ],
+            [
+                'code' => '1E.1e',
+                'violation' => 'BEATING THE RED LIGHT'
+            ],
+            [
+                'code' => '1E.1f',
+                'violation' => 'ACCIDENT'
+            ],
+            [
+                'code' => '1E.1g',
+                'violation' => 'UNSAFE MV'
+            ],
+            [
+                'code' => '1E.1h',
+                'violation' => 'BACKING'
+            ],
+            [
+                'code' => '1E.1i',
+                'violation' => 'TAIL GATING'
+            ],
+            [
+                'code' => '1E.1j',
+                'violation' => 'OVER SPEEDING'
+            ],
+            [
+                'code' => '1E.1k',
+                'violation' => 'BACKING AGAINST TRAFFIC'
+            ],
+            [
+                'code' => '1E.1l',
+                'violation' => 'COUNTERFLOW (EXPRESSWAY)'
+            ],
+            [
+                'code' => '1E.2a',
+                'violation' => 'RECKLESS DRIVING'
+            ],
+            [
+                'code' => '1E.2b',
+                'violation' => 'UNSAFE LOAD'
+            ],
+            [
+                'code' => '1E.2c',
+                'violation' => 'OPEN DOOR'
+            ],
+            [
+                'code' => '1E.2d',
+                'violation' => 'SWERVING'
+            ],
+            [
+                'code' => '1E.2e',
+                'violation' => 'BEATING THE RED LIGHT'
+            ],
+            [
+                'code' => '1E.2f',
+                'violation' => 'ACCIDENT'
+            ],
+            [
+                'code' => '1E.2g',
+                'violation' => 'UNSAFE MV'
+            ],
+            [
+                'code' => '1E.2h',
+                'violation' => 'BACKING'
+            ],
+            [
+                'code' => '1E.2i',
+                'violation' => 'TAIL GATING'
+            ],
+            [
+                'code' => '1E.2j',
+                'violation' => 'OVER SPEEDING'
+            ],
+            [
+                'code' => '1E.2k',
+                'violation' => 'BACKING AGAINST TRAFFIC'
+            ],
+            [
+                'code' => '1E.2l',
+                'violation' => 'COUNTERFLOW (EXPRESSWAY)'
             ],
             [
                 'code' => '1G.1',
@@ -42,17 +130,30 @@ class TrafficViolationSeeder extends Seeder
                 'violation' => 'NO SEATBELT SIGNAGE (FOR HIRE)'
             ],
             [
-                'code' => '1H',
-                'violation' => 'NO HELMET, NO ICC STICKER'
+                'code' => '1H.a',
+                'violation' => 'NO HELMET'
             ],
             [
-                'code' => '1I',
-                'violation' => 'FAILURE TO CARRY DL, FAILURE TO SURRENDER DL, NO OR CR- W/ PLATE NUMBER'
+                'code' => '1H.b',
+                'violation' => 'NO ICC STICKER'
+            ],
+            [
+                'code' => '1I.a',
+                'violation' => 'FAILURE TO CARRY DL'
+            ],
+            [
+                'code' => '1I.b',
+                'violation' => 'FAILURE TO SURRENDER DL, NO OR CR- W/ PLATE NUMBER'
+            ],
+            [
+                'code' => '1I.c',
+                'violation' => 'NO OR CR- W/ PLATE NUMBER'
             ],
             [
                 'code' => '1J.1',
                 'violation' => 'ILLEGAL PARKING'
-            ],[
+            ],
+            [
                 'code' => '1J.2',
                 'violation' => 'DTS, TRUCK BAN, TRICYCLE BAN, ILLEGAL ENTRY, DTO'
             ],
