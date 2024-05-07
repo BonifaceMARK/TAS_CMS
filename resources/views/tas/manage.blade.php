@@ -145,7 +145,6 @@
             <table class="table table-borderless datatable">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
                         <th scope="col">Resolution No.</th>
                         <th scope="col">TOP</th>
                         <th scope="col">Driver</th>
@@ -163,7 +162,6 @@
                 <tbody>
                     @foreach($recentViolationsToday as $violation)
                     <tr>
-                        <th scope="row"><a href="#">{{ $violation->id }}</a></th>
                         <td>{{ $violation->resolution_no }}</td>
                         <td>{{ $violation->top }}</td>
                         <td>{{ $violation->driver }}</td>

@@ -635,22 +635,30 @@ class DashboardController extends Controller
                 'contact_no' => 'nullable|string|max:255',
                 'remarks' => 'nullable|string|max:255',
             ]);
-    
+
             // Find the violation by ID
             $violation = TasFile::findOrFail($id);
-    
+
             // Update the violation with validated data
             $violation->update($validatedData);
-    
+
+            // Update history
+            $history = $violation->history ?? [];
+            $history[] = [
+                'action' => 'update',
+                'user_id' => auth()->id(), // Assuming you have user authentication
+                'timestamp' => now(),
+                'changes' => $validatedData,
+            ];
+            $violation->history = $history;
+            $violation->save();
+
             // Set success message
             return redirect()->back()->with('success', 'Violation updated successfully');
         } catch (\Exception $e) {
-            // Rollback any database transactions if necessary
-            // DB::rollBack();
-    
             // Log the error
             Log::error('Error updating Violation: ' . $e->getMessage());
-    
+
             // Set error message
             return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
