@@ -19,6 +19,7 @@ use App\Models\G5ChatMessage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Models\ContestedHistory;
 
 
 
@@ -89,8 +90,29 @@ class DashboardController extends Controller
         return view('index', compact('unreadMessageCount','messages', 'name', 'department','articles','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
-       
-
+    public function editViolation(Request $request, $id)
+    {
+        // Step 1: Retrieve the violation record
+        $violation = Violation::find($id);
+        
+        // Check if the violation exists
+        if (!$violation) {
+            // Handle the case where the violation does not exist
+            return redirect()->back()->with('error', 'Violation not found.');
+        }
+        
+        // Step 2: Validate the incoming request data
+        $validatedData = $request->validate([
+            // Define your validation rules here
+        ]);
+        
+        // Step 3: Update the violation record with the new data
+        $violation->update($validatedData);
+        
+        // Step 4: Redirect the user back with a success or error message
+        return redirect()->back()->with('success', 'Violation updated successfully.');
+    }
+    
         public function chatIndex()
         {
             $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
@@ -537,7 +559,7 @@ class DashboardController extends Controller
             // Begin a database transaction
             DB::beginTransaction();
     
-            // Create the new User instance
+            
             $user = new User([
                 'fullname' => $request->input('fullname'),
                 'username' => $request->input('username'),
@@ -547,22 +569,22 @@ class DashboardController extends Controller
                 'password' => bcrypt($request->input('password')),
             ]);
     
-            // Save the user to the database
+            
             $user->save();
     
-            // Commit the transaction if everything is successful
+            
             DB::commit();
     
-            // Redirect back with success message
+            
             return redirect()->route('user_management')->with('success', 'User created successfully');
         } catch (\Exception $e) {
-            // If an error occurs, rollback the transaction
+            
             DB::rollBack();
     
-            // Log the exception for debugging
+            
             Log::error('Error creating user: ' . $e->getMessage());
     
-            // Redirect back with error message
+           
             return redirect()->back()->with('error', 'Error creating user: ' . $e->getMessage());
         }
     }   
@@ -597,4 +619,48 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
     }   
+
+    public function updateTas(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'resolution_no' => 'required|string',
+            'top' => 'required|string',
+            'driver' => 'required|string',
+            'apprehending_officer' => 'required|string',
+            'tas_files_id' => 'required|exists:tas_files,id', 
+            'transaction_no' => 'required|string',
+            'date_received' => 'required|date',
+            'plate_no' => 'required|string',
+            'contact_no' => 'required|string',
+            'remarks' => 'nullable|string',
+            'file_attach' => 'nullable|file',
+            'history' => 'nullable|string',
+        ]);
+    
+        try {
+            $tasFile = TasFile::findOrFail($validatedData['tas_files_id']);
+            
+            // Get the previous history
+            $previousHistory = $tasFile->history ?? '';
+    
+            // Concatenate the new history with the previous history
+            $newHistory = $previousHistory . ($previousHistory ? "\n" : '') . $validatedData['history'];
+    
+            // Update the TAS file record with the validated data including the new history
+            $tasFile->update(array_merge($validatedData, ['history' => $newHistory]));
+    
+            // Debugging statement
+            dd('Update successful');
+    
+            // Set success message in session
+            Session::flash('success', 'TAS file updated successfully');
+    
+            return redirect()->back();
+        } catch (\Exception $e) {
+            // Set error message in session
+            Session::flash('error', 'Failed to update TAS file: ' . $e->getMessage());
+    
+            return redirect()->back();
+        }
+}
 }

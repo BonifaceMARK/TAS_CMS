@@ -106,6 +106,7 @@
 
 
           <!-- Website Traffic -->
+          <div class="col-12">
           <div class="card">
             <div class="filter">
               <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
@@ -121,10 +122,59 @@
             </div>
 
             <div class="card-body pb-0">
-            <h5 class="card-title">Apprehending Offices <span id="todaySpan">| Chart</span></h5>
+            <h5 class="card-title">Concerned Apprehending Offices <span id="todaySpan">| Chart</span></h5>
 
             <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
+<!-- Modal -->
+<div class="modal fade" id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="departmentModalLabel">Officers from <span id="modalDepartmentName"></span> Department</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Officer names will be displayed here -->
+      </div>
+    </div>
+  </div>
+</div>
 
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    var trafficChart = echarts.init(document.querySelector("#trafficChart"));
+
+    // Your existing chart initialization code
+
+    // Add event listener to chart
+    trafficChart.on('click', function (params) {
+      if (params.componentType === 'series') {
+        // Fetch officers from the clicked department
+        var departmentName = params.name;
+        fetch('/officers/' + encodeURIComponent(departmentName))
+          .then(response => response.json())
+          .then(data => {
+            // Populate modal with officer names
+            var modalDepartmentName = document.getElementById('modalDepartmentName');
+            var modalBody = document.getElementById('modalBody');
+            modalDepartmentName.textContent = departmentName;
+            modalBody.innerHTML = '';
+            data.forEach(officer => {
+              var officerName = document.createElement('div');
+              officerName.textContent = officer.officer;
+              modalBody.appendChild(officerName);
+            });
+            // Display modal
+            var departmentModal = new bootstrap.Modal(document.getElementById('departmentModal'));
+            departmentModal.show();
+          })
+          .catch(error => console.error('Error fetching officers:', error));
+      }
+    });
+  });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         var trafficChart = echarts.init(document.querySelector("#trafficChart"));
@@ -182,57 +232,8 @@
 
             </div>
           </div><!-- End Website Traffic -->
-
-<!-- Modal -->
-<div class="modal fade" id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="departmentModalLabel">Officers from <span id="modalDepartmentName"></span> Department</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="modalBody">
-        <!-- Officer names will be displayed here -->
-      </div>
-    </div>
-  </div>
 </div>
 
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    var trafficChart = echarts.init(document.querySelector("#trafficChart"));
-
-    // Your existing chart initialization code
-
-    // Add event listener to chart
-    trafficChart.on('click', function (params) {
-      if (params.componentType === 'series') {
-        // Fetch officers from the clicked department
-        var departmentName = params.name;
-        fetch('/officers/' + encodeURIComponent(departmentName))
-          .then(response => response.json())
-          .then(data => {
-            // Populate modal with officer names
-            var modalDepartmentName = document.getElementById('modalDepartmentName');
-            var modalBody = document.getElementById('modalBody');
-            modalDepartmentName.textContent = departmentName;
-            modalBody.innerHTML = '';
-            data.forEach(officer => {
-              var officerName = document.createElement('div');
-              officerName.textContent = officer.officer;
-              modalBody.appendChild(officerName);
-            });
-            // Display modal
-            var departmentModal = new bootstrap.Modal(document.getElementById('departmentModal'));
-            departmentModal.show();
-          })
-          .catch(error => console.error('Error fetching officers:', error));
-      }
-    });
-  });
-</script>
 
             <!-- Top Selling -->
             <div class="col-12">

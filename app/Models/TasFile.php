@@ -23,6 +23,7 @@ class TasFile extends Model
         'plate_no',
         'remarks',
         'file_attach',
+        'history',
     ];
     public function relatedofficer()
     {

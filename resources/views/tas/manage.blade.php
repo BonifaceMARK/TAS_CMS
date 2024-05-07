@@ -139,13 +139,11 @@
             </div>
         </div>
     </div>
-    <!-- Recent Violations -->
+<!-- Recent Violations -->
 <div class="col-12">
     <div class="card recent-violations overflow-auto">
-
         <div class="card-body">
-            <h5 class="card-title">Recent Contested Cases Added <span></span></h5>
-
+            <h5 class="card-title">Edit Contested Cases<span></span></h5>
             <table class="table table-borderless datatable">
                 <thead>
                     <tr>
@@ -161,10 +159,11 @@
                         <th scope="col">Contact No.</th>
                         <th scope="col">Remarks</th>
                         <th scope="col">File Attachment</th>
+                        <th scope="col">Actions</th> <!-- Add this table header for actions -->
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($recentViolationsToday as $violation)
+                    @foreach($recentViolationsToday as $violation)
                     <tr>
                         <th scope="row"><a href="#">{{ $violation->id }}</a></th>
                         <td>{{ $violation->resolution_no }}</td>
@@ -178,19 +177,97 @@
                         <td>{{ $violation->contact_no }}</td>
                         <td>{{ $violation->remarks }}</td>
                         <td>{{ $violation->file_attach }}</td>
+                        <td>
+                            <button class="btn btn-primary editViolation" data-id="{{ $violation->id }}" data-bs-toggle="modal" data-bs-target="#editViolationModal{{ $violation->id }}">Edit</button>
+                        </td>
                     </tr>
-                    @empty
-                    <tr>
-                        <td colspan="12" class="text-center">No recent Violations for today.</td>
-                    </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
-
         </div>
-
     </div>
 </div><!-- End Recent Violations -->
+<!-- Modal -->
+@foreach($recentViolationsToday as $violation)
+<div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">Edit Violation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editViolationForm{{ $violation->id }}">
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Violation details section -->
+                <h6 class="fw-bold mb-3">Violation Details</h6>
+                <div class="mb-3">
+                    <label for="resolutionNo{{ $violation->id }}" class="form-label">Resolution No.</label>
+                    <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="resolution_no" value="{{ $violation->resolution_no }}">
+                </div>
+                <div class="mb-3">
+                    <label for="top{{ $violation->id }}" class="form-label">TOP</label>
+                    <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
+                </div>
+                <div class="mb-3">
+                    <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
+                    <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
+                </div>
+                <div class="mb-3">
+                    <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
+                    <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
+                </div>
+                <div class="mb-3">
+                    <label for="violation{{ $violation->id }}" class="form-label">Violation</label>
+                    <input type="text" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Additional details section -->
+                <h6 class="fw-bold mb-3">Additional Details</h6>
+                <div class="mb-3">
+                    <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
+                    <input type="text" class="form-control" id="transactionNo{{ $violation->id }}" name="transaction_no" value="{{ $violation->transaction_no }}">
+                </div>
+                <div class="mb-3">
+                    <label for="dateReceived{{ $violation->id }}" class="form-label">Date Received</label>
+                    <input type="date" class="form-control" id="dateReceived{{ $violation->id }}" name="date_received" value="{{ $violation->date_received }}">
+                </div>
+                <div class="mb-3">
+                    <label for="plateNo{{ $violation->id }}" class="form-label">Plate No.</label>
+                    <input type="text" class="form-control" id="plateNo{{ $violation->id }}" name="plate_no" value="{{ $violation->plate_no }}">
+                </div>
+                <div class="mb-3">
+                    <label for="contactNo{{ $violation->id }}" class="form-label">Contact No.</label>
+                    <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
+                </div>
+                <div class="mb-3">
+                    <label for="remarks{{ $violation->id }}" class="form-label">Remarks</label>
+                    <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks" value="{{ $violation->remarks }}">
+                </div>
+                <div class="mb-3">
+                    <label for="fileAttach{{ $violation->id }}" class="form-label">File Attachment</label>
+                    <input type="file" class="form-control" id="fileAttach{{ $violation->id }}" name="file_attach">
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+                        <label for="history{{ $violation->id }}" class="form-label">History/Changes</label>
+                        <textarea class="form-control" id="history{{ $violation->id }}" name="history" rows="4"></textarea>
+                    </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+    </div>
+</form>
+
+        </div>
+    </div>
+</div>
+@endforeach
+
 
 <!-- Modal -->
 <div class="modal fade" id="violationsModal" tabindex="-1" aria-labelledby="violationsModalLabel" aria-hidden="true">

@@ -22,10 +22,11 @@ return new class extends Migration
             $table->string('violation')->nullable();
             $table->string('transaction_no')->nullable();
             $table->date('date_received')->nullable();
-            $table->string('contact_no')->nullable(); // Add contact_no field
+            $table->string('contact_no')->nullable();
             $table->string('plate_no')->nullable();
             $table->text('remarks')->nullable();
             $table->text('file_attach')->nullable(); 
+            $table->text('history')->nullable(); 
             $table->timestamps();
         });
     }
