@@ -43,9 +43,7 @@
             <div class="col-lg-8"> <!-- Adjusted the width of the column -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Contest Case - Input <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
-                            View Violations
-                          </button></h5>
+                        <h5 class="card-title">Contest Case - Input</h5>
     
                         <!-- Form Start -->
                         <form method="POST" action="{{ route('submitForm.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
@@ -94,17 +92,12 @@
                             </div>
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipViolation" class="form-label">Violation</label>
-                                <input type="text" name="violation" class="form-control" id="validationTooltipViolation" list="violations" autocomplete="off" required>
-                                <datalist id="violations">
-                                    <!-- Populate options dynamically using PHP or JavaScript -->
-                                    @foreach($violations as $violation)
-                                        <option value="{{ $violation->code }}">{{ $violation->violation }}</option>
-                                    @endforeach
-                                </datalist>
-                                <div class="invalid-tooltip">
-                                    Please provide a violation.
+                                <div id="violationContainer">
+                                    <input type="text" name="violation[]" class="form-control violation-input" required>
                                 </div>
+                                <button type="button" class="btn btn-success mt-2" onclick="addViolation()">Add Violation</button>
                             </div>
+                            
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipTransac" class="form-label">Transaction No.</label>
                                 <input type="text" name="transaction_no" class="form-control" id="validationTooltipTransac" placeholder="(TRX-LETAS) NO. ONLY">
@@ -168,7 +161,28 @@
       </div>
     </div>
   </div>
+  <script>
+    function addViolation() {
+        var violationContainer = document.getElementById('violationContainer');
+        var newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.name = 'violation[]'; // Use an array to handle multiple violations
+        newInput.className = 'form-control violation-input mt-2';
+        newInput.required = true;
+        violationContainer.appendChild(newInput);
 
+        // Create a "Minus" button
+        var minusButton = document.createElement('button');
+        minusButton.type = 'button';
+        minusButton.className = 'btn btn-danger mt-2';
+        minusButton.textContent = 'Remove';
+        minusButton.onclick = function() {
+            violationContainer.removeChild(newInput);
+            violationContainer.removeChild(minusButton);
+        };
+        violationContainer.appendChild(minusButton);
+    }
+</script>
   <script>
     function selectViolation(selectedViolation) {
       var input = document.getElementById('validationTooltipViolation');

@@ -29,7 +29,7 @@ Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 
 // start middleware
 Route::middleware(['auth'])->group(function () {
-    
+        
         Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboard');
         Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
         Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');

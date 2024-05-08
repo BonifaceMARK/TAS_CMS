@@ -148,23 +148,19 @@ class DashboardController extends Controller
             // Assign the related officers to the $tasFile object
             $tasFile->relatedofficer = $officersForFile;
         }
-        
-        // dd($officers);
-        foreach ($tasFiles as $tasFile) {
-            // $tasFile->relatedofficer = $officer;
-            $violations = json_decode($tasFile->violation);
-            
-            // $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-            if ($violations) {
-                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-            } else {
-                $relatedViolations = [];
-            }
-            $tasFile->relatedViolations = $relatedViolations;
-            
+        // foreach ($tasFiles as $tasFile) {
+        //     $officialviolation = json_decode($tasFile->violation);
+
+        //     $tasFile->relatedViolations = $officialviolation;
+        // }
+        foreach ($tasFile as $violation)
+        {
+            $violation;
         }
-        // dd($relatedViolations);
+        // dd($violation);
+        // dd($tasFile);
         return view('tas.view', compact('tasFiles'));
+        
     }
     
     
@@ -257,7 +253,8 @@ class DashboardController extends Controller
             'top' => 'nullable|string',
             'driver' => 'required|string',
             'apprehending_officer' => 'required|string',
-            'violation' => 'required|string',
+            'violation' => 'required|array',
+            'violation.*' => 'required|string',
             'transaction_no' => 'nullable|string',
             'date_received' => 'required|date',
             'contact_no' => 'required|string',
@@ -273,7 +270,7 @@ class DashboardController extends Controller
                 'top' => $validatedData['top'],
                 'driver' => $validatedData['driver'],
                 'apprehending_officer' => $validatedData['apprehending_officer'],
-                'violation' => json_encode(explode(', ', $validatedData['violation'])),
+                'violation' => json_encode($validatedData['violation']),
                 'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                 'plate_no' => $validatedData['plate_no'],
                 'date_received' => $validatedData['date_received'],
@@ -621,10 +618,15 @@ class DashboardController extends Controller
             '11-15', // Regional holiday
         ];
         // Get the current date and format it as "Month Day, Year"
-        $startDate = date('F j, Y'); // Example output: "May 6, 2024"
+        $startDate = $changes->date_received; // Example output: "May 6, 2024"
+        
+
+        // Add the specified number of days
+        
         $date = new DateTime($startDate);
         $numDays = 4;
-        
+        $date->modify("+" . $numDays . " days");
+        $newDate = $date->format('F j, Y');
         while ($numDays > 0) {
             $date->modify('+1 day');
             if ($date->format('N') >= 6 || in_array($date->format('m-d'), $holidays)) {
@@ -638,7 +640,7 @@ class DashboardController extends Controller
             'changes' => $changes,
             'officers' => $officers,
             'relatedViolations' => $relatedViolations,
-            'date' => date('F j, Y'),
+            'date' => $newDate,
             'hearing' => $endDate,
         ];
         // dd($compactData);

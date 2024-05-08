@@ -46,7 +46,7 @@ public function login(Request $request)
             // }  else {
             //     return redirect()->to('/employee/dashboard');
             // }
-            return redirect()->to('/dashboard');
+            return redirect()->intended('/dashboard');
         } else {
             throw new \Exception('Invalid credentials. Please try again.');
         }
