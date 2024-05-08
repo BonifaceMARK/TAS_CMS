@@ -622,6 +622,12 @@ class DashboardController extends Controller
     public function updateTas(Request $request, $id)
     {
         try {
+            // Find the violation by ID
+            $violation = TasFile::findOrFail($id);
+    
+            $history = $violation->history ?: [];
+
+    
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'resolution_no' => 'nullable|string|max:255',
@@ -635,32 +641,61 @@ class DashboardController extends Controller
                 'contact_no' => 'nullable|string|max:255',
                 'remarks' => 'nullable|string|max:255',
             ]);
-
-            // Find the violation by ID
-            $violation = TasFile::findOrFail($id);
-
-            // Update the violation with validated data
-            $violation->update($validatedData);
-
-            // Update history
-            $history = $violation->history ?? [];
+    
+            // Capture changes
+            $changes = [];
+            foreach ($validatedData as $field => $newValue) {
+                if ($violation->$field !== $newValue) {
+                    $changes[$field] = [
+                        'old_value' => $violation->$field,
+                        'new_value' => $newValue,
+                    ];
+                }
+            }
+    
+            // Append new changes to existing history
             $history[] = [
                 'action' => 'update',
                 'user_id' => auth()->id(), // Assuming you have user authentication
+                'username' => auth()->user()->username,
                 'timestamp' => now(),
-                'changes' => $validatedData,
+                'changes' => $changes,
             ];
-            $violation->history = $history;
+    
+            // Update the violation with validated data
+            $violation->update($validatedData);
+    
+            // Save updated history along with violation
+            $violation->history = json_encode($history);
             $violation->save();
-
+    
             // Set success message
             return redirect()->back()->with('success', 'Violation updated successfully');
         } catch (\Exception $e) {
             // Log the error
             Log::error('Error updating Violation: ' . $e->getMessage());
-
+    
             // Set error message
             return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
     }
+    public function deleteTas($id)
+{
+    try {
+        // Find the violation by ID
+        $violation = TasFile::findOrFail($id);
+
+        // Delete the violation
+        $violation->delete();
+
+        // Set success message
+        return redirect()->back()->with('success', 'Violation deleted successfully');
+    } catch (\Exception $e) {
+        // Log the error
+        Log::error('Error deleting Violation: ' . $e->getMessage());
+
+        // Set error message
+        return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
+    }
+}
 }

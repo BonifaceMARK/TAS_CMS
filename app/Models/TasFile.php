@@ -74,5 +74,9 @@ class TasFile extends Model
     {
         $this->attributes['plate_no'] = strtoupper($value);
     }
+    public function getHistoryAttribute($value)
+{
+    return $value ? json_decode($value, true) : [];
+}
     
 }

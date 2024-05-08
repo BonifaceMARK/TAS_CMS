@@ -67,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
         
 
         Route::put('/violations/{id}', [DashboardController::class, 'updateTas'])->name('violations.updateTas');
+        Route::delete('/violations/{id}', [DashboardController::class, 'deleteTas'])->name('violations.delete');
 
 
 
