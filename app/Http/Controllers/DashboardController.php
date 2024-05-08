@@ -655,7 +655,7 @@ class DashboardController extends Controller
     
             // Append new changes to existing history
             $history[] = [
-                'action' => 'update',
+                'action' => 'EDIT',
                 'user_id' => auth()->id(), // Assuming you have user authentication
                 'username' => auth()->user()->username,
                 'timestamp' => now(),
@@ -697,5 +697,9 @@ class DashboardController extends Controller
         // Set error message
         return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
     }
+}
+public function analyticsDash()
+{
+    return view('analytics');
 }
 }

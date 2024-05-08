@@ -30,6 +30,7 @@ Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     
         Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboard');
+        Route::get('/analytics', [DashboardController::class, 'analyticsDash'])->name('analytics.index');
         Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
         Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');
         Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view');

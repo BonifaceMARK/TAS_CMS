@@ -35,7 +35,11 @@
         <span>Dashboard</span>
       </a>
     </li><!-- End Dashboard Nav -->
-    <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('analytics.index')}}">
+      <i class="bi bi-graph-up-arrow"></i><span> Analytics</span>
+      </a>
+    </li>
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('see.vio')}}">
           <i class="bi bi-file-earmark-text"></i><span> Add Violation</span>
