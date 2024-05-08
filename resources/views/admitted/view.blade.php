@@ -112,7 +112,7 @@
                         </div>
                         <div class="datatable-bottom">
                             <div class="datatable-info">
-                            Showing {{ $admitted->count() }} entries
+                            Showing {{ $admittedted->count() }} entries
                             </div>
                         </div>
                     </div>

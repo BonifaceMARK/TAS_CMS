@@ -7,11 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ApprehendingOfficer extends Model
 {
-    use HasFactory;
     protected $table = 'apprehending_officers';
     protected $fillable = ['officer','department'];
     public function tasFiles()
     {
         return $this->belongsToMany(TasFile::class, 'apprehending_officer');
+    }
+    public function setNameAttribute($value)
+    {
+        $this->attributes['officer'] = strtoupper($value);
     }
 }

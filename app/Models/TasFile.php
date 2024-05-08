@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\TrafficViolation;
 class TasFile extends Model
 {
-    use HasFactory;
 
     protected $table = 'tas_files';
 
@@ -25,6 +24,10 @@ class TasFile extends Model
         'file_attach',
         'history',
     ];
+    public function setofficerAttribute($value)
+    {
+        $this->attributes['apprehending_officer'] = strtoupper($value);
+    }
     public function relatedofficer()
     {
         return $this->hasOne(ApprehendingOfficer::class, 'apprehending_officer');
@@ -65,10 +68,7 @@ class TasFile extends Model
     {
         $this->attributes['driver'] = strtoupper($value);
     }
-    public function setofficerAttribute($value)
-    {
-        $this->attributes['apprehending_officer'] = strtoupper($value);
-    }
+    
     // Define mutator for 'plate_no' field
     public function setPlateNoAttribute($value)
     {

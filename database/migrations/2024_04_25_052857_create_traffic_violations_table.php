@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('traffic_violations', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->nullable();
             $table->text('violation')->nullable();
             $table->timestamps();
         });

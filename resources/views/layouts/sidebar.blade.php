@@ -45,6 +45,12 @@
           <i class="bi bi-file-earmark-text"></i><span> Add Violation</span>
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('see.offi')}}">
+          <i class="bi bi-person-fill-add"></i><span> Add Apprehending Officer</span>
+      </a>
+    </li>
+    <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">Contested Case</li>
 
     <li class="nav-item">

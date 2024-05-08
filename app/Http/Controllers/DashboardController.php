@@ -19,8 +19,7 @@ use App\Models\G5ChatMessage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
-use App\Models\ContestedHistory;
-
+use DateTime;
 
 
 class DashboardController extends Controller
@@ -155,8 +154,8 @@ class DashboardController extends Controller
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
         $recentViolationsToday = TasFile::orderBy('date_received', 'desc')
         ->get();
-
-        return view('tas.manage', compact('officers','recentViolationsToday'));
+$violations = TrafficViolation::all();
+        return view('tas.manage', compact('officers','recentViolationsToday','violations'));
     }
     public function updateAdmittedCase(Request $request, $id)
     {
@@ -220,16 +219,17 @@ class DashboardController extends Controller
         foreach ($tasFiles as $tasFile) {
             // $tasFile->relatedofficer = $officer;
             $violations = json_decode($tasFile->violation);
-        
-            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            
+            // $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             if ($violations) {
-                $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             } else {
                 $relatedViolations = [];
             }
             $tasFile->relatedViolations = $relatedViolations;
             
         }
+        // dd($relatedViolations);
         return view('tas.view', compact('tasFiles'));
     }
     
@@ -592,6 +592,11 @@ class DashboardController extends Controller
     {
         
         return view('addvio');
+    }
+    public function officergg()
+    {
+        
+        return view('addoffi');
     }
     public function addvio(Request $request)
     {
