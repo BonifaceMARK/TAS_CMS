@@ -48,10 +48,10 @@ class TasFile extends Model
     }
 
     // Define mutator for 'violation' field
-    public function setViolationAttribute($value)
-    {
-        $this->attributes['violation'] = strtoupper($value);
-    }
+    // public function setViolationAttribute($value)
+    // {
+    //     $this->attributes['violation'] = strtoupper($value);
+    // }
 
     // Define mutator for 'transaction_no' field
     public function setTransactionNoAttribute($value)

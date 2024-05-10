@@ -33,7 +33,7 @@
                         <th>Email</th>
                         <th>Status</th>
                         <th>Action</th>
-                    </tr>
+                    </tr> 
                 </thead>
                 <tbody>
                     @foreach ($users as $user)
@@ -43,8 +43,10 @@
                         <td>{{ $user->username }}</td>
                         <td>{{ $user->email }}</td>
                         <td>
-                            @if ($user->role == 1)
+                            @if ($user->role == 9)
                             <span class="text-primary">Administrator</span>
+                            @elseif($user->role == 2)
+                            <span class="text-primary">Employee Staff</span>
                             @else
                             <span class="text-success">Employee</span>
                             @endif
@@ -58,7 +60,6 @@
                         </td>
                         <td>
                             <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-primary">Edit</a>
-    
                             <form action="{{ route('users.destroy', $user) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
@@ -116,7 +117,9 @@
                             <select class="form-control" id="role" name="role" required>
                                 <option selected="selected" disabled="disabled">Select Role</option>
                                 <option value="0">Employee</option>
-                                <option value="1">Administrator</option>
+                                <option value="1">Employee view</option>
+                                <option value="2">Employee add</option>
+                                <option value="9">Administrator</option>
                             </select>
                             <div class="invalid-tooltip">
                                 Please select a role.

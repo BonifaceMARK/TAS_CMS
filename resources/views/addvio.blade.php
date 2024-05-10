@@ -78,6 +78,8 @@
 
       <form action="{{route('add.violation')}}" method="POST">
         @csrf
+        <label for="violation">Code:</label><br>
+        <input type="text" id="code" name="code"><br><br>
         <label for="violation">Violation:</label><br>
         <input type="text" id="violation" name="violation"><br><br>
         <input type="submit" value="Submit">

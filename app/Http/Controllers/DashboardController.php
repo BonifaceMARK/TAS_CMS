@@ -26,123 +26,81 @@ class DashboardController extends Controller
 {
     public function indexa()
     {
-        // Fetch revenue for this month
         $revenueThisMonth = TasFile::whereMonth('created_at', now())->count();
-    
-        // Fetch revenue for the previous month
         $previousMonthRevenue = TasFile::whereMonth('created_at', Carbon::now()->subMonth())->count();
     
         // // Calculate the percentage change
         // $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
     
         // $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
-
-        // Fetch recent activity
         $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-    
-        // Fetch sales for today
         $salesToday = TasFile::whereDate('created_at', today())->count();
-    
-        // Fetch customers for this year
         $customersThisYear = TasFile::whereYear('created_at', now())->count();
-    
-        // Fetch recent sales for today
         $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-    
-        // Calculate average violations for the previous week
-        $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])
-                                ->count() / 7;
-    // Retrieve data for the chart
-    $admittedData = Admitted::all();
-    $tasFileData = TasFile::all();
-    
-    // Prepare data for chart
+        $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])->count() / 7;
+        $admittedData = Admitted::all();
+        $tasFileData = TasFile::all();  
     $chartData = $admittedData->map(function ($item) {
         $violationCount = 0;
         if ($item->violation) {
             $violations = json_decode($item->violation);
             $violationCount = is_array($violations) ? count($violations) : 0;
         }
-
         return [
             'name' => $item->name,
             'violation_count' => $violationCount,
             'transaction_date' => $item->transaction_date,
         ];
-    });      $departmentsData = ApprehendingOfficer::all();
-
-       // Replace 'YOUR_API_KEY' with your actual News API key
+    });      
+    $departmentsData = ApprehendingOfficer::all();
        $apiKey = '014d72b0e8ae42aeab34e2163a269a83';
        $newsApiUrl = 'https://newsapi.org/v2/top-headlines?country=ph&apiKey=' . $apiKey;
-
-       // Fetch news articles from the News API
        $response = Http::get($newsApiUrl);
-
-       // Extract news articles from the response
        $articles = $response->json()['articles'];
        $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
        $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
             $user = Auth::user();
             $name = $user->name;
             $department = $user->department;
-      
         return view('index', compact('unreadMessageCount','messages', 'name', 'department','articles','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
     public function editViolation(Request $request, $id)
     {
-        // Step 1: Retrieve the violation record
         $violation = Violation::find($id);
-        
-        // Check if the violation exists
         if (!$violation) {
-            // Handle the case where the violation does not exist
             return redirect()->back()->with('error', 'Violation not found.');
         }
-        
-        // Step 2: Validate the incoming request data
         $validatedData = $request->validate([
-            // Define your validation rules here
         ]);
-        
-        // Step 3: Update the violation record with the new data
         $violation->update($validatedData);
-        
-        // Step 4: Redirect the user back with a success or error message
         return redirect()->back()->with('success', 'Violation updated successfully.');
     }
-    
-        public function chatIndex()
-        {
-            $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
-            $user = Auth::user();
-            $name = $user->name;
-            $department = $user->department;
-            $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
-            return view('chat',compact('unreadMessageCount','messages', 'name', 'department'));
-        }
-        public function storeMessage(Request $request)
-        {
-            $request->validate([
-                'message' => 'required|string',
-            ]);
-    
-            $message = new G5ChatMessage();
-            $message->message = $request->input('message');
-    
-            $message->user_id = Auth::id();
-    
-            $message->save();
-    
-            return redirect()->back()->with('success', 'Message sent successfully.');
-        }
-        public function getByDepartmentName($departmentName)
-        {
-            // Assuming you have a column named 'department' in the 'apprehending_officers' table
-            $officers = ApprehendingOfficer::where('department', $departmentName)->get();
-    
-            return response()->json($officers);
-        }
+    public function chatIndex()
+    {
+        $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
+        $user = Auth::user();
+        $name = $user->name;
+        $department = $user->department;
+        $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
+        return view('chat',compact('unreadMessageCount','messages', 'name', 'department'));
+    }
+    public function storeMessage(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+        $message = new G5ChatMessage();
+        $message->message = $request->input('message');
+        $message->user_id = Auth::id();
+        $message->save();
+        return redirect()->back()->with('success', 'Message sent successfully.');
+    }
+    public function getByDepartmentName($departmentName)
+    {
+        $officers = ApprehendingOfficer::where('department', $departmentName)->get();
+        return response()->json($officers);
+    }
 
     public function tables()
     {
@@ -152,8 +110,9 @@ class DashboardController extends Controller
     public function tasManage()
     {
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
-        $recentViolationsToday = TasFile::orderBy('date_received', 'desc')
+        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
         ->get();
+        // dd($recentViolationsToday[1]);
 $violations = TrafficViolation::all();
         return view('tas.manage', compact('officers','recentViolationsToday','violations'));
     }
@@ -214,14 +173,26 @@ $violations = TrafficViolation::all();
             // Assign the related officers to the $tasFile object
             $tasFile->relatedofficer = $officersForFile;
         }
-        // foreach ($tasFiles as $tasFile) {
-        //     $officialviolation = json_decode($tasFile->violation);
+       
+        // dd($officers);
+        foreach ($tasFiles as $tasFile) {
+            // $tasFile->relatedofficer = $officer;
+            $violations = json_decode($tasFile->violation);
 
-        //     $tasFile->relatedViolations = $officialviolation;
-        // }
-        foreach ($tasFile as $violation)
-        {
-            $violation;
+            if ($violations) {
+                // Check if $violations is an array
+                if (is_array($violations)) {
+                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+                } else {
+                    // If $violations is not an array, handle the case accordingly
+                    // For example, you can consider it as a single violation code and proceed accordingly
+                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
+                }
+            } else {
+                $relatedViolations = [];
+            }
+            
+            $tasFile->relatedViolations = $relatedViolations;
         }
         // dd($violation);
         // dd($tasFile);
@@ -325,8 +296,7 @@ $violations = TrafficViolation::all();
             'top' => 'nullable|string',
             'driver' => 'required|string',
             'apprehending_officer' => 'required|string',
-            'violation' => 'required|array',
-            'violation.*' => 'required|string',
+            'violation' => 'required|string',
             'transaction_no' => 'nullable|string',
             'date_received' => 'required|date',
             'contact_no' => 'required|string',
@@ -342,7 +312,7 @@ $violations = TrafficViolation::all();
                 'top' => $validatedData['top'],
                 'driver' => $validatedData['driver'],
                 'apprehending_officer' => $validatedData['apprehending_officer'],
-                'violation' => json_encode($validatedData['violation']),
+                'violation' => json_encode(explode(', ', $validatedData['violation'])),
                 'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                 'plate_no' => $validatedData['plate_no'],
                 'date_received' => $validatedData['date_received'],
@@ -585,6 +555,7 @@ $violations = TrafficViolation::all();
             return redirect()->back()->with('error', 'Error creating user: ' . $e->getMessage());
         }
     }   
+
     public function violationadd()
     {
         
@@ -595,16 +566,56 @@ $violations = TrafficViolation::all();
         
         return view('addoffi');
     }
+    //add officer
+    public function save_offi(Request $request)
+    {
+        try {
+            $request->validate([
+                'officer' => 'required|string',
+                'department' => 'required|string',
+            ]);
+
+            // Check if the officer already exists
+            $existingOfficer = ApprehendingOfficer::where('officer', $request->input('officer'))
+                ->where('department', $request->input('department'))
+                ->first();
+
+            if ($existingOfficer) {
+                return redirect()->back()->with('error', 'Officer already exists.');
+            }
+
+            DB::beginTransaction();
+            $user = new ApprehendingOfficer([
+                'officer' => $request->input('officer'),
+                'department' => $request->input('department'),
+            ]);
+
+            $user->save();
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Officer created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating Officer: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Error creating Officer: ' . $e->getMessage());
+        }
+    } 
+
+    // add violation//
     public function addvio(Request $request)
     {
         try {
             $request->validate([
+                'code' => 'string',
                 'violation' => 'string',
             ]);
     
            
             DB::beginTransaction();
             $user = new TrafficViolation([
+                'code' => $request->input('code'),
                 'violation' => $request->input('violation'),
                 ]);
     
@@ -622,65 +633,84 @@ $violations = TrafficViolation::all();
         }
     }   
     public function updateTas(Request $request, $id)
-    {
-        try {
-            // Find the violation by ID
-            $violation = TasFile::findOrFail($id);
+{
+    try {
+        // Find the violation by ID
+        $violation = TasFile::findOrFail($id);
     
-            $history = $violation->history ?: [];
-
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'resolution_no' => 'nullable|string|max:255',
+            'top' => 'nullable|string|max:255',
+            'driver' => 'nullable|string|max:255',
+            'apprehending_officer' => 'nullable|string|max:255',
+            'violation' => 'nullable|array', // Changed to array, as we expect multiple violations
+            'transaction_no' => 'nullable|string|max:255',
+            'date_received' => 'nullable|date',
+            'plate_no' => 'nullable|string|max:255',
+            'contact_no' => 'nullable|string|max:255',
+            'remarks.*' => 'nullable|string',
+        ]);
     
-            // Validate the incoming request data
-            $validatedData = $request->validate([
-                'resolution_no' => 'nullable|string|max:255',
-                'top' => 'nullable|string|max:255',
-                'driver' => 'nullable|string|max:255',
-                'apprehending_officer' => 'nullable|string|max:255',
-                'violation' => 'nullable|string|max:255',
-                'transaction_no' => 'nullable|string|max:255',
-                'date_received' => 'nullable|date',
-                'plate_no' => 'nullable|string|max:255',
-                'contact_no' => 'nullable|string|max:255',
-                'remarks' => 'nullable|string|max:255',
-            ]);
-    
-            // Capture changes
-            $changes = [];
-            foreach ($validatedData as $field => $newValue) {
-                if ($violation->$field !== $newValue) {
-                    $changes[$field] = [
-                        'old_value' => $violation->$field,
-                        'new_value' => $newValue,
-                    ];
-                }
-            }
-    
-            // Append new changes to existing history
-            $history[] = [
-                'action' => 'EDIT',
-                'user_id' => auth()->id(), // Assuming you have user authentication
-                'username' => auth()->user()->username,
-                'timestamp' => now(),
-                'changes' => $changes,
-            ];
-    
-            // Update the violation with validated data
-            $violation->update($validatedData);
-    
-            // Save updated history along with violation
-            $violation->history = json_encode($history);
-            $violation->save();
-    
-            // Set success message
-            return redirect()->back()->with('success', 'Violation updated successfully');
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('Error updating Violation: ' . $e->getMessage());
-    
-            // Set error message
-            return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
+                // If 'remarks' is set and is an array, join the array elements into a single string
+        if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
+            $validatedData['remarks'] = implode(', ', $validatedData['remarks']);
         }
-    }   
+
+        // Trim the 'remarks' field only if it is a string
+        if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
+            $validatedData['remarks'] = trim($validatedData['remarks']);
+        }
+    
+        // Merge new violations into existing violations array
+        if (!empty($validatedData['violation'])) {
+            $existingViolations = json_decode($violation->violation, true) ?? [];
+            $newViolations = array_filter($validatedData['violation'], function($value) {
+                return $value !== null;
+            });
+            $validatedData['violation'] = array_unique(array_merge($existingViolations, $newViolations));
+        }
+    
+        // Capture changes
+        $changes = [];
+        foreach ($validatedData as $field => $newValue) {
+            if ($violation->$field !== $newValue) {
+                $changes[$field] = [
+                    'old_value' => $violation->$field,
+                    'new_value' => $newValue,
+                ];
+            }
+        }
+    
+        // Append new changes to existing history
+        $history = $violation->history ?? [];
+
+        $history[] = [
+            'action' => 'EDIT',
+            'user_id' => auth()->id(), // Assuming you have user authentication
+            'username' => auth()->user()->username,
+            'timestamp' => now(),
+            'changes' => $changes,
+        ];
+        
+        // Update the violation with validated data
+        $violation->update($validatedData);
+        
+        // Save updated history along with violation
+        $violation->history = $history;
+        $violation->save();
+    
+        // Set success message
+        return redirect()->back()->with('success', 'Violation updated successfully');
+    } catch (\Exception $e) {
+        // Log the error
+        Log::error('Error updating Violation: ' . $e->getMessage());
+    
+        // Set error message
+        return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
+    }
+}
+
     public function printsub($id)
     {
         $tasFile = TasFile::findOrFail($id);
@@ -750,7 +780,7 @@ $violations = TrafficViolation::all();
         // dd($compactData);
         return view('sub.print', compact('tasFile', 'compactData'));
     }
-    }
+    
     public function deleteTas($id)
 {
     try {

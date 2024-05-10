@@ -45,7 +45,9 @@
             <div class="col-lg-12"> <!-- Adjusted the width of the column -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Contest Case - Input </h5>
+                        <h5 class="card-title">Contest Case - Input <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
+                            View Violations
+                          </button></h5>
     
                         <!-- Form Start -->
                         <form method="POST" action="{{ route('submitForm.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
@@ -94,10 +96,16 @@
                             </div>
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipViolation" class="form-label">Violation</label>
-                                <div id="violationContainer">
-                                    <input type="text" name="violation[]" class="form-control violation-input" required>
+                                <input type="text" name="violation" class="form-control" id="validationTooltipViolation" list="violations" autocomplete="off" required>
+                                <datalist id="violations">
+                                    <!-- Populate options dynamically using PHP or JavaScript -->
+                                    @foreach($violations as $violation)
+                                        <option value="{{ $violation->code }}">{{ $violation->violation }}</option>
+                                    @endforeach
+                                </datalist>
+                                <div class="invalid-tooltip">
+                                    Please provide a violation.
                                 </div>
-                                <button type="button" class="btn btn-success mt-2" onclick="addViolation()">Add Violation</button>
                             </div>
                             
                             <div class="col-md-6 position-relative">
@@ -114,7 +122,7 @@
                             
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipContac" class="form-label">Contact no.</label>
-                                <input type="text" name="contact_no" class="form-control" id="validationTooltipContac" value="N/A" required>
+                                <input type="text" name="contact_no" class="form-control" id="validationTooltipContac" value="-" required>
                                 <div class="invalid-tooltip">
                                     Please provide a Contact no.
                                 </div>
@@ -138,6 +146,11 @@
             </div>
         </div>
     </div>
+
+
+
+
+    
 <!-- Recent Violations -->
 <div class="col-12">
     <div class="card recent-violations overflow-auto">
@@ -146,7 +159,7 @@
             <table class="table table-borderless datatable">
                 <thead>
                     <tr>
-                        <th scope="col">Resolution No.</th>
+                        <th scope="col">Case No.</th>
                         <th scope="col">TOP</th>
                         <th scope="col">Driver</th>
                         <th scope="col">Apprehending Officer</th>
@@ -163,7 +176,7 @@
                 <tbody>
                     @foreach($recentViolationsToday as $violation)
                     <tr>
-                        <td>{{ $violation->resolution_no }}</td>
+                        <td>{{ $violation->case_no }}</td>
                         <td>{{ $violation->top }}</td>
                         <td>{{ $violation->driver }}</td>
                         <td>{{ $violation->apprehending_officer }}</td>
@@ -203,8 +216,8 @@
                             <!-- Violation details section -->
                             <h6 class="fw-bold mb-3">Violation Details</h6>
                             <div class="mb-3">
-                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Resolution No.</label>
-                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="resolution_no" value="{{ $violation->resolution_no }}">
+                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
                             </div>
                             <div class="mb-3">
                                 <label for="top{{ $violation->id }}" class="form-label">TOP</label>
@@ -220,7 +233,21 @@
                             </div>
                             <div class="mb-3">
                                 <label for="violation{{ $violation->id }}" class="form-label">Violation</label>
-                                <input type="text" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
+                                @php
+                                    $violas = json_decode($violation->violation, true); 
+                                @endphp
+                                @if (!empty($violas))
+                                        @foreach($violas as $viola)
+                                        <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation" list="violations[]" value="{{ $viola }}">
+                                    @endforeach
+                                @endif
+                                <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation[]" list="violations" value="">
+                                <datalist id="violations">
+                                    <!-- Populate options dynamically using PHP or JavaScript -->
+                                    @foreach($violations as $violationlist)
+                                        <option value="{{ $violationlist->code }}">{{ $violationlist->violation }}</option>
+                                    @endforeach
+                                </datalist>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -244,7 +271,16 @@
                             </div>
                             <div class="mb-3">
                                 <label for="remarks{{ $violation->id }}" class="form-label">Remarks</label>
-                                <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks" value="{{ $violation->remarks }}">
+                                @php
+                                    $remarks = json_decode($violation->remarks, true); 
+                                @endphp
+                                @if (!empty($remarks))
+                                @foreach($remarks as $remark)
+                                    <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" value="{{ $remark }}">
+                                @endforeach
+                            @endif
+                            <!-- Always include one input field for remarks --> 
+                            <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" >
                             </div>
                             <div class="mb-3">
                                 <label for="fileAttach{{ $violation->id }}" class="form-label">File Attachment</label>
@@ -283,9 +319,13 @@
         <li class="list-group-item">
             <strong>{{ $field }}:</strong>
             @if (is_array($values) && isset($values['old_value']) && isset($values['new_value']))
-                <span class="badge bg-primary">{{ $values['old_value'] }}</span>
+                <span class="badge bg-danger">{{ $values['old_value'] }}</span>
                 <i class="bi bi-caret-right mx-2"></i>
-                <span class="badge bg-success">{{ $values['new_value'] }}</span>
+                @if(is_array($values['new_value']))
+                    <span class="badge bg-success">{{ implode(', ', $values['new_value']) }}</span>
+                @else
+                    <span class="badge bg-success">{{ $values['new_value'] }}</span>
+                @endif
             @else
                 <span class="badge bg-secondary">N/A</span>
             @endif
@@ -309,9 +349,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    
+                    
                 </div>
             </form>
         </div>
@@ -328,12 +370,13 @@
                 Are you sure you want to delete this violation?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form action="{{ route('violations.delete', ['id' => $violation->id]) }}" method="POST">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                
             </div>
         </div>
     </div>

@@ -115,10 +115,16 @@
                 represented by <span style='margin-left:21.5%'> Case
                     No.</span><b><span style='color:black'>{{ $compactData['changes']['case_no'] }}</span></b></span></p>
 
-        <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif;display:relative'>{{ $compactData['changes']['apprehending_officer'] }}</span></b><b><span style='font-size:12.0pt;
-                font-family:"Arial",sans-serif'>    
-            </span></b><span  style='font-size:12.0pt;font-family:"Arial";justify-content: right;align-items: right;'>{{ $compactData['changes']['transaction_no'] }}</span></p>
-
+                    
+                    <div style="display:inline-block;">
+                        <b><span style="font-size:12.0pt;font-family:'Arial',sans-serif;">{{ $compactData['changes']['apprehending_officer'] }}</span></b>
+                    </div><div style="margin-left:20%; display:inline-block;">
+                        <span style="font-size:12.0pt;font-family:'Arial',sans-serif;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <span style="font-size:12.0pt;font-family:'Arial',sans-serif;">{{ $compactData['changes']['transaction_no'] }}</span>
+                    </div>
+                    
+                    
+                    
         <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'> 
             </span></b></p>
 
@@ -133,11 +139,11 @@
                 </span></b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>FOR:&nbsp;&nbsp;&nbsp;&nbsp;
                     
                     <?php $counter = 1; ?>
-                    @if (!empty($compactData['changes']['violation']))
-                        @foreach (json_decode($compactData['changes']['violation']) as $violation)
-                            {{ $counter }}. {{ $violation}} <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <?php $counter++; ?>
-                        @endforeach
+                    @if (!empty($compactData['relatedViolations']))
+                        @foreach ($compactData['relatedViolations'] as $violation)
+                        {{ $counter }}. {{ $violation->code }} - {{ $violation->violation }} <br>
+                        <?php $counter++; ?>
+                    @endforeach
                     @else
                         No violations recorded.
                     @endif

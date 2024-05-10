@@ -27,99 +27,99 @@ class TrafficViolationSeeder extends Seeder
             ],
             [
                 'code' => '1E.1a',
-                'violation' => 'RECKLESS DRIVING'
+                'violation' => 'RECKLESS DRIVING (NON-PRO)'
             ],
             [
                 'code' => '1E.1b',
-                'violation' => 'UNSAFE LOAD'
+                'violation' => 'UNSAFE LOAD (NON-PRO)'
             ],
             [
                 'code' => '1E.1c',
-                'violation' => 'OPEN DOOR'
+                'violation' => 'OPEN DOOR (NON-PRO)'
             ],
             [
                 'code' => '1E.1d',
-                'violation' => 'SWERVING'
+                'violation' => 'SWERVING (NON-PRO)'
             ],
             [
                 'code' => '1E.1e',
-                'violation' => 'BEATING THE RED LIGHT'
+                'violation' => 'BEATING THE RED LIGHT (NON-PRO)'
             ],
             [
                 'code' => '1E.1f',
-                'violation' => 'ACCIDENT'
+                'violation' => 'ACCIDENT (NON-PRO)'
             ],
             [
                 'code' => '1E.1g',
-                'violation' => 'UNSAFE MV'
+                'violation' => 'UNSAFE MV (NON-PRO)'
             ],
             [
                 'code' => '1E.1h',
-                'violation' => 'BACKING'
+                'violation' => 'BACKING (NON-PRO)'
             ],
             [
                 'code' => '1E.1i',
-                'violation' => 'TAIL GATING'
+                'violation' => 'TAIL GATING (NON-PRO)'
             ],
             [
                 'code' => '1E.1j',
-                'violation' => 'OVER SPEEDING'
+                'violation' => 'OVER SPEEDING (NON-PRO)'
             ],
             [
                 'code' => '1E.1k',
-                'violation' => 'BACKING AGAINST TRAFFIC'
+                'violation' => 'BACKING AGAINST TRAFFIC (NON-PRO)'
             ],
             [
                 'code' => '1E.1l',
-                'violation' => 'COUNTERFLOW (EXPRESSWAY)'
+                'violation' => 'COUNTERFLOW (EXPRESSWAY) (NON-PRO)'
             ],
             [
                 'code' => '1E.2a',
-                'violation' => 'RECKLESS DRIVING'
+                'violation' => 'RECKLESS DRIVING (PRO)'
             ],
             [
                 'code' => '1E.2b',
-                'violation' => 'UNSAFE LOAD'
+                'violation' => 'UNSAFE LOAD (PRO)'
             ],
             [
                 'code' => '1E.2c',
-                'violation' => 'OPEN DOOR'
+                'violation' => 'OPEN DOOR (PRO)'
             ],
             [
                 'code' => '1E.2d',
-                'violation' => 'SWERVING'
+                'violation' => 'SWERVING (PRO)'
             ],
             [
                 'code' => '1E.2e',
-                'violation' => 'BEATING THE RED LIGHT'
+                'violation' => 'BEATING THE RED LIGHT (PRO)'
             ],
             [
                 'code' => '1E.2f',
-                'violation' => 'ACCIDENT'
+                'violation' => 'ACCIDENT (PRO)'
             ],
             [
                 'code' => '1E.2g',
-                'violation' => 'UNSAFE MV'
+                'violation' => 'UNSAFE MV (PRO)'
             ],
             [
                 'code' => '1E.2h',
-                'violation' => 'BACKING'
+                'violation' => 'BACKING (PRO)'
             ],
             [
                 'code' => '1E.2i',
-                'violation' => 'TAIL GATING'
+                'violation' => 'TAIL GATING (PRO)'
             ],
             [
                 'code' => '1E.2j',
-                'violation' => 'OVER SPEEDING'
+                'violation' => 'OVER SPEEDING (PRO)'
             ],
             [
                 'code' => '1E.2k',
-                'violation' => 'BACKING AGAINST TRAFFIC'
+                'violation' => 'BACKING AGAINST TRAFFIC (PRO)'
             ],
             [
                 'code' => '1E.2l',
-                'violation' => 'COUNTERFLOW (EXPRESSWAY)'
+                'violation' => 'COUNTERFLOW (EXPRESSWAY) (PRO)'
             ],
             [
                 'code' => '1G.1',

@@ -38,7 +38,10 @@
                             <div class="col-md-6 position-relative">
                                 <label for="validationTooltipDepartment" class="form-label">Department</label>
                                 <select class="form-select" id="validationTooltipDepartment" name="department" required>
-                                    <option selected="selected" disabled="disabled">Select Department</option>
+                                    <div class="invalid-tooltip">
+                                        Please select a Department.
+                                    </div>
+                                    <option selected="selected" disabled="disabled" >Select Department</option>
                                     <option value="CALAX">CALAX</option>
                                     <option value="TPLEX">TPLEX</option>
                                     <option value="DO MMDA">DO-MMDA</option>
@@ -51,11 +54,10 @@
                                     <option value="SKYWAY">SKYWAY</option>
                                     <option value="SLEX">SLEX</option>
                                     <option value="STARTOLL">STARTOLL</option>
+                                    <option value="LES">LES</option>
                                     <!-- Add more options as needed -->
                                 </select>
-                                <div class="invalid-tooltip">
-                                    Please select a Department.
-                                </div>
+                                
                             </div>
                             <div class="col-12">
                                 <button class="btn btn-primary" type="submit">Submit form</button>
