@@ -30,34 +30,71 @@
         <!-- Left side columns -->
         <div class="col-lg-8">
           <div class="row">
-<!-- Sales Card -->
+<!-- Clickable Sales Card -->
 <div class="col-xxl-4 col-md-6">
-    <div class="card info-card sales-card">
+    <div class="card info-card sales-card clickable-card" data-bs-toggle="modal" data-bs-target="#salesModal">
         <div class="card-body">
-            <h5 class="card-title"> {{ date('l') }} <span> | Violations Today</span></h5> <!-- Display today's date -->
+            <h5 class="card-title">{{ date('l') }} <span> | Violations Today</span></h5> <!-- Display today's date -->
             <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-cone-striped"></i>
                 </div>
                 <div class="ps-3">
-                    <h6>{{ $salesToday }}</h6> <!-- Display sales for today -->
-                    {{-- @if($averageSalesLastWeek > 0)
-                    @php
-                        $percentageChange = (($salesToday - $averageSalesLastWeek) / $averageSalesLastWeek) * 100;
-                    @endphp
-                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif --}}
+                    @if($salesToday->isEmpty())
+                        <p>No Violations recorded today.</p>
+                    @else
+                        <h6>{{ $salesToday->count() }}</h6> <!-- Display count of violations for today -->
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- End Sales Card -->
+<!-- End Clickable Sales Card -->
+
+<div class="modal fade" id="salesModal" tabindex="-1" aria-labelledby="salesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Adjust modal size as needed -->
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="salesModalLabel">Traffic Violations Today</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-dialog-scrollable"> <!-- Added modal-dialog-scrollable class -->
+                @if($salesToday->isEmpty())
+                    <p>No traffic violations recorded today.</p>
+                @else
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Case Number</th>
+                                <th>Driver</th>
+                                <th>Plate Number</th>
+                                <th>Violation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($salesToday as $violation)
+                                <tr>
+                                    <td>{{ $violation->case_no }}</td>
+                                    <td>{{ $violation->driver }}</td>
+                                    <td>{{ $violation->plate_no }}</td>
+                                    <td>{{ $violation->violation }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
 <!-- Revenue Card -->
 <div class="col-xxl-4 col-md-6">
-    <div class="card info-card revenue-card">
+    <div class="card info-card revenue-card clickable-card" data-bs-toggle="modal" data-bs-target="#revenueModal">
         <div class="card-body">
             <h5 class="card-title">{{ date('F') }} <span> | This Month</span></h5> <!-- Display current month name -->
             <div class="d-flex align-items-center">
@@ -80,9 +117,46 @@
 <!-- End Revenue Card -->
 
 
+<!-- Revenue Modal -->
+<div class="modal fade" id="revenueModal" tabindex="-1" aria-labelledby="revenueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="revenueModalLabel">Record Count by Month</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Record Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($countByMonth as $count)
+                        <tr>
+                            <td>{{ Carbon\Carbon::create()->month($count['month'])->format('F') }}</td>
+                            <td>{{ $count['record_count'] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Revenue Modal -->
+
+
+
+
 <!-- Customers Card -->
 <div class="col-xxl-4 col-xl-12">
-    <div class="card info-card customers-card">
+    <div class="card info-card customers-card clickable-card" data-bs-toggle="modal" data-bs-target="#customersModal">
         <div class="card-body">
             <h5 class="card-title">{{ date('Y') }}<span> | This Year</span></h5> <!-- Display current year -->
             <div class="d-flex align-items-center">
@@ -91,12 +165,6 @@
                 </div>
                 <div class="ps-3">
                     <h6>{{ $customersThisYear }}</h6> <!-- Display customers for this year -->
-                    {{-- @if($previousYearCustomers > 0)
-                    @php
-                        $percentageChange = (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100;
-                    @endphp
-                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif --}}
                 </div>
             </div>
         </div>
@@ -104,22 +172,47 @@
 </div>
 <!-- End Customers Card -->
 
+<!-- Customers Modal -->
+<div class="modal fade" id="customersModal" tabindex="-1" aria-labelledby="customersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customersModalLabel">Yearly Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Record Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    @foreach($yearlyData as $year => $record)
+        <tr>
+            <td>{{ $year }}</td>
+            <td>{{ $record->record_count }}</td>
+        </tr>
+    @endforeach
+</tbody>
+
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Customers Modal -->
+
+
 
           <!-- Website Traffic -->
           <div class="col-12">
           <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
+          
 
             <div class="card-body pb-0">
             <h5 class="card-title">Concerned Apprehending Offices <span id="todaySpan">| Chart</span></h5>
@@ -170,13 +263,14 @@
             trigger: 'item'
         },
         legend: {
-            top: '5%',
-            left: 'center'
-        },
+        orient: 'vertical',
+        left: '5%',
+        top: 'center',
+    },
         series: [{
             name: 'Total Officers From:',
             type: 'pie',
-            radius: ['40%', '70%'],
+            radius: ['45%', '100%'],
             avoidLabelOverlap: false,
             label: {
                 show: false,
@@ -230,79 +324,7 @@
 </div>
 
 
-            <!-- Top Selling -->
-            <div class="col-12">
-              <div class="card top-selling overflow-auto">
 
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body pb-0">
-                  <h5 class="card-title">Top Selling <span>| Today</span></h5>
-
-                  <table class="table table-borderless">
-                    <thead>
-                      <tr>
-                        <th scope="col">Preview</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Sold</th>
-                        <th scope="col">Revenue</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-1.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Ut inventore ipsa voluptas nulla</a></td>
-                        <td>$64</td>
-                        <td class="fw-bold">124</td>
-                        <td>$5,828</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-2.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Exercitationem similique doloremque</a></td>
-                        <td>$46</td>
-                        <td class="fw-bold">98</td>
-                        <td>$4,508</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-3.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Doloribus nisi exercitationem</a></td>
-                        <td>$59</td>
-                        <td class="fw-bold">74</td>
-                        <td>$4,366</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-4.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Officiis quaerat sint rerum error</a></td>
-                        <td>$32</td>
-                        <td class="fw-bold">63</td>
-                        <td>$2,016</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-5.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Sit unde debitis delectus repellendus</a></td>
-                        <td>$79</td>
-                        <td class="fw-bold">41</td>
-                        <td>$3,239</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                </div>
-
-              </div>
-            </div><!-- End Top Selling -->
 
           </div>
         </div><!-- End Left side columns -->
@@ -355,6 +377,96 @@
       
 
         </div><!-- End Right side columns -->
+<!-- Rankings Table -->
+<div class="col-12">
+    <div class="card top-selling overflow-auto">
+        <div class="card-body pb-0">
+            <h5 class="card-title">Top Apprehending Officers <span>| Cases</span></h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover custom-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Apprehending Officer</th>
+                            <th scope="col">Department</th>
+                            <th scope="col">Total Cases</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($officers)
+                            @foreach($officers as $index => $officer)
+                                <tr class="{{ $index < 3 ? 'top-officer' : '' }}"> <!-- Highlight top 3 officers -->
+                                    <th scope="row">{{ $index + 1 }}</th>
+                                    <td>
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#officerModal{{ $index }}">{{ $officer->apprehending_officer ?: 'Unknown' }}</a>
+                                    </td>
+                                    <td>{{ $officer->department }}</td>
+                                    <td>{{ $officer->total_cases }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            <p>Showing top {{ count($officers) ?? 0 }} officers based on the total number of cases.</p>
+            <p>For more detailed information, click on the officer's name.</p>
+        </div>
+    </div>
+</div>
+@if($officers->isNotEmpty())
+    @foreach($officers as $index => $officer)
+        <!-- Modal for Officer Details -->
+        <div class="modal fade" id="officerModal{{ $index }}" tabindex="-1" aria-labelledby="officerModalLabel{{ $index }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cases Handled by {{ $officer->apprehending_officer ?: 'Unknown' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Total Cases:</strong> {{ $officer->total_cases }}</p>
+                        <div class="list-group">
+                            @php
+                                $caseNumbers = explode(',', $officer->case_numbers);
+                            @endphp
+                            @foreach($caseNumbers as $caseNo)
+                                <div class="list-group-item">
+                                    <p><strong>Case No:</strong> {{ $caseNo }}</p>
+                                    <!-- Retrieve other case details as needed -->
+                                    <!-- For example: -->
+                                    @php
+                                        $case = App\Models\TasFile::where('case_no', $caseNo)->first();
+                                    @endphp
+                                    @if($case)
+                                        <p><strong>Driver:</strong> {{ $case->driver }}</p>
+                                        <p><strong>Violation:</strong> {{ $case->violation }}</p>
+                                        <p><strong>Date Received:</strong> {{ $case->date_received }}</p>
+                                        <p><strong>Contact No:</strong> {{ $case->contact_no }}</p>
+                                        <p><strong>Plate No:</strong> {{ $case->plate_no }}</p>
+                                        <p><strong>Remarks:</strong> {{ $case->remarks ?? 'No remarks' }}</p>
+                                    @else
+                                        <em>Case details not found.</em>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal for Officer Details -->
+    @endforeach
+@else
+    <p>No officers found.</p>
+@endif
+
+
+
+
+
+
 
       </div>
     </section>
