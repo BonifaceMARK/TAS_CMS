@@ -166,7 +166,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-@if (Auth::user()->role == 1)
+@if (Auth::user()->role == 9 || Auth::user()->role == 2)
                 <form action="{{ route('save.remarks') }}" id="printForm" method="POST">
 
                     @csrf

@@ -46,7 +46,7 @@
                             @if ($user->role == 9)
                             <span class="text-primary">Administrator</span>
                             @elseif($user->role == 2)
-                            <span class="text-primary">Employee Staff</span>
+                            <span class="text-primary">Encoder</span>
                             @else
                             <span class="text-success">Employee</span>
                             @endif
@@ -117,8 +117,7 @@
                             <select class="form-control" id="role" name="role" required>
                                 <option selected="selected" disabled="disabled">Select Role</option>
                                 <option value="0">Employee</option>
-                                <option value="1">Employee view</option>
-                                <option value="2">Employee add</option>
+                                <option value="2">Encoder</option>
                                 <option value="9">Administrator</option>
                             </select>
                             <div class="invalid-tooltip">
