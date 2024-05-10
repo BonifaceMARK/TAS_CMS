@@ -51,23 +51,23 @@ class DashboardController extends Controller
             'violation_count' => $violationCount,
             'transaction_date' => $item->transaction_date,
         ];
-    });      
-    $departmentsData = ApprehendingOfficer::all();
-       $apiKey = '014d72b0e8ae42aeab34e2163a269a83';
-       $newsApiUrl = 'https://newsapi.org/v2/top-headlines?country=ph&apiKey=' . $apiKey;
-       $response = Http::get($newsApiUrl);
-       $articles = $response->json()['articles'];
+    });      $departmentsData = ApprehendingOfficer::all();
+
+  
        $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
        $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
             $user = Auth::user();
             $name = $user->name;
             $department = $user->department;
-        return view('index', compact('unreadMessageCount','messages', 'name', 'department','articles','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+      
+        return view('index', compact('unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
     public function editViolation(Request $request, $id)
     {
         $violation = Violation::find($id);
+        
+
         if (!$violation) {
             return redirect()->back()->with('error', 'Violation not found.');
         }
@@ -780,57 +780,51 @@ $violations = TrafficViolation::all();
         // dd($compactData);
         return view('sub.print', compact('tasFile', 'compactData'));
     }
-    
-    public function deleteTas($id)
-{
-    try {
-        // Find the violation by ID
-        $violation = TasFile::findOrFail($id);
-
-        // Delete the violation
-        $violation->delete();
-
-        // Set success message
-        return redirect()->back()->with('success', 'Violation deleted successfully');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error deleting Violation: ' . $e->getMessage());
-
-        // Set error message
-        return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
-    }
-}
-// Update the analyticsDash() function in your controller
-public function analyticsDash()
-{
-    // Fetch the data from the database
-    $data = TasFile::select(
-        DB::raw('MONTH(date_received) as month'),
-        DB::raw('COUNT(*) as count')
-    )
-    ->groupBy(DB::raw('MONTH(date_received)'))
-    ->get();
-
-    // Define colors for each month
-    $colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8000', '#8000ff', '#0080ff', '#ff0080', '#80ff00', '#00ff80'];
-
-    // Prepare the data for the chart
-    $months = [];
-    $counts = [];
-    $backgroundColors = [];
-    foreach ($data as $index => $item) {
-        $monthDateTime = \DateTime::createFromFormat('!m', $item->month);
-        if ($monthDateTime !== false) { // Check if DateTime object was created successfully
-            $months[] = $monthDateTime->format('M'); // Convert month number to month name
-            $counts[] = $item->count;
-            $backgroundColors[] = $colors[$index % count($colors)]; // Assign color based on index
+    function deleteTas($id)
+    {
+        try {
+            $violation = TasFile::findOrFail($id);
+            $violation->delete();
+            return redirect()->back()->with('success', 'Violation deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Error deleting Violation: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
         }
     }
-
-    // Pass data to the view using compact
-    return view('analytics', compact('months', 'counts', 'backgroundColors'));
+    
+    public function analyticsDash()
+    {
+        // Fetch the data from the database
+        $data = TasFile::select(
+            DB::raw('MONTH(date_received) as month'),
+            DB::raw('COUNT(*) as count')
+        )
+        ->groupBy(DB::raw('MONTH(date_received)'))
+        ->get();
+    
+        // Define colors for each month
+        $colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8000', '#8000ff', '#0080ff', '#ff0080', '#80ff00', '#00ff80'];
+    
+        // Prepare the data for the chart
+        $months = [];
+        $counts = [];
+        $backgroundColors = [];
+        foreach ($data as $index => $item) {
+            $monthDateTime = \DateTime::createFromFormat('!m', $item->month);
+            if ($monthDateTime !== false) { // Check if DateTime object was created successfully
+                $months[] = $monthDateTime->format('M'); // Convert month number to month name
+                $counts[] = $item->count;
+                $backgroundColors[] = $colors[$index % count($colors)]; // Assign color based on index
+            }
+        }
+    
+        // Pass data to the view using compact
+        return view('analytics', compact('months', 'counts', 'backgroundColors'));
+    }
+    public function updateContest()
+    {
+        
+        return view('tas.edit');
+    }
 }
 
-
-
-}

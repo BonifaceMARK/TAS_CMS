@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/storeChat', [DashboardController::class, 'storeMessage'])->name('chat.store');
 
         Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
-    
+        Route::get('/editContested', [DashboardController::class, 'updateContest'])->name('update.contest.index');
         Route::get('/officers/{departmentName}', [DashboardController::class, 'getByDepartmentName']);
         
 

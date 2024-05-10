@@ -146,7 +146,55 @@
   document.addEventListener("DOMContentLoaded", () => {
     var trafficChart = echarts.init(document.querySelector("#trafficChart"));
 
-    // Your existing chart initialization code
+    // Assuming $departmentsData is available as a JavaScript variable.
+    var departmentsData = {!! json_encode($departmentsData) !!};
+
+    // Process the data to calculate the total count for each department
+    var departmentCounts = {};
+    departmentsData.forEach(function(department) {
+        if (department.department in departmentCounts) {
+            departmentCounts[department.department]++;
+        } else {
+            departmentCounts[department.department] = 1;
+        }
+    });
+
+    // Convert the departmentCounts object into an array of objects
+    var data = Object.keys(departmentCounts).map(function(key) {
+        return { name: key, value: departmentCounts[key] };
+    });
+
+    // Render the chart
+    trafficChart.setOption({
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            top: '5%',
+            left: 'center'
+        },
+        series: [{
+            name: 'Total Officers From:',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+                show: false,
+                position: 'center'
+            },
+            emphasis: {
+                label: {
+                    show: true,
+                    fontSize: '18',
+                    fontWeight: 'bold'
+                }
+            },
+            labelLine: {
+                show: false
+            },
+            data: data
+        }]
+    });
 
     // Add event listener to chart
     trafficChart.on('click', function (params) {
@@ -175,60 +223,7 @@
     });
   });
 </script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        var trafficChart = echarts.init(document.querySelector("#trafficChart"));
 
-        // Assuming $departmentsData is available as a JavaScript variable.
-        var departmentsData = {!! json_encode($departmentsData) !!};
-
-        // Process the data to calculate the total count for each department
-        var departmentCounts = {};
-        departmentsData.forEach(function(department) {
-            if (department.department in departmentCounts) {
-                departmentCounts[department.department]++;
-            } else {
-                departmentCounts[department.department] = 1;
-            }
-        });
-
-        // Convert the departmentCounts object into an array of objects
-        var data = Object.keys(departmentCounts).map(function(key) {
-            return { name: key, value: departmentCounts[key] };
-        });
-
-        trafficChart.setOption({
-            tooltip: {
-                trigger: 'item'
-            },
-            legend: {
-                top: '5%',
-                left: 'center'
-            },
-            series: [{
-                name: 'Total Officers From:',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                label: {
-                    show: false,
-                    position: 'center'
-                },
-                emphasis: {
-                    label: {
-                        show: true,
-                        fontSize: '18',
-                        fontWeight: 'bold'
-                    }
-                },
-                labelLine: {
-                    show: false
-                },
-                data: data
-            }]
-        });
-    });
-</script>
 
             </div>
           </div><!-- End Website Traffic -->
