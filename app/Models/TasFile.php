@@ -27,6 +27,7 @@ class TasFile extends Model
         'status', 
         'typeofvehicle',
         'fine_fee',
+        'symbols', 
     ];
     public function setofficerAttribute($value)
     {

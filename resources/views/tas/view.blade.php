@@ -34,22 +34,27 @@
                     <!-- Table header -->
                     <thead class="thead-light">
                         <tr>
+                            <th>Symbols</th>
                             <th>Case No</th>
                             <th>Department</th>
                             <th>Apprehending Officer</th>
                             <th>Driver</th>
+                            <th>Type of Vehicle</th>
                             <th>Top</th>
                             <th>Violation</th>
-                            <th>Status</th>
+                            
                             <th>Transaction No</th>
                             <th>Transaction Date</th>
-                            <th>Attachment</th>
+                            
+                            <th>Status</th>
+                            
                         </tr>
                     </thead>
                     <!-- Table body -->
                     <tbody>
                         @foreach ($tasFiles as $tasFile)
                         <tr class="table-row" data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
+                        <td>{{ $tasFile->symbols }}</td>
                             <td>{{ $tasFile->case_no }}</td>
                             <td>
                                 @if ($tasFile->relatedofficer->isNotEmpty())
@@ -60,26 +65,17 @@
                             </td>
                             <td>{{ $tasFile->apprehending_officer ?? 'N/A' }}</td>
                             <td>{{ $tasFile->driver }}</td>
+                            <td>{{ $tasFile->typeofvehicle }}</td>
                             <td>{{ $tasFile->top ?? 'N/A' }}</td>
                             <td>{{ $tasFile->violation }}</td>
-                            <td>{{ $tasFile->status }}</td>
+                            
                             <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
                             <td>{{ $tasFile->created_at }}</td>
-                            <td>
-                                @if (!is_null($tasFile->file_attach))
-                                @php
-                                $decodedFiles = json_decode($tasFile->file_attach, true);
-                                @endphp
-                    
-                                @if (!is_null($decodedFiles))
-                                @foreach ($decodedFiles as $filePath)
-                                <li>
-                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                </li>
-                                @endforeach
-                                @endif
-                                @endif
-                            </td>
+                        
+                            <td style="background-color: {{ getStatusColor($tasFile->status) }}">{{ $tasFile->status }}</td>
+
+
+
                         </tr>
                         @endforeach
                     </tbody>
@@ -151,9 +147,6 @@
         </div> <!-- Close modal-content -->
     </div>
 </div>
-
-@endforeach
-
 <!-- Finish Modal -->
 <div class="modal fade" id="finishModal{{ $tasFile->id }}" tabindex="-1" role="dialog" aria-labelledby="finishModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -177,6 +170,9 @@
         </div>
     </div>
 </div>
+@endforeach
+
+
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
