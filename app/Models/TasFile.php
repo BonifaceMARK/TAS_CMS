@@ -8,6 +8,7 @@ use App\Models\TrafficViolation;
 class TasFile extends Model
 {
 
+    use HasFactory;
     protected $table = 'tas_files';
 
     protected $fillable = [
@@ -23,6 +24,9 @@ class TasFile extends Model
         'remarks',
         'file_attach',
         'history',
+        'status', 
+        'typeofvehicle',
+        'fine_fee',
     ];
     public function setofficerAttribute($value)
     {
@@ -31,6 +35,10 @@ class TasFile extends Model
     public function relatedofficer()
     {
         return $this->hasOne(ApprehendingOfficer::class, 'apprehending_officer');
+    }
+    public function relatedViolations()
+    {
+        return $this->hasMany(TrafficViolation::class, 'violation');
     }
     public function trafficViolations()
     {

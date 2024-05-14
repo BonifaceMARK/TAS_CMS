@@ -44,10 +44,7 @@
                         
                         <h5 class="card-title">Admitted Case - Input     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#violationsModal">
                             View Violations
-                        </button>                       <!-- Button to trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admittedModal">
-    Edit Admitted Cases
-</button></h5>
+                        </button>                       <!-- Button to trigger modal --></h5>
                   
 <form method="POST" action="{{ route('admittedsubmit.tas') }}" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
     @csrf

@@ -47,7 +47,7 @@
             <table class="table table-borderless datatable">
                 <thead>
                     <tr>
-                        <th scope="col">Resolution No.</th>
+                        <th scope="col">Case No.</th>
                         <th scope="col">TOP</th>
                         <th scope="col">Driver</th>
                         <th scope="col">Apprehending Officer</th>
@@ -63,8 +63,8 @@
                 </thead>
                 <tbody>
                     @foreach($recentViolationsToday as $violation)
-                    <tr>
-                        <td>{{ $violation->resolution_no }}</td>
+                    <tr class="table-row">
+                        <td>{{ $violation->case_no }}</td>
                         <td>{{ $violation->top }}</td>
                         <td>{{ $violation->driver }}</td>
                         <td>{{ $violation->apprehending_officer }}</td>
@@ -74,7 +74,26 @@
                         <td>{{ $violation->plate_no }}</td>
                         <td>{{ $violation->contact_no }}</td>
                         <td>{{ $violation->remarks }}</td>
-                        <td>{{ $violation->file_attach }}</td>
+                        <td>
+    @if (!is_null($violation->file_attach))
+        @php
+            $decodedFiles = json_decode($violation->file_attach, true);
+        @endphp
+
+        @if (is_array($decodedFiles))
+            @foreach ($decodedFiles as $filePath)
+                <li>
+                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                </li>
+            @endforeach
+        @else
+            <li>
+                <a href="{{ asset('storage/' . $violation->file_attach) }}" target="_blank">{{ basename($violation->file_attach) }}</a>
+            </li>
+        @endif
+    @endif
+</td>
+
                         <td>
                             <button class="btn btn-primary editViolation" data-id="{{ $violation->id }}" data-bs-toggle="modal" data-bs-target="#editViolationModal{{ $violation->id }}">Edit</button>
                         </td>
@@ -92,7 +111,11 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">Edit Violation</h5>
+            <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
+    <span><i class="bi bi-pencil-square"></i></span>
+    Edit Violation
+</h5>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
@@ -104,8 +127,8 @@
                             <!-- Violation details section -->
                             <h6 class="fw-bold mb-3">Violation Details</h6>
                             <div class="mb-3">
-                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Resolution No.</label>
-                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="resolution_no" value="{{ $violation->resolution_no }}">
+                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
                             </div>
                             <div class="mb-3">
                                 <label for="top{{ $violation->id }}" class="form-label">TOP</label>
@@ -122,36 +145,84 @@
                             <div class="mb-3">
                                 <label for="violation{{ $violation->id }}" class="form-label">Violation</label>
                                 <input type="text" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
+                                @php
+                                    $violas = json_decode($violation->violation, true); 
+                                @endphp
+                                @if (!empty($violas))
+                                        @foreach($violas as $viola)
+                                        <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation" list="violations[]" value="{{ $viola }}">
+                                    @endforeach
+                                @endif
+                                <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation[]" list="violations" value="">
+                                <datalist id="violations">
+                                    <!-- Populate options dynamically using PHP or JavaScript -->
+                                    @foreach($violations as $violationlist)
+                                        <option value="{{ $violationlist->code }}">{{ $violationlist->violation }}</option>
+                                    @endforeach
+                                </datalist>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <!-- Additional details section -->
-                            <h6 class="fw-bold mb-3">Additional Details</h6>
-                            <div class="mb-3">
-                                <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
-                                <input type="text" class="form-control" id="transactionNo{{ $violation->id }}" name="transaction_no" value="{{ $violation->transaction_no }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="dateReceived{{ $violation->id }}" class="form-label">Date Received</label>
-                                <input type="date" class="form-control" id="dateReceived{{ $violation->id }}" name="date_received" value="{{ $violation->date_received }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="plateNo{{ $violation->id }}" class="form-label">Plate No.</label>
-                                <input type="text" class="form-control" id="plateNo{{ $violation->id }}" name="plate_no" value="{{ $violation->plate_no }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="contactNo{{ $violation->id }}" class="form-label">Contact No.</label>
-                                <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="remarks{{ $violation->id }}" class="form-label">Remarks</label>
-                                <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks" value="{{ $violation->remarks }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="fileAttach{{ $violation->id }}" class="form-label">File Attachment</label>
-                                <input type="file" class="form-control" id="fileAttach{{ $violation->id }}" name="file_attach">
-                            </div>
-                        </div>
+                        <div class="col-lg-6">
+    <!-- Additional details section -->
+    <h6 class="fw-bold mb-3">Additional Details</h6>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
+            <input type="text" class="form-control" id="transactionNo{{ $violation->id }}" name="transaction_no" value="{{ $violation->transaction_no }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="dateReceived{{ $violation->id }}" class="form-label">Date Received</label>
+            <input type="date" class="form-control" id="dateReceived{{ $violation->id }}" name="date_received" value="{{ $violation->date_received }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="plateNo{{ $violation->id }}" class="form-label">Plate No.</label>
+            <input type="text" class="form-control" id="plateNo{{ $violation->id }}" name="plate_no" value="{{ $violation->plate_no }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="contactNo{{ $violation->id }}" class="form-label">Contact No.</label>
+            <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
+        </div>
+        <div class="col-md-12 mb-3">
+            <label for="remarks{{ $violation->id }}" class="form-label">Remarks</label>
+            <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks" value="{{ $violation->remarks }}">
+            @php
+                $remarks = json_decode($violation->remarks, true); 
+            @endphp
+            @if (!empty($remarks))
+            @foreach($remarks as $remark)
+                <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" value="{{ $remark }}">
+            @endforeach
+        @endif
+        <!-- Always include one input field for remarks --> 
+        <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" >
+        </div>
+        <div class="col-md-12 mb-3">
+    <label class="form-label">File Attachments</label>
+    @php
+        $attachments = explode(',', $violation->file_attach);
+    @endphp
+    @if (!empty($attachments))
+        @foreach ($attachments as $attachment)
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" value="{{ $attachment }}" readonly>
+                <div class="input-group-append">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="delete_file[]" value="{{ $attachment }}">
+                        <label class="form-check-label">Delete</label>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+    <div class="input-group mt-2">
+        <input type="file" class="form-control" name="file_attach[]">
+    </div>
+</div>
+
+
+    </div>
+</div>
+
                         <div class="col-md-12">
                             <!-- History section -->
                             <h6 class="fw-bold mt-4">History</h6>
