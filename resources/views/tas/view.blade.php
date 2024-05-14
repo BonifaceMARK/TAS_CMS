@@ -1,5 +1,4 @@
 @extends('layouts.title')
-
 @section('title', env('APP_NAME'))
 
 @include('layouts.title')
@@ -24,6 +23,10 @@
         {{ session('error') }}
     </div>
 @endif
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js"></script>
+
+
     <section class="section">
             <div class="card-body">
                 <div class="card recent-violations overflow-auto">
@@ -88,89 +91,18 @@
                 </div>
             </div>
     </section>
-<script>
-    function stopAttachmentLink(event) {
-        event.stopPropagation(); // Prevent event from propagating to parent elements
-        event.preventDefault(); // Prevent the default behavior of anchor tags
-    };
-    document.addEventListener("DOMContentLoaded", function () {
-        const selector = document.getElementById("datatable-selector");
-        const table = document.getElementById("dataTable");
-        const rows = table.getElementsByTagName("tr");
-
-        selector.addEventListener("change", function () {
-            const value = parseInt(selector.value);
-            const totalRows = rows.length - 1; // Exclude header row
-            
-            let startIndex = 1;
-            let endIndex = value;
-
-            if (value === -1) {
-                // Show all rows
-                startIndex = 1;
-                endIndex = totalRows;
-            }
-
-            for (let i = 1; i <= totalRows; i++) {
-                if (i >= startIndex && i <= endIndex) {
-                    rows[i].style.display = "";
-                } else {
-                    rows[i].style.display = "none";
-                }
-            }
-        });
-    });
-</script>
+    
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("searchInput");
-        const table = document.getElementById("dataTable");
-        const rows = table.getElementsByTagName("tr");
-
-        searchInput.addEventListener("keyup", function (event) {
-            const searchTerm = event.target.value.toLowerCase();
-
-            for (let i = 0; i < rows.length; i++) {  // Start loop from 0 to include header row
-                const row = rows[i];
-                const cells = row.getElementsByTagName("td");
-                let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    const cellText = cells[j].textContent.toLowerCase();
-                    if (cellText.includes(searchTerm)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            }
-        });
-    });
-</script>
-
-
-
+{{-- @if (Auth::user()->role == 9 || Auth::user()->role == 2) --}}
 @foreach($tasFiles as $tasFile)
 <div class="modal fade" id="exampleModal{{ $tasFile->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Case No: <strong>{{ $tasFile->case_no }}</strong></strong></h5>
+                <h5 class="modal-title" id="exampleModalLabel">Case No: <strong>{{ $tasFile->case_no }}</strong></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
-@if (Auth::user()->role == 9 || Auth::user()->role == 2)
-                <form action="{{ route('save.remarks') }}" id="printForm" method="POST">
-
-                    @csrf
-                    <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -186,55 +118,31 @@
                             <p><strong>Apprehending Officer:</strong> {{ $tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A' }}</p>
                             <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                             <p><strong>Violations:</strong></p>
-                            
-                            
                             @foreach ($tasFile->relatedViolations as $violation)
-
-                            @if ($tasFile->violation)
-                                <ul>
-                                    <li>
-                                        {{ $violation->code }} - {{ $violation->violation }}
-                                    </li>
-                                </ul>
-                                
-                            @else
-                                <p>No violations recorded.</p>
-                            @endif
+                                @if ($tasFile->violation)
+                                    <ul>
+                                        <li>
+                                            {{ $violation->code }} - {{ $violation->violation }}
+                                        </li>
+                                    </ul>
+                                @else
+                                    <p>No violations recorded.</p>
+                                @endif
                             @endforeach
-                            
-                            
                         </div>
                         <div class="col-md-6">
                             <h6>Remarks</h6>
-                            @if ($tasFile->remarks !== null)
-                                <ul>
-                                    @php
-                                        $remarks = json_decode($tasFile->remarks);
-                                        // Check if $remarks is an array
-                                        if (is_array($remarks)) {
-                                            $remarks = array_reverse($remarks);
-                                        } else {
-                                            // If $remarks is not an array, set it to an empty array
-                                            $remarks = [];
-                                        }
-                                    @endphp
-
-                                    @foreach ($remarks as $remark)
-                                        <li>{{ $remark }}</li>
-                                        <br><br>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
-
+                            @include('remarksupdate', ['remarks' => $tasFile->remarks])
                         </div>
                     </div>
+                    <form action="{{route('save.remarks')}}" id="printForm" method="POST" target="_blank" class="remarksForm">
+                        @csrf
+                        <input type="hidden" id="tas_file_id" name="tas_file_id" value="{{ $tasFile->id }}">
                     <div class="row mt-3">
                         <div class="col-md-12">
                             <h6>Add Remark</h6>
                             <hr>
-                            <textarea class="form-control" name="remarks" rows="5"></textarea>
+                            <textarea class="form-control" name="remarks" id="remarkstext{{ $tasFile->id }}" rows="5"></textarea>
                         </div>
                     </div>
                 </div>
@@ -245,64 +153,13 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </form>
-@else
-
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Case No:</strong> {{ $tasFile->case_no }}</p>
-                            <p><strong>Name:</strong> {{ $tasFile->name }}</p>
-                            <p><strong>Top:</strong> {{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
-                            <p><strong>Contact No:</strong> {{ $tasFile->contact_no }}</p>
-                            <hr>
-                            <h5>Violation Details</h5>
-                            <p><strong>Plate No:</strong> {{ $tasFile->plate_no }}</p>
-                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
-                            <p><strong>Violations:</strong></p>
-                            
-                            @foreach ($tasFile->relatedViolations as $violation)
-                            <ul>
-                                <li>
-                                    {{ $violation->id }} - {{ $violation->violation }}
-                                </li>
-                            </ul>
-                        
-                            @endforeach
-                            <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Remarks</h6>
-                            @if ($tasFile->remarks)
-                                <ul>
-                                @php
-    $remarks = json_decode($tasFile->remarks, true);
-
-    if ($remarks !== null) {
-        $remarks = array_reverse($remarks);
-    }
-@endphp
-
-@if ($remarks !== null)
-    @foreach ($remarks as $remark)
-        <li>{{ $remark }}</li>
-    @endforeach
-@endif
-
-                                </ul>
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                @endif
-        </div>
+        </div> <!-- Close modal-content -->
     </div>
 </div>
 @endforeach
 
 
-</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function openInNewTabAndPrint(url) {
         var win = window.open(url, '_blank');
@@ -311,6 +168,56 @@
         };
     }
 </script>
+
+
+<script> // working!!!!!
+    $(document).ready(function () {
+        // Check if there's a cached modal ID and open it
+        var cachedModalId = localStorage.getItem('modalId');
+        if (cachedModalId) {
+            $('#' + cachedModalId).modal('show');
+        }
+
+        $('.modal').on('shown.bs.modal', function (e) {
+            // Cache the ID of the opened modal
+            var modalId = e.target.id;
+            localStorage.setItem('modalId', modalId);
+        });
+
+        $('.modal').on('hidden.bs.modal', function (e) {
+            // Remove cached modal ID when the modal is closed
+            localStorage.removeItem('modalId');
+        });
+        
+        $('.remarksForm').on('submit', function (e) {
+            e.preventDefault();
+            var form = $(this);
+            var formData = form.serialize();
+            
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: formData,
+                success: function (response) {
+                    // Update remarks section with new data
+                    var remarksList = form.closest('.modal-content').find('.remarks-list');
+                    remarksList.html(response.remarks);
+                    // Display success alert
+                    alert('Remarks saved successfully.');
+                    // Reload the page
+                    window.location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    // Display error alert
+                    alert('Failed to save remarks. Please try again later.');
+                }
+            });
+        });
+    });
+</script> 
+{{-- dont touch --}}
+
 
 </section>
 

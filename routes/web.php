@@ -76,12 +76,12 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-            
+           
         Route::get('/print.subpoena/{id}', [DashboardController::class, 'printsub'])->name('print.sub');
 });
-
+Route::get('/fetch-remarks/?id={id}', [DashboardController::class, 'fetchRemarks'])->name('fetch.remarks'); 
 Route::get('/subpoena', function () {
-    return view('sub.print');
+    return view('subpoena');
 });
 // create for staff
 // Route::middleware(['auth'])->group(function () {
