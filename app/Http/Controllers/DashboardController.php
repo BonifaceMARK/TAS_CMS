@@ -290,8 +290,8 @@ class DashboardController extends Controller
         
             // Send back a response with JavaScript to close the tab
             $remarksHtml = view('remarksupdate', ['remarks' => $tasFile->remarks])->render();
-            
-            return back()->with('success', 'Remarks saved successfully.');
+            return response()->json(['remarks' => $remarksHtml]);
+            // return back()->with('success', 'Remarks saved successfully.');
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());

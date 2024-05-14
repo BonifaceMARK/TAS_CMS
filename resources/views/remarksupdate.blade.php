@@ -1,13 +1,10 @@
-@if (is_array($remarks))
-    @if (!empty($remarks))
-        <ul class="remarks-list">
-            @foreach ($remarks as $remark)
-                <li>{!! htmlspecialchars_decode($remark) !!}</li>
-            @endforeach
-        </ul>
-    @else
-        <p>No remarks available.</p>
-    @endif
+@if ($remarks !== null)
+    <ul class="remarks-list">
+        @foreach ($remarks as $remark)
+            <li>{{ $remark }}</li>
+            <br><br>
+        @endforeach
+    </ul>
 @else
-    <p>{!! htmlspecialchars_decode($remarks) !!}</p>
+    <p>No remarks available.</p>
 @endif
