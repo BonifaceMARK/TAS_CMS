@@ -587,10 +587,16 @@ class DashboardController extends Controller
         }
     }   
     public function violationadd(){
-        return view('addvio');
+        return view('ao.addvio');
     }
     public function officergg(){ 
-        return view('addoffi');
+        return view('ao.addoffi');
+    }    public function editoffi(){ 
+
+        $officers = ApprehendingOfficer::all();
+
+        // dd($officers[1]);
+        return view('ao.editoffi', compact('officers'));
     }
     //add officer
     public function save_offi(Request $request){
@@ -825,6 +831,7 @@ class DashboardController extends Controller
         $changes = $tasFile;
         $officerName = $changes->apprehending_officer;
         $officers = ApprehendingOfficer::where('officer', $officerName)->get();
+        
         if (!empty($changes->violation)) {
             $violations = json_decode($changes->violation);
             if ($violations !== null) {
@@ -835,9 +842,8 @@ class DashboardController extends Controller
         } else {
             $relatedViolations = [];
         }
-
+    
         $holidays = [
-            // List of holidays, format: 'MM-DD' or 'YYYY-MM-DD'
             '01-01', // New Year's Day
             '04-09', // Araw ng Kagitingan
             '05-01', // Labor Day
@@ -855,39 +861,44 @@ class DashboardController extends Controller
             '10-31', // Halloween
             '04-20', // 420 (Cannabis Culture)
             '07-04', // Independence Day (United States)
-            '10-31', // Halloween
             '05-14', // Additional holiday declared by the government
             '11-15', // Regional holiday
         ];
-        // Get the current date and format it as "Month Day, Year"
-        $startDate = $changes->date_received; // Example output: "May 6, 2024"
+    
+        // Get the current date
+        $startDate = Carbon::now();
+        $formattedDate = $startDate->format('F j, Y');
         
-
-        // Add the specified number of days
+        // Calculate the new date excluding weekends and holidays
+        $currentDate = clone $startDate; // Clone to avoid modifying the original start date
+        $numDays = 3;
         
-        $date = new DateTime($startDate);
-        $numDays = 4;
-        $date->modify("+" . $numDays . " days");
-        $newDate = $date->format('F j, Y');
         while ($numDays > 0) {
-            $date->modify('+1 day');
-            if ($date->format('N') >= 6 || in_array($date->format('m-d'), $holidays)) {
-                continue; 
+            $currentDate->addDay();
+            
+            // Check if the current day is a weekend or a holiday
+            if ($currentDate->isWeekend() || in_array($currentDate->format('m-d'), $holidays)) {
+                continue; // Skip weekends and holidays
             }
             
             $numDays--;
         }
-        $endDate = $date->format('F j, Y');
+        
+        $endDate = $currentDate->format('F j, Y');
+    
         $compactData = [
             'changes' => $changes,
             'officers' => $officers,
             'relatedViolations' => $relatedViolations,
-            'date' => $newDate,
+            'date' => $formattedDate,
             'hearing' => $endDate,
         ];
+    
         // dd($compactData);
+    
         return view('sub.print', compact('tasFile', 'compactData'));
     }
+    
     function deleteTas($id){
         try {
             $violation = TasFile::findOrFail($id);

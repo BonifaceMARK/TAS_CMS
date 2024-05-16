@@ -48,6 +48,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/store.officer', [DashboardController::class, 'save_offi'])->name('save.offi');
         Route::get('/violation', [DashboardController::class, 'violationadd'])->name('see.vio');
         Route::post('/save.violation', [DashboardController::class, 'addvio'])->name('add.violation');
+        // Route::post('/save.violation', [DashboardController::class, 'editoffi'])->name('edit.offi');
+        Route::get('/editofficer', [DashboardController::class, 'editoffi'])->name('edit.offi');
+
         Route::post('/admit-remarks', [DashboardController::class, 'admitremark'])->name('admitremark');
         Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
         Route::get('/getChartData', [DashboardController::class, 'getChartData']);
