@@ -29,6 +29,11 @@
           <i class="bi bi-person-fill-add"></i><span> Add Apprehending Officer</span>
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('edit.offi')}}">
+          <i class="bi bi-person-fill-add"></i><span> Edit Apprehending Officer</span>
+      </a>
+    </li>
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">Contested Case</li>
 

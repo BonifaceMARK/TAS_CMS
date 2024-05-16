@@ -134,7 +134,7 @@
                                 @endphp
                                 @if (!empty($violas))
                                         @foreach($violas as $viola)
-                                        <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation" list="violations[]" value="{{ $viola }}">
+                                        <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation" list="violations" value="{{ $viola }}">
                                     @endforeach
                                 @endif
                                 <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation[]" list="violations" value="">
