@@ -176,66 +176,72 @@ class DashboardController extends Controller
         return view('case_archives');
     }
 
-    public function tasView()
-    {
-        $pageSize = 15; // Define the default page size
-        $tasFiles = TasFile::all()->sortByDesc('case_no');
+   public function tasView()
+{
+    $pageSize = 15; // Define the default page size
+    $tasFiles = TasFile::orderBy('case_no', 'desc')->paginate($pageSize);
     
-        // Initialize a collection to hold related officers
-        $officers = collect();
     
-        // Iterate through each TasFile record
-        foreach ($tasFiles as $tasFile) {
-            // Extract the name of the apprehending officer for the current TasFile
-            $officerName = $tasFile->apprehending_officer;
-            
-            // Query the ApprehendingOfficer model for officers with the given name
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    // Initialize a collection to hold related officers
+    $officers = collect();
+    
+    // Iterate through each TasFile record
+    foreach ($tasFiles as $tasFile) {
+        // Extract the name of the apprehending officer for the current TasFile
+        $officerName = $tasFile->apprehending_officer;
+        
+        // Query the ApprehendingOfficer model for officers with the given name
+        $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
 
-            $officers = $officers->merge($officersForFile);
-            
-   
-            $tasFile->relatedofficer = $officersForFile;
+        $officers = $officers->merge($officersForFile);
+        $tasFile->relatedofficer = $officersForFile;
+        
+        // Handle remarks field
+        if (is_string($tasFile->remarks)) {
+            // Decode JSON string to array
+            $remarks = json_decode($tasFile->remarks, true);
 
-            $remarks = json_decode($tasFile->remarks);
-            
-            if (is_array($remarks)) {
-                $remarks = array_reverse($remarks);
-            } else {
-                // If $remarks is not an array, set it to an empty array
+            // Check if decoding was successful
+            if ($remarks === null) {
+                // Handle case where JSON is invalid
                 $remarks = [];
             }
-            $tasFile->remarks = is_array($remarks) ? $remarks : [];
+        } else if (is_array($tasFile->remarks)) {
+            // If $tasFile->remarks is already an array, use it directly
+            $remarks = $tasFile->remarks;
+        } else {
+            // If remarks is neither a string nor an array, set it to an empty array
+            $remarks = [];
         }
+        $tasFile->remarks = $remarks;
+    }
 
-        foreach ($tasFiles as $tasFile) {
+    // Process violations
+    foreach ($tasFiles as $tasFile) {
+        $violations = json_decode($tasFile->violation);
 
-            $violations = json_decode($tasFile->violation);
-    
-            if ($violations) {
-
-                if (is_array($violations)) {
-
-                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-                } else {
-
-                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
-                }
+        if ($violations) {
+            if (is_array($violations)) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             } else {
-
-                $relatedViolations = [];
+                $relatedViolations = TrafficViolation::where('code', $violations)->get();
             }
-
-            $tasFile->relatedViolations = $relatedViolations;
+        } else {
+            $relatedViolations = [];
         }
-        // Fetch TasFile data
-        $tF = TasFile::all();
-     foreach ($tF as $tasFile) {
+
+        $tasFile->relatedViolations = $relatedViolations;
+    }
+
+    // Fetch TasFile data again (if needed)
+    $tF = TasFile::all();
+    foreach ($tF as $tasFile) {
         $tasFile->checkCompleteness();
     }
 
-        return view('tas.view', compact('tasFiles'));
-    }
+    return view('tas.view', compact('tasFiles'));
+}
+
     
     
     
@@ -677,7 +683,6 @@ class DashboardController extends Controller
                 'plate_no' => 'nullable|string|max:255',
                 'contact_no' => 'nullable|string|max:255',
                 'remarks.*' => 'nullable|string',
-                'delete_file.*' => 'nullable|string', // Added validation for delete_file array
                 'file_attach.*' => 'nullable|file|max:10240', // Adjust max file size as needed
             ]);
             
@@ -689,30 +694,6 @@ class DashboardController extends Controller
             // Trim the 'remarks' field only if it is a string
             if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
                 $validatedData['remarks'] = trim($validatedData['remarks']);
-            }
-            
-            // Check if file deletion option is selected
-            if ($request->has('delete_file')) {
-                // Get the checked attachments to delete
-                $attachmentsToDelete = $validatedData['delete_file'] ?? [];
-                
-                // Remove the checked attachments from the current file attachments
-                $attachments = json_decode($violation->file_attach, true) ?? [];
-                $newAttachments = array_diff($attachments, $attachmentsToDelete);
-                
-                // Update the file_attach attribute in the database
-                $violation->update(['file_attach' => json_encode($newAttachments)]);
-                
-                // Append deletion action to history
-                foreach ($attachmentsToDelete as $attachment) {
-                    $history[] = [
-                        'action' => 'DELETE_ATTACHMENT',
-                        'user_id' => auth()->id(), // Assuming you have user authentication
-                        'username' => auth()->user()->username,
-                        'timestamp' => now(),
-                        'attachment' => $attachment,
-                    ];
-                }
             }
             
             // Check if new attachments are uploaded
@@ -789,7 +770,8 @@ class DashboardController extends Controller
             return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
     }
-
+    
+    
     public function updateStatus(Request $request, $id)
     {
         try {

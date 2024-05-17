@@ -153,22 +153,28 @@
                             <div class="mb-3">
                                 <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
                                 <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-                            </div>
+                            </div>@php
+                            $violations = \App\Models\TrafficViolation::pluck('code')->toJson();
+                        @endphp
+                        
                             <div class="mb-3">
                                 <label for="violation{{ $violation->id }}" class="bi bi-exclamation-diamond-fill form-label"> Violations</label>
                                 <input type="hidden" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
-                            </div> 
+                            </div>
                             
                             {{-- Container for dynamically created input fields --}}
                             <div id="violationsContainer{{ $violation->id }}"></div>
                             
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
+                                    // Fetch violations data from PHP
+                                    var violationsData = {!! $violations !!}; // Convert PHP array to JavaScript object
+                            
                                     // Get the initial value of the violation input
                                     var initialViolation = document.getElementById('violation{{ $violation->id }}').value;
                             
                                     try {
-                                        // Parse the JSON string into an array
+                                        // Parse the JSON string into an array (if applicable)
                                         var violationsArray = JSON.parse(initialViolation);
                             
                                         // Select the container where new input fields will be appended
@@ -200,6 +206,7 @@
                                             input.id = 'violation{{ $violation->id }}_' + index;
                                             input.name = 'violations[]';
                                             input.value = violation; // Set the value to the current violation
+                                            input.setAttribute('list', 'suggestions'); // Set list attribute for datalist
                             
                                             inputGroup.appendChild(iconSpan);
                                             inputGroup.appendChild(input);
@@ -207,15 +214,46 @@
                                             div.appendChild(label);
                                             div.appendChild(inputGroup);
                                             container.appendChild(div);
+                            
+                                            // Initialize autocomplete
+                                            autocomplete(input, violationsData);
                                         });
                                     } catch (e) {
                                         console.error('Invalid JSON string: ', e);
                                     }
                                 });
+                            
+                                // Autocomplete function
+                                function autocomplete(input, data) {
+                                    input.addEventListener('input', function() {
+                                        var val = this.value.toLowerCase();
+                                        var suggestions = [];
+                                        data.forEach(function(item) {
+                                            if (item.toLowerCase().startsWith(val)) {
+                                                suggestions.push(item);
+                                            }
+                                        });
+                            
+                                        var dataList = document.createElement('datalist');
+                                        dataList.id = 'suggestions';
+                                        suggestions.forEach(function(suggestion) {
+                                            var option = document.createElement('option');
+                                            option.value = suggestion;
+                                            dataList.appendChild(option);
+                                        });
+                            
+                                        // Clear previous suggestions
+                                        var existingDataList = document.getElementById('suggestions');
+                                        if (existingDataList) {
+                                            existingDataList.remove();
+                                        }
+                            
+                                        // Append new suggestions
+                                        this.parentNode.appendChild(dataList);
+                                        this.setAttribute('list', 'suggestions');
+                                    });
+                                }
                             </script>
-                            
-                            
-                            
                             
                         </div>
                         <div class="col-lg-6">
