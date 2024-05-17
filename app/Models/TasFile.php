@@ -124,6 +124,10 @@ public function checkCompleteness()
         throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
     }
 }
+public function getRemarksAttribute($value)
+{
+    return $value ? json_decode($value, true) : [];
+}
 
 
 }

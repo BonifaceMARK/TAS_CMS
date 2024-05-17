@@ -135,7 +135,7 @@
                 @method('PUT')
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-6"> 
                             <!-- Violation details section -->
                             <h6 class="fw-bold mb-3">Violation Details</h6>
                             <div class="mb-3">
@@ -154,54 +154,69 @@
                                 <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
                                 <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
                             </div>
-       
-                            @if (!empty($violationArray))
-    @foreach ($violationArray as $key => $value)
-        <div class="mb-3">
-            <label for="violation{{ $loop->parent->index }}_{{ $key }}" class="form-label">Violation {{ $key + 1 }}</label>
-            <input type="text" class="form-control typeahead" id="violation{{ $loop->parent->index }}_{{ $key }}" name="violations[{{ $loop->parent->index }}][]" value="{{ $value }}">
-        </div>
-    @endforeach
-@endif
-<script>
-$(document).ready(function() {
-    // Initialize Typeahead for each input field with class typeahead
-    $('.typeahead').typeahead({
-        source: function (query, process) {
-            // Return the combined list of codes and violations as suggestions
-            var suggestions = @json(array_merge($codes, $violationArray));
-            process(suggestions);
-        },
-        minLength: 1, // Minimum characters before showing suggestions
-        highlighter: function (item) {
-            return '<div>' + item + '</div>'; // Customize the appearance of suggestions
-        }
-    });
-});
-</script>
-
-
-    <script>
-    // Get all input elements with name "violations[]"
-    var inputs = document.getElementsByName('violations[]');
-
-    // Loop through each input element
-    for (var i = 0; i < inputs.length; i++) {
-        // Get the value of the current input element
-        var value = inputs[i].value;
-
-        // Remove square brackets from the string
-        value = value.replace("[", "").replace("]", "");
-
-        // Split the value by double quotes
-        var valuesArray = value.split('"').filter(function(el) {
-            return el !== "" && el !== ",";
-        });
-
-        // Join the array values into a single string separated by line breaks
-        inputs[i].value = valuesArray.join('\n');
-    }
-</script>
+                            <div class="mb-3">
+                                <label for="violation{{ $violation->id }}" class="bi bi-exclamation-diamond-fill form-label"> Violations</label>
+                                <input type="hidden" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
+                            </div> 
+                            
+                            {{-- Container for dynamically created input fields --}}
+                            <div id="violationsContainer{{ $violation->id }}"></div>
+                            
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    // Get the initial value of the violation input
+                                    var initialViolation = document.getElementById('violation{{ $violation->id }}').value;
+                            
+                                    try {
+                                        // Parse the JSON string into an array
+                                        var violationsArray = JSON.parse(initialViolation);
+                            
+                                        // Select the container where new input fields will be appended
+                                        var container = document.getElementById('violationsContainer{{ $violation->id }}');
+                            
+                                        // Clear the initial input field (optional)
+                                        document.getElementById('violation{{ $violation->id }}').value = '';
+                            
+                                        // Create input fields dynamically for each violation
+                                        violationsArray.forEach(function(violation, index) {
+                                            var div = document.createElement('div');
+                                            div.className = 'mb-3';
+                            
+                                            var label = document.createElement('label');
+                                            label.setAttribute('for', 'violation{{ $violation->id }}_' + index);
+                                            label.className = 'form-label';
+                                            label.textContent = 'Violation ' + (index + 1);
+                            
+                                            var inputGroup = document.createElement('div');
+                                            inputGroup.className = 'input-group';
+                            
+                                            var iconSpan = document.createElement('span');
+                                            iconSpan.className = 'input-group-text';
+                                            iconSpan.innerHTML = '<i class="bi bi-exclamation-circle"></i>';
+                            
+                                            var input = document.createElement('input');
+                                            input.type = 'text';
+                                            input.className = 'form-control';
+                                            input.id = 'violation{{ $violation->id }}_' + index;
+                                            input.name = 'violations[]';
+                                            input.value = violation; // Set the value to the current violation
+                            
+                                            inputGroup.appendChild(iconSpan);
+                                            inputGroup.appendChild(input);
+                            
+                                            div.appendChild(label);
+                                            div.appendChild(inputGroup);
+                                            container.appendChild(div);
+                                        });
+                                    } catch (e) {
+                                        console.error('Invalid JSON string: ', e);
+                                    }
+                                });
+                            </script>
+                            
+                            
+                            
+                            
                         </div>
                         <div class="col-lg-6">
     <!-- Additional details section -->
@@ -224,41 +239,61 @@ $(document).ready(function() {
             <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
         </div>
         <div class="col-md-12 mb-3">
-            <label for="remarks{{ $violation->id }}" class="form-label">Remarks</label>
-            <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks" value="{{ $violation->remarks }}">
+            <label for="remarks{{ $violation->id }}" class="bi bi-bookmarks-fill form-label"> Remarks</label>
             @php
-                $remarks = json_decode($violation->remarks, true); 
-            @endphp
-            @if (!empty($remarks))
-            @foreach($remarks as $remark)
-                <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" value="{{ $remark }}">
-            @endforeach
-        @endif
-        <!-- Always include one input field for remarks --> 
-        <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" >
-        </div>
-        <div class="col-md-12 mb-3">
-    <label class="form-label">File Attachments</label>
-    @php
-        $attachments = explode(',', $violation->file_attach);
-    @endphp
-    @if (!empty($attachments))
-        @foreach ($attachments as $attachment)
-            <div class="input-group mt-2">
-                <input type="text" class="form-control" value="{{ $attachment }}" readonly>
-                <div class="input-group-append">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="delete_file[]" value="{{ $attachment }}">
-                        <label class="form-check-label">Delete</label>
-                    </div>
-                </div>
+                $remarks = $violation->remarks;  // Directly use the remarks attribute
+            @endphp 
+            @if (!empty($remarks) && is_array($remarks))
+                @foreach($remarks as $index => $remark)
+                    @if (is_array($remark))
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" id="remark{{ $violation->id }}_{{ $index }}" name="remarks[]" value="{{ $remark['text'] ?? '' }}">
+                            <span class="input-group-text">{{ $index + 1 }}</span>
+                            <span class="input-group-text">{{ isset($remark['timestamp']) ? date('h:i a m/d/y', strtotime($remark['timestamp'])) : '' }}</span>
+                            <span class="input-group-text">{{ $remark['user'] ?? '' }}</span>
+                        </div>
+                    @else
+                        <div class="input-group mb-2">
+                            <span class="bi bi-bookmarks input-group-text"></span>
+                            <input type="text" class="form-control" id="remark{{ $violation->id }}_{{ $index }}" name="remarks[]" value="{{ $remark }}">
+                            
+                        </div> 
+                    @endif
+                @endforeach
+            @endif
+            <!-- Always include one additional input field for new remarks -->
+            <div class="input-group mb-2">
+                <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
+                <input type="text" class="form-control" id="remarks{{ $violation->id }}_new" name="remarks[]" value="">
+                
             </div>
-        @endforeach
-    @endif
-    <div class="input-group mt-2">
-        <input type="file" class="form-control" name="file_attach[]">
-    </div>
-</div>
+        </div>
+ 
+        <div class="col-md-12 mb-3">
+            <label class="bi bi-folder-fill form-label"> File Attachments</label>
+            @php
+                $attachments = explode(',', $violation->file_attach);
+            @endphp
+            @if (!empty($attachments))
+                @foreach ($attachments as $attachment)
+                    <div class="input-group mt-2">
+                        <input type="file" class="form-control" name="file_attach_existing[]" disabled>
+                        <input type="text" class="form-control" value="{{ $attachment }}" readonly>
+                        <div class="input-group-append">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="delete_file[]" value="{{ $attachment }}">
+                                <label class="form-check-label">Delete</label>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+            <div class="input-group mt-2">
+                <input type="file" class="form-control" name="file_attach_new[]">
+                <span class="bi bi-paperclip input-group-text custom-new-badge"> Add New</span>
+            </div>
+        </div> 
+        
 
 
     </div>

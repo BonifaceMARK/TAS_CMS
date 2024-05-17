@@ -19,7 +19,7 @@
     @if (Auth::user()->role == 9)
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">
-  <h3>AO/Violation</h3>
+  AO/Violation
 </li>
 
     <li class="nav-item">

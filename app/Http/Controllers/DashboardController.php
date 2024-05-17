@@ -932,33 +932,40 @@ class DashboardController extends Controller
     }
     public function updateContest()
     {
-        $codes = TrafficViolation::all();
-        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
+        // Fetch all traffic violations
         $violations = TrafficViolation::all();
+        
+        // Fetch recent TasFiles ordered by case number descending
+        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
+        
+        // Fetch all codes (assuming TrafficViolation model provides codes)
+        $codes = TrafficViolation::all();
+        
+        // Prepare a collection for officers
         $officers = collect();
-    
+        
         // Iterate through each TrafficViolation record
         foreach ($violations as $violation) {
             // Extract the name of the apprehending officer for the current TrafficViolation
             $officerName = $violation->apprehending_officer;
-    
+        
             // Query the ApprehendingOfficer model for officers with the given name
             $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-    
+        
+            // Merge the officers into the collection
             $officers = $officers->merge($officersForFile);
-    
+        
             // Decode the violation data if it's stored as JSON
             $violationData = json_decode($violation->violation, true);
-    
-            // Pass the violation data to the view
+        
+            // Assign the decoded violation data back to the violation object
             $violation->violationData = $violationData;
         }
-    
+        
         // Pass data to the view
         return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
     }
     
-
     public function historyIndex()
     {
       
