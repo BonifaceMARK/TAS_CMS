@@ -176,21 +176,21 @@ class DashboardController extends Controller
         return view('case_archives');
     }
 
-    public function tasView()
-    {
-        $pageSize = 15; // Define the default page size
-        $tasFiles = TasFile::all()->sortByDesc('case_no');
+    // public function tasView()
+    // {
+    //     $pageSize = 15; // Define the default page size
+    //     $tasFiles = TasFile::all()->sortByDesc('case_no');
     
-        // Initialize a collection to hold related officers
-        $officers = collect();
+    //     // Initialize a collection to hold related officers
+    //     $officers = collect();
     
-        // Iterate through each TasFile record
-        foreach ($tasFiles as $tasFile) {
-            // Extract the name of the apprehending officer for the current TasFile
-            $officerName = $tasFile->apprehending_officer;
+    //     // Iterate through each TasFile record
+    //     foreach ($tasFiles as $tasFile) {
+    //         // Extract the name of the apprehending officer for the current TasFile
+    //         $officerName = $tasFile->apprehending_officer;
             
-            // Query the ApprehendingOfficer model for officers with the given name
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    //         // Query the ApprehendingOfficer model for officers with the given name
+    //         $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
 
 //         $officers = $officers->merge($officersForFile);
 //         $tasFile->relatedofficer = $officersForFile;
@@ -240,30 +240,30 @@ class DashboardController extends Controller
 
 //     return view('tas.view', compact('tasFiles'));
 // }
-public function tasView()
-{
-    // Define the default page size
-    $pageSize = 15;
+    public function tasView()
+    {
+        // Define the default page size
+        $pageSize = 15;
 
-    // Eager load related data to avoid N+1 query issues
-    $tasFiles = TasFile::with('relatedofficer', 'relatedViolations')
-                        ->orderBy('case_no', 'desc')
-                        ->get();  // Fetch all TasFile records
+        // Eager load related data to avoid N+1 query issues
+        $tasFiles = TasFile::with('relatedofficer', 'relatedViolations')
+                            ->orderBy('case_no', 'desc')
+                            ->get();  // Fetch all TasFile records
 
-    // Loop through each TasFile to handle additional data manipulation
-    foreach ($tasFiles as $tasFile) {
-        // Convert remarks to array if it's a JSON string
-        $tasFile->remarks = json_decode($tasFile->remarks, true) ?? [];
+        // Loop through each TasFile to handle additional data manipulation
+        foreach ($tasFiles as $tasFile) {
+            // Convert remarks to array if it's a JSON string
+            $tasFile->remarks = json_decode($tasFile->remarks, true) ?? [];
 
-        // Call checkCompleteness() method if defined on TasFile model
-        if (method_exists($tasFile, 'checkCompleteness')) {
-            $tasFile->checkCompleteness();
+            // Call checkCompleteness() method if defined on TasFile model
+            if (method_exists($tasFile, 'checkCompleteness')) {
+                $tasFile->checkCompleteness();
+            }
         }
-    }
 
-    // Return the view with the fetched $tasFiles collection
-    return view('tas.view', compact('tasFiles'));
-}
+        // Return the view with the fetched $tasFiles collection
+        return view('tas.view', compact('tasFiles'));
+    }
 
     
     
