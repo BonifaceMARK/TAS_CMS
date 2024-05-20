@@ -58,7 +58,7 @@
                         <td>{{ $tasFile->symbols }}</td>
                             <td>{{ $tasFile->case_no }}</td>
                             <td>
-                                @if ($tasFile->relatedofficer->isNotEmpty())
+                                @if ($tasFile->relatedofficer)
                                     @foreach ($tasFile->relatedofficer as $officer)
                                         {{$officer->department}}
                                     @endforeach

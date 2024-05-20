@@ -33,10 +33,10 @@ class TasFile extends Model
     {
         $this->attributes['apprehending_officer'] = strtoupper($value);
     }
-    public function relatedofficer()
-    {
-        return $this->hasOne(ApprehendingOfficer::class, 'apprehending_officer');
-    }
+    public function relatedOfficer()
+{
+    return $this->hasOne(ApprehendingOfficer::class, 'officer');
+}
     public function relatedViolations()
     {
         // Assuming 'violation' is a JSON-encoded field in the TasFile table
