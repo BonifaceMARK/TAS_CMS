@@ -24,8 +24,8 @@
     </div>
 @endif
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js"></script>
+{{-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js" defer></script> --}}
 
 
     <section class="section">
@@ -77,7 +77,7 @@
                            
                             <td>{{ $tasFile->apprehending_officer ?? 'N/A' }}</td>
                             <td>
-                                @if ($tasFile->relatedofficer->isNotEmpty())
+                                @if ($tasFile->relatedofficer)
                                     @foreach ($tasFile->relatedofficer as $officer)
                                         {{$officer->department}}
                                     @endforeach
@@ -328,7 +328,7 @@
     }
 </script>
 
-<script>
+<script defer>
     $(document).ready(function () {
         // Check if there's a cached modal ID and open it
         var cachedModalId = localStorage.getItem('modalId');

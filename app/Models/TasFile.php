@@ -38,16 +38,16 @@ class TasFile extends Model
     }
     public function relatedofficer()
     {
-        return $this->hasOne(ApprehendingOfficer::class, 'apprehending_officer');
+        return $this->belongsTo(ApprehendingOfficer::class, 'apprehending_officer_id', 'id');
     }
+
+    // Define relationship with TrafficViolation model
     public function relatedViolations()
     {
-        return $this->hasMany(TrafficViolation::class, 'violation');
+        // Assuming 'violation' is a JSON-encoded field in the TasFile table
+        return $this->hasMany(TrafficViolation::class, 'violation_code', 'code');
     }
-    public function trafficViolations()
-    {
-        return $this->hasMany(TrafficViolation::class, 'violation');
-    }
+
     public function setTopAttribute($value)
     {
         $this->attributes['top'] = strtoupper($value);
@@ -87,43 +87,43 @@ class TasFile extends Model
         $this->attributes['plate_no'] = strtoupper($value);
     }
     public function getHistoryAttribute($value)
-{
-    return $value ? json_decode($value, true) : [];
-}
-    
-public function checkCompleteness()
-{
-    try {
-        $fillableAttributes = $this->getFillable();
-        $incompleteSymbols = [];
-
-        foreach ($fillableAttributes as $attribute) {
-            // Skip updating non-existent columns
-            if (!Schema::hasColumn('tas_files', $attribute)) {
-                continue;
-            }
-
-            if ($attribute !== 'history' && empty($this->$attribute)) {
-                $incompleteSymbols[$attribute] = 'incomplete';
-            }
-        }
-
-        if (empty($incompleteSymbols)) {
-            $this->symbols = 'complete';
-        } else {
-            $this->symbols = json_encode($incompleteSymbols);
-        }
-
-        $this->save();
-    } catch (\Exception $e) {
-        // Log the error for debugging
-        \Log::error('Error updating symbols attribute: ' . $e->getMessage());
-
-        // You can handle the error based on your requirement
-        // For example, you can throw a custom exception, return a response, or perform any other action.
-        throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
+    {
+        return $value ? json_decode($value, true) : [];
     }
-}
+    
+    public function checkCompleteness()
+    {
+        try {
+            $fillableAttributes = $this->getFillable();
+            $incompleteSymbols = [];
 
+            foreach ($fillableAttributes as $attribute) {
+                // Skip updating non-existent columns
+                if (!Schema::hasColumn('tas_files', $attribute)) {
+                    continue;
+                }
 
+                if ($attribute !== 'history' && empty($this->$attribute)) {
+                    $incompleteSymbols[$attribute] = 'incomplete';
+                }
+            }
+
+            if (empty($incompleteSymbols)) {
+                $this->symbols = 'complete';
+            } else {
+                $this->symbols = json_encode($incompleteSymbols);
+            }
+
+            $this->save();
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error updating symbols attribute: ' . $e->getMessage());
+
+            // You can handle the error based on your requirement
+            // For example, you can throw a custom exception, return a response, or perform any other action.
+            throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
+        }
+    }
+    
+   
 }
