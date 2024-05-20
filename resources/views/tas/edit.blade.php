@@ -153,7 +153,8 @@
                             <div class="mb-3">
                                 <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
                                 <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-                            </div>@php
+                            </div>
+                            @php
                             $violations = \App\Models\TrafficViolation::pluck('code')->toJson();
                         @endphp
                         
@@ -276,37 +277,43 @@
             <label for="contactNo{{ $violation->id }}" class="form-label">Contact No.</label>
             <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
         </div>
-        <div class="col-md-12 mb-3">
-            <label for="remarks{{ $violation->id }}" class="bi bi-bookmarks-fill form-label"> Remarks</label>
+        <div class="col-md-12 mb-2">
+    <label for="remarks{{ $violation->id }}" class="bi bi-bookmarks-fill form-label"> Remarks</label>
+
+    @if(is_array($violation->remarks))
+        @foreach ($violation->remarks as $index => $remark)
             @php
-                $remarks = $violation->remarks;  // Directly use the remarks attribute
-            @endphp 
-            @if (!empty($remarks) && is_array($remarks))
-                @foreach($remarks as $index => $remark)
-                    @if (is_array($remark))
-                        <div class="input-group mb-2">
-                            <input type="text" class="form-control" id="remark{{ $violation->id }}_{{ $index }}" name="remarks[]" value="{{ $remark['text'] ?? '' }}">
-                            <span class="input-group-text">{{ $index + 1 }}</span>
-                            <span class="input-group-text">{{ isset($remark['timestamp']) ? date('h:i a m/d/y', strtotime($remark['timestamp'])) : '' }}</span>
-                            <span class="input-group-text">{{ $remark['user'] ?? '' }}</span>
-                        </div>
-                    @else
-                        <div class="input-group mb-2">
-                            <span class="bi bi-bookmarks input-group-text"></span>
-                            <input type="text" class="form-control" id="remark{{ $violation->id }}_{{ $index }}" name="remarks[]" value="{{ $remark }}">
-                            
-                        </div> 
-                    @endif
-                @endforeach
-            @endif
-            <!-- Always include one additional input field for new remarks -->
-            <div class="input-group mb-2">
-                <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
-                <input type="text" class="form-control" id="remarks{{ $violation->id }}_new" name="remarks[]" value="">
-                
+                // Split the remark into text, timestamp, and user
+                $parts = explode(" - ", $remark);
+                $text = $parts[0] ?? '';
+                $timestamp = $parts[1] ?? '';
+                $user = $parts[2] ?? '';
+            @endphp
+            <div class="col-md-4">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text">
+                </div>
             </div>
-        </div>
- 
+            <div class="col-md-4">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="timestamp{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][timestamp]" value="{{ $timestamp }}" placeholder="Timestamp">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="user{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][user]" value="{{ $user }}" placeholder="User">
+                </div>
+            </div>
+        @endforeach
+    @endif
+</div>
+
+<!-- Always include one additional input field for new remarks -->
+<div class="input-group mb-2">
+    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
+    <input type="text" class="form-control" id="remarks{{ $violation->id }}_new" name="remarks[]" value="" placeholder="Add new Remarks">
+</div>
+
         <div class="col-md-12 mb-3">
             <label class="bi bi-folder-fill form-label"> File Attachments</label>
             @php
@@ -315,7 +322,7 @@
             @if (!empty($attachments))
                 @foreach ($attachments as $attachment)
                     <div class="input-group mt-2">
-                        <input type="file" class="form-control" name="file_attach_existing[]" disabled>
+                        <input type="file" class="form-control" name="file_attach_existing[]">
                         <input type="text" class="form-control" value="{{ $attachment }}" readonly>
                         <div class="input-group-append">
                             <div class="form-check form-check-inline">
@@ -328,7 +335,7 @@
             @endif
             <div class="input-group mt-2">
                 <input type="file" class="form-control" name="file_attach_new[]">
-                <span class="bi bi-paperclip input-group-text custom-new-badge"> Add New</span>
+                <span class="bi bi-paperclip input-group-text custom-new-badge" > Add New</span>
             </div>
         </div> 
         
