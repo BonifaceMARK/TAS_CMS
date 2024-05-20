@@ -23,7 +23,7 @@ class UsersTableSeeder extends Seeder
                 'email' => 'admin@tas.com',
                 'password' => Hash::make('p@s$w0rd123'),
                 'email_verified_at' => now(),
-                'role' => 1,
+                'role' => 9,
                 'isactive' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -34,7 +34,7 @@ class UsersTableSeeder extends Seeder
                 'email' => 'saint@tas.com',
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
-                'role' => 1,
+                'role' => 2,
                 'isactive' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -45,12 +45,12 @@ class UsersTableSeeder extends Seeder
                 'email' => 'mark@tas.com',
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
-                'role' => 1,
+                'role' => 2,
                 'isactive' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Add more users as needed
         ];
 

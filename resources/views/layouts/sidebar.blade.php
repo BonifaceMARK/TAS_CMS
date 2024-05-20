@@ -65,7 +65,7 @@
       <i class="bi bi-file-earmark-check"></i><span>View Admitted Cases</span>
       </a>
     </li><!-- End Tables Nav -->
- 
+
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">Manage Users</li>
     <li class="nav-item">
@@ -109,6 +109,12 @@
       <i class="bi bi-chat-left-text"></i><span> Chat</span>
       </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{{ route('profile', ['id' => Auth::id()]) }}">
+          <i class="bi bi-person"></i>
+          <span>Profile</span>
+        </a>
+      </li><!-- End Profile Page Nav -->
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">AO/Violation</li>
     <li class="nav-item">
@@ -213,6 +219,7 @@
         <span>Case Archives</span>
       </a>
     </li><!-- End Profile Page Nav -->
+
 
   </ul>
 </aside><!-- End Sidebar-->
