@@ -248,9 +248,9 @@ public function tasView()
     // Eager load related data to avoid N+1 query issues
     $tasFiles = TasFile::with('relatedofficer', 'relatedViolations')
                     ->orderBy('case_no', 'desc')
-                    ->paginate($pageSize);
+                    ->get();
 
-    dd($tasFiles->toSql());
+    // dd($tasFiles->toSql());
 
     // Loop through each TasFile to handle additional data manipulation
     foreach ($tasFiles as $tasFile) {
