@@ -214,21 +214,22 @@
                                 <h5 class="card-title mb-0">Remarks</h5>
                             </div>
                             <div class="card-body mt-3">
-                                <!-- Remarks content -->
+                                
                                 @include('remarksupdate', ['remarks' => $tasFile->remarks])
-                                <form action="{{ route('save.remarks') }}" id="remarksForm" method="POST" class="remarksForm">
-                                    @csrf
-                                    <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
-                                    <div class="mt-3">
-                                        <label for="remarks" class="form-label">Add Remark</label>
-                                        <hr>
-                                        <textarea class="form-control" name="remarks" id="remarks" rows="5"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary mt-3" id="saveRemarksBtn">
-                                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                        Save Remarks
-                                    </button>
-                                </form>
+
+                                    <form action="{{ route('save.remarks') }}" id="remarksForm" method="POST" class="remarksForm">
+                                        @csrf
+                                        <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
+                                        <div class="mt-3">
+                                            <label for="remarks" class="form-label">Add Remark</label>
+                                            <hr>
+                                            <textarea class="form-control" name="remarks" id="remarks" rows="5"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mt-3" id="saveRemarksBtn">
+                                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                            Save Remarks
+                                        </button>
+                                    </form>
                             </div>
                         </div>
                     </div>
@@ -272,14 +273,10 @@
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finishModal{{ $tasFile->id }}">Finish</button>
                 <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
                     @csrf
-                    <input type="hidden" name="status" value="settled">
-                    <button type="submit" class="btn btn-warning">Settled</button>
+                    <button type="submit" class="btn btn-warning" name="status" value="settled">Settled</button>
+                    <button type="submit" class="btn btn-danger" name="status" value="Unsettled">Unsettled</button>
                 </form>
-                <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
-                    @csrf
-                    <input type="hidden" name="status" value="unsettled">
-                    <button type="submit" class="btn btn-danger">Unsettled</button>
-                </form>
+               
             </div>
         </div>
     </div>
