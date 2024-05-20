@@ -192,46 +192,79 @@ class DashboardController extends Controller
             // Query the ApprehendingOfficer model for officers with the given name
             $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
 
-            $officers = $officers->merge($officersForFile);
-            
-   
-            $tasFile->relatedofficer = $officersForFile;
+//         $officers = $officers->merge($officersForFile);
+//         $tasFile->relatedofficer = $officersForFile;
+        
+//         // Handle remarks field
+//         if (is_string($tasFile->remarks)) {
+//             // Decode JSON string to array
+//             $remarks = json_decode($tasFile->remarks, true);
 
-            $remarks = json_decode($tasFile->remarks);
-            
-            if (is_array($remarks)) {
-                $remarks = array_reverse($remarks);
-            } else {
-                // If $remarks is not an array, set it to an empty array
-                $remarks = [];
-            }
-            $tasFile->remarks = is_array($remarks) ? $remarks : [];
+//             // Check if decoding was successful
+//             if ($remarks === null) {
+//                 // Handle case where JSON is invalid
+//                 $remarks = [];
+//             }
+//         } else if (is_array($tasFile->remarks)) {
+//             // If $tasFile->remarks is already an array, use it directly
+//             $remarks = $tasFile->remarks;
+//         } else {
+//             // If remarks is neither a string nor an array, set it to an empty array
+//             $remarks = [];
+//         }
+//         $tasFile->remarks = $remarks;
+//     }
+
+//     // Process violations
+//     foreach ($tasFiles as $tasFile) {
+//         $violations = json_decode($tasFile->violation);
+
+//         if ($violations) {
+//             if (is_array($violations)) {
+//                 $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+//             } else {
+//                 $relatedViolations = TrafficViolation::where('code', $violations)->get();
+//             }
+//         } else {
+//             $relatedViolations = [];
+//         }
+
+//         $tasFile->relatedViolations = $relatedViolations;
+//     }
+
+//     // Fetch TasFile data again (if needed)
+//     $tF = TasFile::all();
+//     foreach ($tF as $tasFile) {
+//         $tasFile->checkCompleteness();
+//     }
+
+//     return view('tas.view', compact('tasFiles'));
+// }
+public function tasView()
+{
+    // Define the default page size
+    $pageSize = 15;
+
+    // Eager load related data to avoid N+1 query issues
+    $tasFiles = TasFile::with('relatedofficer', 'relatedViolations')
+                        ->orderBy('case_no', 'desc')
+                        ->get();  // Fetch all TasFile records
+
+    // Loop through each TasFile to handle additional data manipulation
+    foreach ($tasFiles as $tasFile) {
+        // Convert remarks to array if it's a JSON string
+        $tasFile->remarks = json_decode($tasFile->remarks, true) ?? [];
+
+        // Call checkCompleteness() method if defined on TasFile model
+        if (method_exists($tasFile, 'checkCompleteness')) {
+            $tasFile->checkCompleteness();
         }
-
-        foreach ($tasFiles as $tasFile) {
-
-            $violations = json_decode($tasFile->violation);
-    
-            if ($violations) {
-
-                if (is_array($violations)) {
-
-                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-                } else {
-
-                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
-                }
-            } else {
-
-                $relatedViolations = [];
-            }
-
-            $tasFile->relatedViolations = $relatedViolations;
-        }
-    
-
-        return view('tas.view', compact('tasFiles'));
     }
+
+    // Return the view with the fetched $tasFiles collection
+    return view('tas.view', compact('tasFiles'));
+}
+
     
     
     

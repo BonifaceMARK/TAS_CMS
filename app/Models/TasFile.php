@@ -39,11 +39,8 @@ class TasFile extends Model
     }
     public function relatedViolations()
     {
-        return $this->hasMany(TrafficViolation::class, 'violation');
-    }
-    public function trafficViolations()
-    {
-        return $this->hasMany(TrafficViolation::class, 'violation');
+        // Assuming 'violation' is a JSON-encoded field in the TasFile table
+        return $this->hasMany(TrafficViolation::class, 'code');
     }
     public function setTopAttribute($value)
     {
