@@ -1,4 +1,4 @@
-@extends('layouts.title')
+
 @section('title', env('APP_NAME'))
 
 @include('layouts.title')
@@ -58,38 +58,38 @@
                         @foreach ($tasFiles as $tasFile)
                         <tr class="table-row" data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
                         <td class="symbol-cell {{ symbolBgColor($tasFile->symbols) }}" onclick="openModal('{{ $tasFile->symbols }}')">
-    @if($tasFile->symbols === 'complete')
-        <span class="text-white"><i class="bi bi-check-circle-fill"></i> Complete</span>
-    @elseif($tasFile->symbols === 'incomplete')
-        <span class="text-white"><i class="bi bi-exclamation-circle-fill"></i> Incomplete</span>
-    @elseif($tasFile->symbols === 'deleting')
-        <span class="text-white"><i class="bi bi-trash-fill"></i> Deleting</span>
-    @else
-        <span class="text-white"><i class="bi bi-question-circle-fill"></i> Incomplete</span>
-    @endif
-</td>
+                            @if($tasFile->symbols === 'complete')
+                                <span class="text-white"><i class="bi bi-check-circle-fill"></i> Complete</span>
+                            @elseif($tasFile->symbols === 'incomplete')
+                                <span class="text-white"><i class="bi bi-exclamation-circle-fill"></i> Incomplete</span>
+                            @elseif($tasFile->symbols === 'deleting')
+                                <span class="text-white"><i class="bi bi-trash-fill"></i> Deleting</span>
+                            @else
+                                <span class="text-white"><i class="bi bi-question-circle-fill"></i> Incomplete</span>
+                            @endif
+                        </td>
 
 
 
-                            <td>{{ $tasFile->case_no }}</td>
+                            <td>{{ $tasFile->case_no  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->top ?? 'N/A' }}</td>
-                            <td>{{ $tasFile->driver }}</td>
+                            <td>{{ $tasFile->driver  ?? 'N/A' }}</td>
                            
                             <td>{{ $tasFile->apprehending_officer ?? 'N/A' }}</td>
                             <td>
                                 @if ($tasFile->relatedofficer)
                                     @foreach ($tasFile->relatedofficer as $officer)
-                                        {{$officer->department}}
+                                        {{$officer->department  ?? 'N/A' }}
                                     @endforeach
                                 @endif
                             </td>
-                            <td>{{ $tasFile->typeofvehicle }}</td>
-                            <td>{{ $tasFile->violation }}</td>
+                            <td>{{ $tasFile->typeofvehicle  ?? 'N/A' }}</td>
+                            <td>{{ $tasFile->violation  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
                             
-                            <td>{{ $tasFile->received_date }}</td>
-                            <td>{{ $tasFile->plate_no }}</td>
-                            <td>{{ $tasFile->created_at }}</td>
+                            <td>{{ $tasFile->received_date  ?? 'N/A' }}</td>
+                            <td>{{ $tasFile->plate_no  ?? 'N/A' }}</td>
+                            <td>{{ $tasFile->created_at  ?? 'N/A' }}</td>
                         
                             <td style="background-color: {{ getStatusColor($tasFile->status) }}">
     @if($tasFile->status === 'closed')
@@ -119,7 +119,7 @@
 {{-- @if (Auth::user()->role == 9 || Auth::user()->role == 2) --}}
 @foreach($tasFiles as $tasFile)
 <div class="modal fade" id="exampleModal{{ $tasFile->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -128,189 +128,16 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Case Information</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Case No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->case_no }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Driver:</h6>
-                                    <p class="fw-bold">{{ $tasFile->driver }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Contact No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->contact_no }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">TOP:</h6>
-                                    <p class="fw-bold">{{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Transaction No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Received Date:</h6>
-                                    <p class="fw-bold">{{ $tasFile->date_received }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Violation Details</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Plate No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->plate_no }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Apprehending Officer:</h6>
-                                    <p class="fw-bold">{{ $tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A' }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Date Recorded:</h6>
-                                    <p class="fw-bold">{{ $tasFile->created_at }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Violations:</h6>
-                                    @if (isset($tasFile->relatedViolations) && !is_array($tasFile->relatedViolations) && $tasFile->relatedViolations->count() > 0)
-                                        <ul class="list-unstyled">
-                                            @foreach ($tasFile->relatedViolations as $violation)
-                                                <li>{{ $violation->code }} - {{ $violation->violation }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <p>No violations recorded.</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="modal-body" id="modal-body-{{ $tasFile->id }}">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
                 </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header ">
-                                <h5 class="card-title mb-0">Remarks</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                
-                                @include('remarksupdate', ['remarks' => $tasFile->remarks])
-
-                                    <form action="{{ route('save.remarks') }}" id="remarksForm" method="POST" class="remarksForm">
-                                        @csrf
-                                        <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
-                                        <div class="mt-3">
-                                            <label for="remarks" class="form-label">Add Remark</label>
-                                            <hr>
-                                            <textarea class="form-control" name="remarks" id="remarks" rows="5"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary mt-3" id="saveRemarksBtn">
-                                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                            Save Remarks
-                                        </button>
-                                    </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header ">
-                                <h5 class="card-title mb-0">File Attachments</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                <!-- File attachments content -->
-                                @if (!is_null($tasFile->file_attach))
-                                    @php
-                                        $decodedFiles = json_decode($tasFile->file_attach, true);
-                                    @endphp
-                                    @if (!is_null($decodedFiles))
-                                        <ol>
-                                            @foreach ($decodedFiles as $filePath)
-                                                <li>
-                                                    <i class="bi bi-paperclip me-1"></i>
-                                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                                </li>
-                                            @endforeach
-                                        </ol>
-                                    @else
-                                        <p>No attachments available.</p>
-                                    @endif
-                                @else
-                                    <p>No attachments available.</p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-
-
-            <div class="modal-footer">
-                <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">
-                    <span class="bi bi-printer"></span> Print Subpeona
-                </a>
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finishModal{{ $tasFile->id }}">Finish</button>
-                <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-warning" name="status" value="settled">Settled</button>
-                    <button type="submit" class="btn btn-danger" name="status" value="Unsettled">Unsettled</button>
-                </form>
-               
             </div>
         </div>
     </div>
-</div>
+@endforeach
 
-
-  {{-- @else --}}
-
-
-
-
-
-  {{-- @endif --}}
-  <!-- Finish Modal -->
-  <div class="modal fade" id="finishModal{{ $tasFile->id }}" tabindex="-1" role="dialog" aria-labelledby="finishModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <form action="{{ route('finish.case', ['id' => $tasFile->id]) }}" method="POST"> @csrf <div class="modal-header">
-            <h5 class="modal-title" id="finishModalLabel">Finish Case</h5>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label for="fine_fee">Fine Fee</label>
-              <input type="number" step="0.01" class="form-control" id="fine_fee" name="fine_fee" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Finish</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div> @endforeach
 
 
 
@@ -394,7 +221,35 @@
         }
     </script>
 
+<script>
+    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'id']));
 
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Button that triggered the modal
+            var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
+            var modalBody = modal.querySelector('.modal-body');
+            
+            // Generate the URL for fetching violation details
+            var fetchUrl = fetchViolationUrl.replace('id', modalId);
+            console.log(fetchUrl);
+
+            // Delay the fetch request by 1.5 seconds
+            setTimeout(() => {
+                // Fetch content for the modal via AJAX or a fetch request
+                fetch(fetchUrl)
+                    .then(response => response.text())
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error('Failed to load modal content', err);
+                        modalBody.innerHTML = '<p>Error loading content</p>';
+                    });
+            }, 1500); // 1.5 seconds delay
+        });
+    });
+</script>
   </main><!-- End #main -->
 
  @include('layouts.footer')

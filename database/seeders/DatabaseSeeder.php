@@ -13,10 +13,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(TrafficViolationSeeder::class);
+
         $this->call(UsersTableSeeder::class);
         $this->call(EmployeeSeeder::class);
         
         // Use the TasFileFactory to generate fake data
-        TasFile::factory()->count(10)->create();
+        TasFile::factory()->count(1500)->create();
     }
 }

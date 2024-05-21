@@ -44,6 +44,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Change Password</button>
+        <a href="javascript:history.back()" class="btn btn-primary">Return</a>
     </form>
     
     

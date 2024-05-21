@@ -28,6 +28,12 @@
       </a>
     </li>
     <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('edit.vio')}}">
+          <i class="bi bi-person-fill-add"></i><span> Edit Violation</span>
+      </a>
+    </li>
+    <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
+    <li class="nav-item">
       <a class="nav-link violation collapsed" data-bs-target="#tables-nav" href="{{ route('see.offi') }}">
         <i class="bi bi-person-fill-add"></i><span>Add Apprehending Officer</span>
       </a>
@@ -37,6 +43,7 @@
           <i class="bi bi-person-fill-add"></i><span> Edit Apprehending Officer</span>
       </a>
     </li>
+    
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">Contested Case</li>
     <li class="nav-item">
@@ -82,6 +89,20 @@
         <i class="bi bi-clock-history"></i><span>History</span>
       </a>
     </li>
+    <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
+    <li class="nav-heading">Manage Users</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="{{ route('profile', ['id' => Auth::id()]) }}">
+        <i class="bi bi-person"></i>
+        <span>Profile</span>
+      </a>
+    </li><!-- End Profile Page Nav -->
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="{{route('user_management')}}">
+        <i class="bi bi-person-fill-add"></i>
+        <span>User Management</span>
+      </a>
+    </li><!-- End Profile Page Nav -->
     @elseif (Auth::user()->role == 2)
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-heading">AO/Violation</li>

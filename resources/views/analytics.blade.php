@@ -1,4 +1,4 @@
-@extends('layouts.title')
+
 
 @section('title', env('APP_NAME'))
 

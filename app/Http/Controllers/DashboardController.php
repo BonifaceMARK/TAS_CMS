@@ -481,9 +481,16 @@ class DashboardController extends Controller
                 'fullname' => 'required|string|max:255',
                 'username' => 'required|string|max:255|unique:users,username,' . $id,
                 'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-                'role' => 'nullable|string|max:255'
+                'role' => 'nullable|string|max:255',
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:6144'
             ]);
             $user = User::findOrFail($id);
+            if ($request->hasFile('profile_picture')) {
+                $profilePicture = $request->file('profile_picture');
+                $filename = Auth::user()->id . '_' . $profilePicture->getClientOriginalName();
+                // Store the uploaded file in storage/app/public/profiles directory
+                $path = $profilePicture->storeAs('public/profiles', $filename);
+            }
             $user->update([
                 'fullname' => $request->input('fullname'),
                 'username' => $request->input('username'),
@@ -498,6 +505,7 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
+    
     public function change($id){
         $user = User::findOrFail($id);
         return view('change_password', compact('user'));
@@ -583,6 +591,13 @@ class DashboardController extends Controller
 
         // dd($officers[1]);
         return view('ao.editoffi', compact('officers'));
+    }
+    public function edivio(){
+
+    $violations = TrafficViolation::all();
+
+    // dd($officers[1]);
+    return view('ao.editvio', compact('violations'));
     }
     //add officer
     public function save_offi(Request $request){
@@ -957,6 +972,92 @@ foreach ($violations as $violation) {
 
         return response()->json(['remarks' => $remarks]);
     }
+    public function updateoffi(Request $request, $id)
+    {
+        try {
+            // Validate incoming request
+            $request->validate([
+                'officer' => 'required|string',
+                'department' => 'required|string',
+            ]);
 
+            // Update officer details
+            $officer = ApprehendingOfficer::findOrFail($id);
+            $officer->officer = $request->input('officer');
+            $officer->department = $request->input('department');
+            $officer->save();
+
+            // Redirect back with success message
+            return back()->with('success', 'Officer details updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle case where officer with $id is not found
+            return back()->with('error', 'Officer not found.');
+        } catch (ValidationException $e) {
+            // Handle validation errors
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            // Handle other unexpected errors
+            return back()->with('error', 'Failed to update officer details. Please try again.');
+        }
+    }
+    public function updateviolation(Request $request, $id)
+    {
+        try {
+            // Validate incoming request
+            $request->validate([
+                'officer' => 'required|string',
+                'department' => 'required|string',
+            ]);
+
+            // Update officer details
+            $officer = ApprehendingOfficer::findOrFail($id);
+            $officer->officer = $request->input('officer');
+            $officer->department = $request->input('department');
+            $officer->save();
+
+            // Redirect back with success message
+            return back()->with('success', 'Officer details updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle case where officer with $id is not found
+            return back()->with('error', 'Officer not found.');
+        } catch (ValidationException $e) {
+            // Handle validation errors
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            // Handle other unexpected errors
+            return back()->with('error', 'Failed to update officer details. Please try again.');
+        }
+    }
+
+    public function detailstasfile(Request $request, $id)
+{
+    try {
+        // Find the TasFile by its ID or throw a ModelNotFoundException
+        $tasFile = TasFile::findOrFail($id);
+
+        // Retrieve related ApprehendingOfficers
+        $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+
+        // Retrieve related TrafficViolations
+        $violations = json_decode($tasFile->violation, true);
+        $relatedViolations = [];
+        if ($violations) {
+            $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+        }
+
+        // Handle remarks field
+
+        $remarks = json_decode($tasFile->remarks, true) ?? [];
+        if ($remarks !== null) {
+            $remarks = array_reverse($remarks);
+        }
+        // Return the view with TasFile and related data
+        return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+    } catch (ModelNotFoundException $e) {
+        // Handle case where TasFile with $id is not found
+        return response()->view('errors.404', [], 404);
+    }
+}
 }
 

@@ -10,8 +10,8 @@
   <meta content="" name="keywords">
 
 <!-- Favicons -->
-<link href="{{asset('assets/img/logo.jpg')}}" rel="icon">
-<link href="{{asset('assets/img/logo.jpg')}}" rel="apple-touch-icon">
+<link href="{{asset('assets/img/logo.png')}}" rel="icon">
+<link href="{{asset('assets/img/logo.png')}}" rel="apple-touch-icon">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,7 +55,7 @@
 
       <a href="index.html" class="logo d-flex align-items-center scrollto me-auto me-lg-0">
    
-         <img src="{{asset('assets/img/logo.jpg')}}" alt=""> 
+         <img src="{{asset('assets/img/logo.png')}}" alt=""> 
         <h1>LAND TRANSPORTATION OFFICE<span></span></h1>
       </a>
 

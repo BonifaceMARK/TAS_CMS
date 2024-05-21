@@ -1,8 +1,17 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
+  <!-- Loading Screen -->
+  <div id="pageLoader" class="page-loader">
+    <img src="{{asset('assets/img/logo.png')}}" alt="">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <strong>Loading...</strong>
+    
+</div>
 
     <div class="d-flex align-items-center justify-content-between">
       <a href="{{url('/')}}" class="logo d-flex align-items-center">
-      <img src="{{asset('assets/img/logo.jpg')}}" alt="">
+      <img src="{{asset('assets/img/logo.png')}}" alt="">
                   <span class="d-none d-lg-block">Traffic Adjudication Service </span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
@@ -113,7 +122,7 @@
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
               <h6>{{Auth::user()->fullname}}</h6>
-              @if (Auth::user()->role == 1)
+              @if (Auth::user()->role == 9)
                   <span>Administrator</span>
               @else
                   <span>Employee</span>
@@ -122,7 +131,18 @@
             <li>
               <hr class="dropdown-divider">
             </li>
-
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="{{ route('profile', ['id' => Auth::id()]) }}">
+                <i class="bi bi-person"></i>
+                <span>My Profile</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="{{route('user_management')}}">
+                <i class="bi bi-person-fill-add"></i>
+                <span>User Management</span>
+              </a>
+            </li>
             <li>
               <a class="dropdown-item d-flex align-items-center" href="{{route('logout')}}">
                 <i class="bi bi-box-arrow-right"></i>
