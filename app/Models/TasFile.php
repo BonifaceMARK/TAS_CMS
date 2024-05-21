@@ -87,7 +87,25 @@ class TasFile extends Model
     {
         return $value ? json_decode($value, true) : [];
     }
+    public function setRemarksAttribute($value)
+    {
+        if (is_array($value)) {
+            // Convert the array of remarks to a comma-separated string
+            $this->attributes['remarks'] = implode(',', $value);
+        } else {
+            // If it's already a string, simply assign it
+            $this->attributes['remarks'] = $value;
+        }
+    }
     
+
+// Define accessor for 'remarks' field
+public function getRemarksAttribute($value)
+{
+    // Convert the comma-separated string of remarks to an array
+    return $value ? explode(',', $value) : [];
+}
+
     public function checkCompleteness()
     {
         try {
@@ -121,6 +139,20 @@ class TasFile extends Model
             throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
         }
     }
-    
+      // Method to add a new violation
+      public function addViolation($newViolation)
+      {
+          // Retrieve existing violations
+          $violations = $this->violation ?? [];
+  
+          // Add the new violation
+          $violations[] = $newViolation;
+  
+          // Update the violation attribute
+          $this->violation = $violations;
+  
+          // Save the model
+          $this->save();
+      }
    
 }

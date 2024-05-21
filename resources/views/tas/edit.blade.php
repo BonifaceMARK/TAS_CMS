@@ -137,23 +137,34 @@
                     <div class="row">
                         <div class="col-md-6"> 
                             <!-- Violation details section -->
-                            <h6 class="fw-bold mb-3">Violation Details</h6>
-                            <div class="mb-3">
-                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
-                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="top{{ $violation->id }}" class="form-label">TOP</label>
-                                <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
-                                <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
-                                <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-                            </div>
+                            <h5 class="fw-bold mb-3 bi bi-card-list"> Violation Details</h5>
+                            <div class="row">
+    <div class="col-md-6">
+        <!-- Case No. -->
+        <div class="mb-3">
+            <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+            <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
+        </div>
+        <!-- TOP -->
+        <div class="mb-3">
+            <label for="top{{ $violation->id }}" class="form-label">TOP</label>
+            <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!-- Driver -->
+        <div class="mb-3">
+            <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
+            <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
+        </div>
+        <!-- Apprehending Officer -->
+        <div class="mb-3">
+            <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
+            <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
+        </div>
+    </div>
+</div>
+
                             @php
                             $violations = \App\Models\TrafficViolation::pluck('code')->toJson();
                         @endphp
@@ -165,6 +176,10 @@
                             
                             {{-- Container for dynamically created input fields --}}
                             <div id="violationsContainer{{ $violation->id }}"></div>
+                            <div class="input-group ">
+    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
+    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violation[]" value="" placeholder="Add new Violation">
+</div> 
                             
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
@@ -259,7 +274,7 @@
                         </div>
                         <div class="col-lg-6">
     <!-- Additional details section -->
-    <h6 class="fw-bold mb-3">Additional Details</h6>
+    <h5 class="fw-bold mb-3 bi bi-collection me-1"> Additional Details</h5>
     <div class="row">
         <div class="col-md-6 mb-3">
             <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
@@ -283,61 +298,64 @@
     @if(is_array($violation->remarks))
         @foreach ($violation->remarks as $index => $remark)
             @php
-                // Split the remark into text, timestamp, and user
+                // Split the remark into text, timestamp, and user using the ' - ' separator
                 $parts = explode(" - ", $remark);
+                // Extract text, timestamp, and user from the remark
                 $text = $parts[0] ?? '';
                 $timestamp = $parts[1] ?? '';
                 $user = $parts[2] ?? '';
             @endphp
-            <div class="col-md-4">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text">
+            <div class="row mb-2">
+                <div class="col-md-5">
+                    <!-- Remarks input -->
+                    <div class="input-group">
+                        <span class="input-group-text bi bi-clipboard-check"></span>
+                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="timestamp{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][timestamp]" value="{{ $timestamp }}" placeholder="Timestamp">
+                <div class="col-md-3">
+                    <!-- Timestamp -->
+                    <div class="input-group">
+                        <p class="form-control badge bg-dark">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="user{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][user]" value="{{ $user }}" placeholder="User">
+                <div class="col-md-4">
+                    <!-- User -->
+                    <div class="input-group">
+                        <p class="form-control badge bg-primary">{{ str_replace(['"', '[', ']'], '', $user) }}</p>
+                    </div>
                 </div>
             </div>
         @endforeach
     @endif
+  
 </div>
 
-<!-- Always include one additional input field for new remarks -->
-<div class="input-group mb-2">
-    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
-    <input type="text" class="form-control" id="remarks{{ $violation->id }}_new" name="remarks[]" value="" placeholder="Add new Remarks">
-</div>
 
-        <div class="col-md-12 mb-3">
-            <label class="bi bi-folder-fill form-label"> File Attachments</label>
-            @php
-                $attachments = explode(',', $violation->file_attach);
-            @endphp
-            @if (!empty($attachments))
-                @foreach ($attachments as $attachment)
-                    <div class="input-group mt-2">
-                        <input type="file" class="form-control" name="file_attach_existing[]">
-                        <input type="text" class="form-control" value="{{ $attachment }}" readonly>
-                        <div class="input-group-append">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" name="delete_file[]" value="{{ $attachment }}">
-                                <label class="form-check-label">Delete</label>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @endif
+
+
+<div class="col-md-12 mb-3">
+    <label class="bi bi-folder-fill form-label"> File Attachments</label>
+    @php
+        $attachments = explode(',', $violation->file_attach);
+    @endphp
+    @if (!empty($attachments))
+        @foreach ($attachments as $attachment)
             <div class="input-group mt-2">
-                <input type="file" class="form-control" name="file_attach_new[]">
-                <span class="bi bi-paperclip input-group-text custom-new-badge" > Add New</span>
+                <input type="file" class="form-control" name="file_attach_existing[]">
+                <input type="text" class="form-control" value="{{ $attachment }}" readonly>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger" data-attachment="{{ $attachment }}">Delete</button>
+                </div>
             </div>
-        </div> 
+        @endforeach
+    @endif
+    <div class="input-group mt-2">
+        <input type="file" class="form-control" name="file_attach_new[]">
+        <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span> 
+    </div>
+</div>
+
         
 
 
