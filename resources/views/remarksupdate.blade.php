@@ -1,4 +1,4 @@
-@if ($remarks !== null && count($remarks) > 0)
+@if ($remarks !== null)
     <div class="remarks-list">
         <table class="table">
             <thead>

@@ -23,7 +23,8 @@
         {{ session('error') }}
     </div>
 @endif
-
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 {{-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js" defer></script> --}}
 
@@ -128,32 +129,116 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-                <div class="modal-body" id="modal-body-{{ $tasFile->id }}">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                      </div>
-                      Loading...
+            <div class="modal-body" id="modal-body-{{ $tasFile->id }}">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
+                Loading...
             </div>
         </div>
     </div>
+</div>
 @endforeach
-
-
-
-
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function openInNewTabAndPrint(url) {
-        var win = window.open(url, '_blank');
-        win.onload = function() {
-            win.print();
-        };
-    }
-</script>
+    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'id']));
 
-<script defer>
+    function initializeModalScripts(modalId) {
+        $('#modal-body-' + modalId + ' .remarksForm').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const saveRemarksBtn = form.find('#saveRemarksBtn');
+            const spinner = saveRemarksBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            saveRemarksBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Show success message
+                    showAlert(response.message);
+
+                    // Reload the modal body content
+                    var fetchUrl = fetchViolationUrl.replace('id', modalId);
+                    fetch(fetchUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(html => {
+                            $('#modal-body-' + modalId).html(html);
+                            initializeModalScripts(modalId);
+                        })
+                        .catch(err => {
+                            console.error('Failed to reload modal content', err);
+                            $('#modal-body-' + modalId).html('<p>Error loading content</p>');
+                        });
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Show error message
+                    showAlert('Failed to save remarks. Please try again later.', 'danger');
+                }
+            });
+        });
+    }
+
+    function showAlert(message, type = 'success') {
+        const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+        </div>`;
+        const alertElement = $(alertHtml).appendTo('body').hide().fadeIn();
+
+        setTimeout(() => {
+            alertElement.fadeOut(() => {
+                alertElement.remove();
+            });
+        }, 3000); // 3 seconds delay
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
+            var modalBody = modal.querySelector('.modal-body');
+            
+            var fetchUrl = fetchViolationUrl.replace('id', modalId);
+            console.log('Fetching URL: ', fetchUrl);
+            
+            setTimeout(() => {
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                        initializeModalScripts(modalId);
+                    })
+                    .catch(err => {
+                        console.error('Failed to load modal content:', err);
+                        modalBody.innerHTML = '<p>Error loading content</p>';
+                    });
+            }, 1500); // 1.5 seconds delay
+        });
+    });
+
     $(document).ready(function () {
         // Check if there's a cached modal ID and open it
         var cachedModalId = localStorage.getItem('modalId');
@@ -161,68 +246,29 @@
             $('#' + cachedModalId).modal('show');
         }
 
-            $('.modal').on('shown.bs.modal', function (e) {
-                // Cache the ID of the opened modal
-                localStorage.setItem('modalId', e.target.id);
-            });
-
-            $('.modal').on('hidden.bs.modal', function () {
-                // Remove cached modal ID when the modal is closed
-                localStorage.removeItem('modalId');
-            });
-
-            // Form submission with AJAX
-            $('.remarksForm').on('submit', function (e) {
-                e.preventDefault();
-                const form = $(this);
-                const saveRemarksBtn = form.find('#saveRemarksBtn');
-                const spinner = saveRemarksBtn.find('.spinner-border');
-
-                // Show spinner and disable button
-                spinner.removeClass('d-none');
-                saveRemarksBtn.prop('disabled', true);
-
-                // Perform AJAX request
-                $.ajax({
-                    type: form.attr('method'),
-                    url: form.attr('action'),
-                    data: form.serialize(),
-                    success: function (response) {
-                        // Hide spinner and enable button
-                        spinner.addClass('d-none');
-                        saveRemarksBtn.prop('disabled', false);
-
-                        // Update remarks section with new data
-                        form.closest('.modal-content').find('.remarks-list').html(response.remarks);
-
-                        // Display success alert
-                        alert('Remarks saved successfully.');
-
-                        // Reload the page
-                        window.location.reload();
-                    },
-                    error: function () {
-                        // Hide spinner and enable button
-                        spinner.addClass('d-none');
-                        saveRemarksBtn.prop('disabled', false);
-
-                        // Display error alert
-                        alert('Failed to save remarks. Please try again later.');
-                    }
-                });
-            });
+        $('.modal').on('shown.bs.modal', function (e) {
+            // Cache the ID of the opened modal
+            localStorage.setItem('modalId', e.target.id);
         });
 
-        // Function to open a URL in a new tab and print
-        function openInNewTabAndPrint(url) {
-            const win = window.open(url, '_blank');
-            win.onload = function () {
-                win.print();
-            };
-        }
-    </script>
+        $('.modal').on('hidden.bs.modal', function () {
+            // Remove cached modal ID when the modal is closed
+            localStorage.removeItem('modalId');
+        });
+    });
+</script>
 
 <script>
+    // Function to open a URL in a new tab and print
+    function openInNewTabAndPrint(url) {
+        const win = window.open(url, '_blank');
+        win.onload = function () {
+            win.print();
+        };
+    }
+</script>
+
+{{-- <script>
     const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'id']));
 
     document.querySelectorAll('.modal').forEach(modal => {
@@ -234,7 +280,7 @@
             // Generate the URL for fetching violation details
             var fetchUrl = fetchViolationUrl.replace('id', modalId);
             console.log(fetchUrl);
-
+            
             // Delay the fetch request by 1.5 seconds
             setTimeout(() => {
                 // Fetch content for the modal via AJAX or a fetch request
@@ -251,6 +297,79 @@
         });
     });
 </script>
+
+<script defer>
+    $(document).ready(function () {
+    // Check if there's a cached modal ID and open it
+    var cachedModalId = localStorage.getItem('modalId');
+    if (cachedModalId) {
+        $('#' + cachedModalId).modal('show');
+    }
+
+    $('.modal').on('shown.bs.modal', function (e) {
+        // Cache the ID of the opened modal
+        localStorage.setItem('modalId', e.target.id);
+    });
+
+    $('.modal').on('hidden.bs.modal', function () {
+        // Remove cached modal ID when the modal is closed
+        localStorage.removeItem('modalId');
+    });
+
+    // Function to initialize modal scripts
+    function initializeModalScripts() {
+        $('.remarksForm').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const saveRemarksBtn = form.find('#saveRemarksBtn');
+            const spinner = saveRemarksBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            saveRemarksBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Update the remarks section with new data
+                    const remarksList = form.closest('.modal-content').find('.remarks-list');
+                    remarksList.empty();
+                    response.remarks.forEach(function (remark) {
+                        remarksList.append('<li>' + remark + '</li>');
+                    });
+
+                    // Display success alert
+                    alert('Remarks saved successfully.');
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Display error alert
+                    alert('Failed to save remarks. Please try again later.');
+                }
+            });
+        });
+    }
+
+    // Initialize modal scripts on page load
+    initializeModalScripts();
+});
+    
+</script> --}}
+
+
+
+
+
   </main><!-- End #main -->
 
  @include('layouts.footer')

@@ -252,12 +252,12 @@ class DashboardController extends Controller
         // Pass the modified admitted data to the view
         return view('admitted.view', compact('admitted'));
     }
-    public function saveRemarks(Request $request){
+    public function saveRemarks(Request $request) {
         $request->validate([
             'remarks' => 'required|string',
             'tas_file_id' => 'required|exists:tas_files,id',
         ]);
-
+    
         try {
             $id = $request->input('tas_file_id');
             $remarks = $request->input('remarks');
@@ -267,21 +267,19 @@ class DashboardController extends Controller
             $newRemark = $remarks . ' - ' . $timestamp .' - '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
-
+    
             DB::beginTransaction();
             $tasFile->update(['remarks' => $updatedRemarksJson]);
             DB::commit();
-
-            // Send back a response with JavaScript to close the tab
-            $remarksHtml = view('remarksupdate', ['remarks' => $tasFile->remarks])->render();
-            return response()->json(['remarks' => $remarksHtml]);
-            // return back()->with('success', 'Remarks saved successfully.');
+    
+            // Send back a response with 201 Created status code
+            // Here, we are also returning a success message in the response body
+            return response()->json(['message' => 'Remarks saved successfully.'], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
-            return back()->withErrors([$th->getMessage()]);
+            return response()->json(['error' => $th->getMessage()], 500); // You can return a different error status code if needed
         }
-
     }
     //admitted remarks
     public function admitremark(Request $request){
@@ -898,7 +896,7 @@ class DashboardController extends Controller
        
         
         // Iterate through each TrafficViolation record
-        foreach ($violations as $violation) {
+        foreach ($recentViolationsToday as $violation) {
             // Extract the name of the apprehending officer for the current TrafficViolation
             $officerName = $violation->apprehending_officer;
     
@@ -912,7 +910,7 @@ class DashboardController extends Controller
         }
   
         // Pass data to the view, including the new variable $violationData
-        return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers' ));
+        return view('tas.edit', compact('recentViolationsToday', 'codes', 'officers' ));
     }
  
     public function historyIndex()
@@ -1013,6 +1011,7 @@ class DashboardController extends Controller
             // If $remarks is not an array, set it to an empty array
             $remarks = [];
         }
+        // dd($remarks);
         // Return the view with TasFile and related data
         return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
 
