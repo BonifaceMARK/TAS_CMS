@@ -667,20 +667,20 @@ class DashboardController extends Controller
         try {
             // Find the violation by ID
             $violation = TasFile::findOrFail($id);
-
+    
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'case_no' => 'nullable|string|max:255',
                 'top' => 'nullable|string|max:255',
                 'driver' => 'nullable|string|max:255',
                 'apprehending_officer' => 'nullable|string|max:255',
-                'violation' => 'nullable|array', // Changed to array, as we expect multiple violations
+                'violation' => 'nullable|array',
                 'transaction_no' => 'nullable|string|max:255',
                 'date_received' => 'nullable|date',
                 'plate_no' => 'nullable|string|max:255',
                 'contact_no' => 'nullable|string|max:255',
-                'remarks.*.text' => 'nullable|string', // Validate each remark text as a string
-                'file_attach.*' => 'nullable|file|max:10240', // Adjust max file size as needed
+                'remarks.*.text' => 'nullable|string',
+                'file_attach.*' => 'nullable|file|max:10240',
             ]);
     
             // Process remarks
@@ -692,9 +692,8 @@ class DashboardController extends Controller
                 $validatedData['remarks'] = json_encode($remarksArray);
             }
     
-            // Check if new attachments are uploaded
+            // Handle file uploads and append new attachments to existing ones
             if ($request->hasFile('file_attach')) {
-                // Handle file uploads and append new attachments to existing ones
                 $newAttachments = [];
                 foreach ($request->file('file_attach') as $file) {
                     $filename = $validatedData['case_no'] . "_documents_" . time() . "_" . $file->getClientOriginalName();
@@ -704,19 +703,8 @@ class DashboardController extends Controller
                 $currentAttachments = json_decode($violation->file_attach, true) ?? [];
                 $allAttachments = array_merge($currentAttachments, $newAttachments);
                 $validatedData['file_attach'] = json_encode($allAttachments);
-
-                // Append addition action to history
-                foreach ($newAttachments as $attachment) {
-                    $history[] = [
-                        'action' => 'ADD_ATTACHMENT',
-                        'user_id' => auth()->id(), // Assuming you have user authentication
-                        'username' => auth()->user()->username,
-                        'timestamp' => now(),
-                        'attachment' => $attachment,
-                    ];
-                }
             }
-
+    
             // Merge new violations into existing violations array
             if (!empty($validatedData['violation'])) {
                 $existingViolations = json_decode($violation->violation, true) ?? [];
@@ -726,53 +714,27 @@ class DashboardController extends Controller
                 $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
             }
     
-            // Capture changes
-            $changes = [];
-            foreach ($validatedData as $field => $newValue) {
-                if ($violation->$field !== $newValue) {
-                    $changes[$field] = [
-                        'old_value' => $violation->$field,
-                        'new_value' => $newValue,
-                    ];
-                }
-            }
-
-            // Append new changes to existing history
-            $history = $violation->history ?? [];
-            if (isset($history)) {
-                $history[] = [
-                    'action' => 'EDIT',
-                    'user_id' => auth()->id(), // Assuming you have user authentication
-                    'username' => auth()->user()->username,
-                    'timestamp' => now(),
-                    'changes' => $changes,
-                ];
-            }
-
             // Update the violation with validated data
             $violation->update($validatedData);
-
-            // Save updated history along with violation
-            $violation->history = $history;
-            $violation->save();
-            
+    
             // If new violations were added, add them to the TasFile model
             if (!empty($newViolations)) {
                 foreach ($newViolations as $newViolation) {
                     $violation->addViolation($newViolation);
                 }
             }
-        
+    
             // Set success message
             return back()->with('success', 'Violation updated successfully');
         } catch (\Exception $e) {
             // Log the error
             Log::error('Error updating Violation: ' . $e->getMessage());
-
+    
             // Set error message
             return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
     }
+    
     
     
     public function updateStatus(Request $request, $id)
@@ -933,17 +895,26 @@ class DashboardController extends Controller
         
         // Prepare a collection for officers
         $officers = collect();
+       
         
         // Iterate through each TrafficViolation record
-        
+        foreach ($violations as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
     
-        // dd($recentViolationsToday[4]);
-        return view('tas.edit', compact('recentViolationsToday', 'codes', 'officers'));
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+ 
+        }
+  
+        // Pass data to the view, including the new variable $violationData
+        return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers' ));
     }
-    
-    
-    
-    
+ 
     public function historyIndex()
     {
 

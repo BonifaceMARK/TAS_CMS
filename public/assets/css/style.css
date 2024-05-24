@@ -1681,3 +1681,68 @@ h6 {
   padding: 5px 10px;
   border-radius: 5px;
 }
+  /* Custom CSS for the card */
+  .card {
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeInAnimation 0.5s ease-in-out;
+    animation-fill-mode: both;
+    opacity: 0;
+    visibility: hidden;
+    margin-bottom: 20px;
+}
+
+@keyframes fadeInAnimation {
+    0% { opacity: 0; visibility: hidden; }
+    100% { opacity: 1; visibility: visible; }
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0;
+ 
+    padding: 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+.fw-bold {
+    font-weight: bold;
+}
+
+/* Custom CSS for the separators */
+.separator {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Custom CSS for the list items */
+ul.list-unstyled {
+    padding-left: 0;
+    list-style-type: none;
+}
+
+ul.list-unstyled li {
+    margin-bottom: 5px;
+}
+
+/* Custom CSS for the badge */
+.badge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #ffc107;
+    color: #212529;
+    font-weight: bold;
+}

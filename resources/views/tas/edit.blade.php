@@ -164,112 +164,45 @@
         </div>
     </div>
 </div>
+<div class="mb-3">
+    <label for="violation{{ $violation->id }}" class="bi bi-exclamation-diamond-fill form-label"> Violations</label>
+    @if(is_array($violation->violation))
+        @foreach($violation->violation as $index => $singleViolation)
+            @php
+                // Split the violation into text, timestamp, and user using the ' - ' separator
+                $parts = explode(" - ", $singleViolation);
+                // Extract text, timestamp, and user from the violation
+                $text = $parts[0] ?? '';
+                $timestamp = $parts[1] ?? '';
+                $user = $parts[2] ?? '';
+            @endphp
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <!-- Violation input field -->
+                    <div class="input-group">
+                        <span class="input-group-text">Violation</span>
+                        <input type="text" class="form-control" id="violation{{ $violation->id }}_{{ $index }}" name="violation[{{ $index }}][text]"  value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Violation">
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+</div>
 
-                            @php
-                            $violations = \App\Models\TrafficViolation::pluck('code')->toJson();
-                        @endphp
-                        
-                            <div class="mb-3">
-                                <label for="violation{{ $violation->id }}" class="bi bi-exclamation-diamond-fill form-label"> Violations</label>
-                                <input type="hidden" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
-                            </div>
-                            
-                            {{-- Container for dynamically created input fields --}}
-                            <div id="violationsContainer{{ $violation->id }}"></div>
-                            <div class="input-group ">
+
+
+
+
+
+
+
+<div class="input-group">
     <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
-    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violation[]" value="" placeholder="Add new Violation">
-</div> 
-                            
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    // Fetch violations data from PHP
-                                    var violationsData = {!! $violations !!}; // Convert PHP array to JavaScript object
-                            
-                                    // Get the initial value of the violation input
-                                    var initialViolation = document.getElementById('violation{{ $violation->id }}').value;
-                            
-                                    try {
-                                        // Parse the JSON string into an array (if applicable)
-                                        var violationsArray = JSON.parse(initialViolation);
-                            
-                                        // Select the container where new input fields will be appended
-                                        var container = document.getElementById('violationsContainer{{ $violation->id }}');
-                            
-                                        // Clear the initial input field (optional)
-                                        document.getElementById('violation{{ $violation->id }}').value = '';
-                            
-                                        // Create input fields dynamically for each violation
-                                        violationsArray.forEach(function(violation, index) {
-                                            var div = document.createElement('div');
-                                            div.className = 'mb-3';
-                            
-                                            var label = document.createElement('label');
-                                            label.setAttribute('for', 'violation{{ $violation->id }}_' + index);
-                                            label.className = 'form-label';
-                                            label.textContent = 'Violation ' + (index + 1);
-                            
-                                            var inputGroup = document.createElement('div');
-                                            inputGroup.className = 'input-group';
-                            
-                                            var iconSpan = document.createElement('span');
-                                            iconSpan.className = 'input-group-text';
-                                            iconSpan.innerHTML = '<i class="bi bi-exclamation-circle"></i>';
-                            
-                                            var input = document.createElement('input');
-                                            input.type = 'text';
-                                            input.className = 'form-control';
-                                            input.id = 'violation{{ $violation->id }}_' + index;
-                                            input.name = 'violations[]';
-                                            input.value = violation; // Set the value to the current violation
-                                            input.setAttribute('list', 'suggestions'); // Set list attribute for datalist
-                            
-                                            inputGroup.appendChild(iconSpan);
-                                            inputGroup.appendChild(input);
-                            
-                                            div.appendChild(label);
-                                            div.appendChild(inputGroup);
-                                            container.appendChild(div);
-                            
-                                            // Initialize autocomplete
-                                            autocomplete(input, violationsData);
-                                        });
-                                    } catch (e) {
-                                        console.error('Invalid JSON string: ', e);
-                                    }
-                                });
-                            
-                                // Autocomplete function
-                                function autocomplete(input, data) {
-                                    input.addEventListener('input', function() {
-                                        var val = this.value.toLowerCase();
-                                        var suggestions = [];
-                                        data.forEach(function(item) {
-                                            if (item.toLowerCase().startsWith(val)) {
-                                                suggestions.push(item);
-                                            }
-                                        });
-                            
-                                        var dataList = document.createElement('datalist');
-                                        dataList.id = 'suggestions';
-                                        suggestions.forEach(function(suggestion) {
-                                            var option = document.createElement('option');
-                                            option.value = suggestion;
-                                            dataList.appendChild(option);
-                                        });
-                            
-                                        // Clear previous suggestions
-                                        var existingDataList = document.getElementById('suggestions');
-                                        if (existingDataList) {
-                                            existingDataList.remove();
-                                        }
-                            
-                                        // Append new suggestions
-                                        this.parentNode.appendChild(dataList);
-                                        this.setAttribute('list', 'suggestions');
-                                    });
-                                }
-                            </script>
+    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violations[]" value="" placeholder="Add new Violation">
+</div>
+
+
+
                             
                         </div>
                         <div class="col-lg-6">
@@ -295,11 +228,28 @@
         <div class="col-md-12 mb-2">
     <label class="bi bi-bookmarks-fill form-label"> Remarks</label>
 
-    {{-- @foreach($violation->remarks as $remark) --}}
-    <div class="mb-3">
-        <input type="text" class="form-control" id="violation" name="violation" value="{{ $violation->remarks }}">
-    </div>
-   {{-- @endforeach --}}
+    @if(is_array($violation->remarks))
+        @foreach ($violation->remarks as $index => $remark)
+            @php
+                // Split the remark into text, timestamp, and user using the ' - ' separator
+                $parts = explode(" - ", $remark);
+                // Extract text, timestamp, and user from the remark
+                $text = $parts[0] ?? '';
+                $timestamp = $parts[1] ?? '';
+                $user = $parts[2] ?? '';
+            @endphp
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <!-- Remarks input -->
+                    <div class="input-group">
+                        <span class="input-group-text bi bi-clipboard-check"></span>
+                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
+                    </div>
+                </div>
+
+            </div>
+        @endforeach
+    @endif
   
 </div>
 
@@ -333,9 +283,9 @@
 
     </div>
 </div>
-
-                        <div class="col-md-12">
-                            <!-- History section -->
+<!-- HISTORY -->
+       <!--                  <div class="col-md-12">
+                      
                             <h6 class="fw-bold mt-4">History</h6>
                             <div class="table-responsive">
     <table class="table table-striped">
@@ -385,11 +335,11 @@
             @endif
         </tbody>
     </table>
-</div>
-
-                        </div>
+</div> 
+                        </div>-->
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Save changes</button>
