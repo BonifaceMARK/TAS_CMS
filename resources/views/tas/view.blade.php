@@ -257,7 +257,7 @@
         });
     });
 </script>
-
+ 
 <script>
     // Function to open a URL in a new tab and print
     function openInNewTabAndPrint(url) {

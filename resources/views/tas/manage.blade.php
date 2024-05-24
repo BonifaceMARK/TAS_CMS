@@ -58,7 +58,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="validationTooltipCaseno" class="form-label">Case no.</label>
-                            <input type="number" name="case_no" class="form-control" id="validationTooltipCaseno" min="1" max="9999999" required>
+                            <input type="text" name="case_no" class="form-control" id="validationTooltipCaseno" min="1" max="9999999" placeholder="Ex(1234)" required>
                             <div class="invalid-tooltip">
                                 Please enter a valid Case no. (Number only)
                             </div>
@@ -77,7 +77,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="validationTooltipdriver" class="form-label">Driver</label>
-                            <input type="text" name="driver" class="form-control" id="validationTooltipdriver" required>
+                            <input type="text" name="driver" class="form-control" id="validationTooltipdriver" placeholder="(Lastname,Firstname,Middlename)" required>
                             <div class="invalid-tooltip">
                                 Please provide a Driver.
                             </div>
