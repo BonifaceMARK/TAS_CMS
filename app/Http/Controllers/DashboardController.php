@@ -264,7 +264,7 @@ class DashboardController extends Controller
             $tasFile = TasFile::findOrFail($id);
             $existingRemarks = json_decode($tasFile->remarks, true) ?? [];
             $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
-            $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
+            $newRemark = $remarks . ' - ' . $timestamp .' - '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
 
@@ -923,7 +923,7 @@ class DashboardController extends Controller
     public function updateContest()
     {
         // Fetch all traffic violations
-        $violations = TrafficViolation::all();
+        
         
         // Fetch recent TasFiles ordered by case number descending
         $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
@@ -935,28 +935,10 @@ class DashboardController extends Controller
         $officers = collect();
         
         // Iterate through each TrafficViolation record
-        foreach ($violations as $violation) {
-            // Extract the name of the apprehending officer for the current TrafficViolation
-            $officerName = $violation->apprehending_officer;
+        
     
-            // Query the ApprehendingOfficer model for officers with the given name
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-    
-            // Merge the officers into the collection
-            $officers = $officers->merge($officersForFile);
-    
-            // Decode the violation data if it's stored as JSON
-            $violationData = json_decode($violation->violation, true);
-    
-            // Assign the decoded violation data back to the violation object
-            $violation->violationData = $violationData;
-    
-            // Convert the remarks attribute to an array using the correct delimiter
-            $violation->remarks = explode(" - ", $violation->remarks);
-        }
-    
-        // Pass data to the view
-        return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
+        // dd($recentViolationsToday[4]);
+        return view('tas.edit', compact('recentViolationsToday', 'codes', 'officers'));
     }
     
     
@@ -1051,12 +1033,14 @@ class DashboardController extends Controller
         if ($violations) {
             $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
         }
-
-        // Handle remarks field
-
-        $remarks = json_decode($tasFile->remarks, true) ?? [];
-        if ($remarks !== null) {
+        
+        $remarks = json_decode($tasFile->remarks);
+        // Check if $remarks is an array
+        if (is_array($remarks)) {
             $remarks = array_reverse($remarks);
+        } else {
+            // If $remarks is not an array, set it to an empty array
+            $remarks = [];
         }
         // Return the view with TasFile and related data
         return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));

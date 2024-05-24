@@ -18,6 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(EmployeeSeeder::class);
         
         // Use the TasFileFactory to generate fake data
-        TasFile::factory()->count(1500)->create();
+        TasFile::factory()->count(1000)->create();
     }
 }

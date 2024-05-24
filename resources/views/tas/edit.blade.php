@@ -293,41 +293,13 @@
             <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
         </div>
         <div class="col-md-12 mb-2">
-    <label for="remarks{{ $violation->id }}" class="bi bi-bookmarks-fill form-label"> Remarks</label>
+    <label class="bi bi-bookmarks-fill form-label"> Remarks</label>
 
-    @if(is_array($violation->remarks))
-        @foreach ($violation->remarks as $index => $remark)
-            @php
-                // Split the remark into text, timestamp, and user using the ' - ' separator
-                $parts = explode(" - ", $remark);
-                // Extract text, timestamp, and user from the remark
-                $text = $parts[0] ?? '';
-                $timestamp = $parts[1] ?? '';
-                $user = $parts[2] ?? '';
-            @endphp
-            <div class="row mb-2">
-                <div class="col-md-5">
-                    <!-- Remarks input -->
-                    <div class="input-group">
-                        <span class="input-group-text bi bi-clipboard-check"></span>
-                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <!-- Timestamp -->
-                    <div class="input-group">
-                        <p class="form-control badge bg-dark">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <!-- User -->
-                    <div class="input-group">
-                        <p class="form-control badge bg-primary">{{ str_replace(['"', '[', ']'], '', $user) }}</p>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    @endif
+    {{-- @foreach($violation->remarks as $remark) --}}
+    <div class="mb-3">
+        <input type="text" class="form-control" id="violation" name="violation" value="{{ $violation->remarks }}">
+    </div>
+   {{-- @endforeach --}}
   
 </div>
 
