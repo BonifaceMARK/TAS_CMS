@@ -79,15 +79,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('violation/details/{id}', function ($id) {$violation = TrafficViolation::findOrFail($id); return view('ao.detailsviolation', compact('violation'));})->name('fetchingviolation');
     Route::get('officer/details/{id}', function ($id) {$officer = ApprehendingOfficer::findOrFail($id); return view('ao.detailsoffi', compact('officer'));})->name('fetchingofficer');
-
-
-
+ 
+Route::post('/tasfile/{id}/updateViolation', [DashboardController::class, 'UPDATEVIO']);
+ 
+Route::post('/tasfile/{id}/deleteViolation', [DashboardController::class, 'DELETEVIO']);
+Route::post('/delete-remark',  [DashboardController::class, 'deleteRemark']);
+Route::post('/tas-files/{id}/add-attachment', [DashboardController::class, 'addAttachment'])->name('add.attachment');
 
     Route::get('tasfile/details/{id}',                  [DashboardController::class, 'detailstasfile'])->name('fetchingtasfile');
 
-
-
-    
 });
 Route::get('/fetch-remarks/?id={id}',                   [DashboardController::class, 'fetchRemarks'])->name('fetch.remarks'); 
 Route::get('/subpoena', function () {
