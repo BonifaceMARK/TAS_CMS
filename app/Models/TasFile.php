@@ -40,6 +40,28 @@ class TasFile extends Model
 {
     return $this->hasOne(ApprehendingOfficer::class, 'officer');
 }
+public function setFileAttachAttribute($value)
+{
+    if (is_array($value)) {
+        // Convert the array of file attachments to a comma-separated string
+        $this->attributes['file_attach'] = implode(',', $value);
+    } else {
+        // If it's already a string, simply assign it
+        $this->attributes['file_attach'] = $value;
+    }
+}
+
+// Accessor for the 'file_attach' attribute
+public function getFileAttachAttribute($value)
+{
+    // Check if the value is already a string, then return it as an array
+    if (is_string($value)) {
+        return explode(',', $value);
+    }
+
+    // If it's an array, return it directly
+    return $value ? explode(',', $value) : [];
+}
 public function relatedViolations()
 {
     // Assuming 'violation' is a JSON-encoded field in the TasFile table

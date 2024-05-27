@@ -175,19 +175,18 @@ class DashboardController extends Controller
     public function caseIndex(){
         return view('case_archives');
     }
-
     public function tasView()
     {
-        $pageSize = 15; // Define the default page size
         $tasFiles = TasFile::orderBy('case_no', 'desc')->get();
         $officers = collect();
-        
+    
         foreach ($tasFiles as $tasFile) {
             $officerName = $tasFile->apprehending_officer;
             $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
             $officers = $officers->merge($officersForFile);
             $tasFile->relatedofficer = $officersForFile;
-            
+    
+            // Ensure remarks is properly decoded to array
             if (is_string($tasFile->remarks)) {
                 $remarks = json_decode($tasFile->remarks, true);
                 if ($remarks === null) {
@@ -200,24 +199,29 @@ class DashboardController extends Controller
             }
             $tasFile->remarks = $remarks;
     
-            $violations = json_decode($tasFile->violation);
-            if ($violations) {
-                if (is_array($violations)) {
-                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-                } else {
-                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
+            // Ensure violation is properly decoded to array
+            if (is_string($tasFile->violation)) {
+                $violations = json_decode($tasFile->violation, true);
+                if ($violations === null) {
+                    $violations = [];
                 }
+            } else if (is_array($tasFile->violation)) {
+                $violations = $tasFile->violation;
+            } else {
+                $violations = [];
+            }
+    
+            if (!empty($violations)) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             } else {
                 $relatedViolations = [];
             }
             $tasFile->relatedViolations = $relatedViolations;
-    
-            // Move the dd() statement inside the loop after $relatedViolations is defined
-            dd($tasFile, $relatedViolations);
         }
-     
+    
         return view('tas.view', compact('tasFiles'));
     }
+    
     
     
     public function admitmanage()
@@ -936,6 +940,66 @@ public function updateContest()
     // Pass data to the view
     return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
 }
+public function removeAttachment(Request $request, $id)
+{
+    $tasFile = TasFile::findOrFail($id);
+    $attachmentToRemove = $request->input('attachment');
+
+    if ($attachmentToRemove) {
+        $attachments = $tasFile->file_attach ?? [];
+        if (($key = array_search($attachmentToRemove, $attachments)) !== false) {
+            unset($attachments[$key]);
+            $tasFile->file_attach = array_values($attachments); // Reindex array
+            $tasFile->save();
+
+            // Optionally, delete the file from the storage
+            Storage::delete($attachmentToRemove);
+        }
+    }
+
+    return response()->json(['success' => 'Attachment removed successfully.']);
+}
+
+public function attachFiles(Request $request, $id)
+{
+    // Validate the incoming files
+    $request->validate([
+        'file_attach_existing.*' => 'required|file|max:10240',
+    ]);
+
+    // Find the TasFile instance by ID
+    $tasFile = TasFile::findOrFail($id);
+
+    // Initialize an empty array for new attachments
+    $newAttachments = [];
+
+    // Process each uploaded file
+    foreach ($request->file('file_attach_existing') as $file) {
+        // Generate a unique file name
+        $fileName = $tasFile->case_no . "_documents_" . (count($newAttachments) + 1) . "_" . time();
+        // Store the file in the 'attachments' directory and get the file path
+        $filePath = $file->storeAs('attachments', $fileName, 'public');
+        // Add the file path to the new attachments array
+        $newAttachments[] = 'attachments/' . $fileName;
+    }
+
+    // Get the existing attachments from the model
+    $existingAttachments = $tasFile->file_attach ? json_decode($tasFile->file_attach, true) : [];
+
+    // Merge the existing attachments with the new attachments
+    $allAttachments = array_merge($existingAttachments, $newAttachments);
+
+    // Update the file_attach attribute with the merged attachments
+    $tasFile->file_attach = json_encode($allAttachments);
+
+    // Save the updated model
+    $tasFile->save();
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Files attached successfully.');
+}
+
+
 
 public function updateTas(Request $request, $id)
 {
@@ -955,7 +1019,6 @@ public function updateTas(Request $request, $id)
             'plate_no' => 'nullable|string|max:255',
             'contact_no' => 'nullable|string|max:255',
             'remarks.*.text' => 'nullable|string',
-            'file_attach.*' => 'nullable|file|max:10240',
         ]);
 
         // Process remarks
@@ -965,19 +1028,6 @@ public function updateTas(Request $request, $id)
                 $remarksArray[] = $remark['text'];
             }
             $validatedData['remarks'] = json_encode($remarksArray);
-        }
-
-        // Handle file uploads and append new attachments to existing ones
-        if ($request->hasFile('file_attach')) {
-            $newAttachments = [];
-            foreach ($request->file('file_attach') as $file) {
-                $filename = $validatedData['case_no'] . "_documents_" . time() . "_" . $file->getClientOriginalName();
-                $file->storeAs('attachments', $filename, 'public'); // Store in public/attachments directory
-                $newAttachments[] = 'attachments/' . $filename; // Store relative path in database
-            }
-            $currentAttachments = json_decode($violation->file_attach, true) ?? [];
-            $allAttachments = array_merge($currentAttachments, $newAttachments);
-            $validatedData['file_attach'] = json_encode($allAttachments);
         }
 
         // Merge new violations into existing violations array
@@ -1010,7 +1060,6 @@ public function updateTas(Request $request, $id)
         return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
     }
 }
-
 public function updateStatus(Request $request, $id)
 {
     try {

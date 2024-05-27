@@ -117,22 +117,22 @@
     </div>
 </div><!-- End Recent Violations -->
 
-<!-- Modal -->
 @foreach($recentViolationsToday as $violation)
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
-    <span><i class="bi bi-pencil-square"></i></span>
-    Edit Violation
-</h5>
-
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
             <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
+                        <span><i class="bi bi-pencil-square"></i></span>
+                        Edit Violation
+                    </h5>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6"> 
@@ -394,12 +394,16 @@ function editViolation(violationId, index) {
         @endforeach
     @endif
 </div>
+
+
+
+
 <script>
     function deleteRemark(violationId, index) {
-        // Assuming you have jQuery included in your project
-        // You can also use plain JavaScript if preferred
+            // Assuming you have jQuery included in your project
+            // You can also use plain JavaScript if preferred
 
-        // Send an AJAX request to delete the remark
+            // Send an AJAX request to delete the remark
         $.ajax({
             url: '/delete-remark',
             type: 'POST',
@@ -425,32 +429,79 @@ function editViolation(violationId, index) {
     
 
 </script>
-
- <div class="col-md-12 mb-3">
-    <label class="bi bi-folder-fill form-label"> File Attachments</label>
+</form>
+<div class="col-md-12 mb-3">
+    <label class="bi bi-folder-fill form-label">File Attachments</label>
     @php
-        $existingAttachments = explode(',', $violation->file_attach);
+        $attachments = $violation->file_attach;
     @endphp
-    @if (!empty($existingAttachments))
-        @foreach ($existingAttachments as $attachment)
+    @if (!empty($attachments))
+        @foreach ($attachments as $attachment)
             <div class="input-group mt-2">
+                <input type="file" class="form-control" name="file_attach_existing[]">
                 <input type="text" class="form-control" value="{{ $attachment }}" readonly>
                 <div class="input-group-append">
-                    <button type="button" class="btn btn-danger bi bi-x-lg" data-attachment="{{ $attachment }}"> </button>
+                    <button type="button" class="btn btn-danger bi bi-x-lg" data-attachment="{{ $attachment }}"></button>
                 </div>
             </div>
         @endforeach
     @endif
-    <div class="input-group mt-2">
-        <input type="file" class="form-control" id="file_attach_existing" name="file_attach_existing[]" multiple>
-    </div>
-    <div class="input-group mt-2">
-        <input type="file" class="form-control" id="file_attach_new" name="file_attach_new[]" multiple>
-        <span class="bi bi-bookmark-plus input-group-text custom-new-badge"></span> 
-    </div>
 </div>
+<form id="attachmentForm" method="POST" enctype="multipart/form-data">
+    @csrf
+    <div class="input-group mt-2">
+        <input type="file" class="form-control" name="file_attach_existing[]" multiple>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Attach Files</button>
+</form>
 
+<!-- Script with Toastr notifications -->
+<script>
+$(document).ready(function() {
+    $('#attachmentForm').on('submit', function(e) {
+        e.preventDefault();
 
+        var formData = new FormData(this);
+
+        $.ajax({
+            type: 'POST',
+            url: '{{ route("tasfile.attach", $violation->id) }}',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                toastr.success(response.message); // Display success message
+                location.reload(); // Reload the page to see the updated attachments
+            },
+            error: function(xhr, status, error) {
+                toastr.error(xhr.responseJSON.message); // Display error message
+            }
+        });
+    });
+
+    // Handle attachment removal
+    $(document).on('click', '.btn-danger', function() {
+        var attachment = $(this).data('attachment');
+        if (confirm('Are you sure you want to remove this attachment?')) {
+            $.ajax({
+                type: 'DELETE',
+                url: '{{ route("tasfile.removeAttachment", $violation->id) }}',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    attachment: attachment
+                },
+                success: function(response) {
+                    toastr.success(response.message); // Display success message
+                    location.reload(); // Reload the page to see the updated attachments
+                },
+                error: function(xhr, status, error) {
+                    toastr.error(xhr.responseJSON.message); // Display error message
+                }
+            });
+        }
+    });
+});
+</script>
 
     </div>
 </div>
@@ -513,10 +564,10 @@ function editViolation(violationId, index) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+              
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete</button>
                 </div>
-            </form>
+       
         </div>
     </div>
 </div>
