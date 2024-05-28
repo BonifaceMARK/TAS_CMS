@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use DateTime;
-
+use Illuminate\Support\Arr;
 
 class DashboardController extends Controller
 {
@@ -867,38 +867,54 @@ class DashboardController extends Controller
     }
 
     public function detailstasfile(Request $request, $id)
-{
-    try {
-        // Find the TasFile by its ID or throw a ModelNotFoundException
-        $tasFile = TasFile::findOrFail($id);
-
-        // Retrieve related ApprehendingOfficers
-        $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
-
-        // Retrieve related TrafficViolations
-        $violations = json_decode($tasFile->violation, true);
-        $relatedViolations = [];
-        if ($violations) {
-            $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+    
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+    
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            // Retrieve and format remarks
+            $remarks = $this->formatRemarks($tasFile->remarks);
+    
+            // Return the view with TasFile and related data
+            return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+    
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
+    
+    // Function to format remarks
+    private function formatRemarks($remarks)
+    {
+        // Check if $remarks is already an array
+        if (is_array($remarks)) {
+            // Reverse the array
+            return array_reverse($remarks);
         }
         
-        $remarks = json_decode($tasFile->remarks);
-        // Check if $remarks is an array
-        if (is_array($remarks)) {
-            $remarks = array_reverse($remarks);
-        } else {
-            // If $remarks is not an array, set it to an empty array
-            $remarks = [];
+        // Convert the JSON string of remarks to an array
+        $remarksArray = json_decode($remarks, true);
+        
+        // Check if $remarksArray is an array
+        if (is_array($remarksArray)) {
+            // Reverse the array
+            return array_reverse($remarksArray);
         }
-        // dd($remarks);
-        // Return the view with TasFile and related data
-        return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
-
-    } catch (ModelNotFoundException $e) {
-        // Handle case where TasFile with $id is not found
-        return response()->view('errors.404', [], 404);
+        
+        // Return an empty array if $remarks is neither an array nor a JSON string
+        return [];
     }
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////// UPDATE PAGE CONTEST ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
