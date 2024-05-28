@@ -17,7 +17,7 @@
   <link href="{{ asset('assets/css/carcar.css') }}" rel="stylesheet">
   <link href="{{asset('assets/img/logo.png')}}" rel="icon">
   <link href="{{asset('assets/img/logo.png')}}" rel="apple-touch-icon">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">

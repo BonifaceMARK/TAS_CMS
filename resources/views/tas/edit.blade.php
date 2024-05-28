@@ -1,4 +1,4 @@
-
+@extends('layouts.title')
 
 @section('title', env('APP_NAME'))
 
@@ -45,7 +45,7 @@
         <div class="card-body">
             <h5 class="card-title">Edit Contested Cases<span></span></h5>
             <table class="table table-striped table-bordered table-hover datatable">
-    <thead class="thead-dark">
+            <thead class="thead-light">
         <tr>
             <th scope="col">Record Status</th>
             <th scope="col">Case No.</th>
@@ -117,97 +117,241 @@
     </div>
 </div><!-- End Recent Violations -->
 
-<!-- Modal -->
 @foreach($recentViolationsToday as $violation)
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
-    <span><i class="bi bi-pencil-square"></i></span>
-    Edit Violation
-</h5>
-
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
             <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
+                        <span><i class="bi bi-pencil-square"></i></span>
+                        Edit Violation
+                    </h5>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6"> 
                             <!-- Violation details section -->
-                            <h5 class="fw-bold mb-3 bi bi-card-list"> Violation Details</h5>
-                            <div class="row">
-    <div class="col-md-6">
-        <!-- Case No. -->
-        <div class="mb-3">
-            <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
-            <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
-        </div>
-        <!-- TOP -->
-        <div class="mb-3">
-            <label for="top{{ $violation->id }}" class="form-label">TOP</label>
-            <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
-        </div>
-    </div>
-    <div class="col-md-6">
-        <!-- Driver -->
-        <div class="mb-3">
-            <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
-            <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
-        </div>
-        <!-- Apprehending Officer -->
-        <div class="mb-3">
-            <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
-            <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-        </div>
-    </div>
-</div>
-<div class="mb-3">
-    <label for="violation{{ $violation->id }}" class="bi bi-exclamation-diamond-fill form-label"> Violations</label>
-    @if(is_array($violation->violation))
-        @foreach($violation->violation as $index => $singleViolation)
-            @php
-                // Split the violation into text, timestamp, and user using the ' - ' separator
-                $parts = explode(" - ", $singleViolation);
-                // Extract text, timestamp, and user from the violation
-                $text = $parts[0] ?? '';
-                $timestamp = $parts[1] ?? '';
-                $user = $parts[2] ?? '';
-            @endphp
-            <div class="row mb-2">
-                <div class="col-md-6">
-                    <!-- Violation input field -->
-                    <div class="input-group">
-                        <span class="input-group-text">Violation</span>
-                        <input type="text" class="form-control" id="violation{{ $violation->id }}_{{ $index }}" name="violation[{{ $index }}][text]"  value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Violation">
-                    </div>
+                            <h6 class="fw-bold mb-3">Violation Details</h6>
+                            <div class="mb-3">
+                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="top{{ $violation->id }}" class="form-label">TOP</label>
+                                <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
+                                <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
+                                <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
+                            </div>
+             @php
+    $violations = \App\Models\TrafficViolation::pluck('code')->toJson();
+@endphp
+
+<div id="violationsContainer{{ $violation->id }}">
+    @if (!empty($violation->violation))
+        @foreach(json_decode($violation->violation) as $index => $violationItem)
+            <div class="mb-3" id="violationField{{ $violation->id }}_{{ $index }}">
+                <label for="violation{{ $violation->id }}_{{ $index }}" class="form-label">Violation {{ $index + 1 }}</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-exclamation-circle"></i></span>
+                    <input type="text" class="form-control" id="violation{{ $violation->id }}_{{ $index }}" name="violations[]" value="{{ $violationItem }}" list="suggestions">
+                    <button type="button" class="btn btn-secondary bi bi-pen" onclick="editViolation('{{ $violation->id }}', {{ $index }})"></button>
+                    <button type="button" class="btn btn-danger bi bi-x-lg" onclick="deleteViolation('{{ $violation->id }}', {{ $index }})"></button>
                 </div>
             </div>
         @endforeach
     @endif
 </div>
 
-
-
-
-
-
-
-
 <div class="input-group">
-    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
-    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violations[]" value="" placeholder="Add new Violation">
+    <span class="bi bi-bookmark-plus input-group-text custom-new-badge" onclick="addNewViolation({{ $violation->id }})"></span>
+    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violation[]" value="" placeholder="Add new Violation">
 </div>
 
+<script>
+    var violationsData; // Declare violationsData in the global scope
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch violations data from PHP
+        violationsData = {!! $violations !!}; // Convert PHP array to JavaScript object
+
+        // Initialize autocomplete for existing inputs
+        document.querySelectorAll('input[name="violations[]"]').forEach(function(input) {
+            autocomplete(input, violationsData);
+        });
+    });
+
+    // Autocomplete function
+    function autocomplete(input, data) {
+        input.addEventListener('input', function() {
+            var val = this.value.toLowerCase();
+            var suggestions = [];
+            data.forEach(function(item) {
+                if (item.toLowerCase().startsWith(val)) {
+                    suggestions.push(item);
+                }
+            });
+
+            var dataList = document.createElement('datalist');
+            dataList.id = 'suggestions';
+            suggestions.forEach(function(suggestion) {
+                var option = document.createElement('option');
+                option.value = suggestion;
+                dataList.appendChild(option);
+            });
+
+            // Clear previous suggestions
+            var existingDataList = document.getElementById('suggestions');
+            if (existingDataList) {
+                existingDataList.remove();
+            }
+
+            // Append new suggestions
+            this.parentNode.appendChild(dataList);
+            this.setAttribute('list', 'suggestions');
+        });
+    }
+
+   // Function to handle editing a violation
+function editViolation(violationId, index) {
+    var input = document.getElementById('violation' + violationId + '_' + index);
+    var newViolation = input.value;
+    // Send AJAX request to update violation
+    updateViolation(violationId, index, newViolation);
+}
 
 
-                            
-                        </div>
+    // Function to handle deleting a violation
+    function deleteViolation(violationId, index) {
+        if (confirm("Are you sure you want to delete this violation?")) {
+            var field = document.getElementById('violationField' + violationId + '_' + index);
+            field.remove();
+            // Send AJAX request to delete violation
+            deleteViolationRequest(violationId, index);
+        }
+    }
+
+    // Function to add a new violation
+    function addNewViolation(violationId) {
+        var container = document.getElementById('violationsContainer' + violationId);
+        var newIndex = container.querySelectorAll('input[type="text"]').length;
+
+        var div = document.createElement('div');
+        div.className = 'mb-3';
+        div.id = 'violationField' + violationId + '_' + newIndex;
+
+        var label = document.createElement('label');
+        label.setAttribute('for', 'violation' + violationId + '_' + newIndex);
+        label.className = 'form-label';
+        label.textContent = 'Violation ' + (newIndex + 1);
+
+        var inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group';
+
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'input-group-text';
+        iconSpan.innerHTML = '<i class="bi bi-exclamation-circle"></i>';
+
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.id = 'violation' + violationId + '_' + newIndex;
+        input.name = 'violations[]';
+        input.value = '';
+        input.setAttribute('list', 'suggestions');
+
+        var editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn btn-secondary';
+        editButton.textContent = 'Edit';
+        editButton.setAttribute('onclick', `editViolation('${violationId}', ${newIndex})`);
+
+        var deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn btn-danger';
+        deleteButton.textContent = 'Delete';
+        deleteButton.setAttribute('onclick', `deleteViolation('${violationId}', ${newIndex})`);
+
+        inputGroup.appendChild(iconSpan);
+        inputGroup.appendChild(input);
+        inputGroup.appendChild(editButton);
+        inputGroup.appendChild(deleteButton);
+
+        div.appendChild(label);
+        div.appendChild(inputGroup);
+        container.appendChild(div);
+
+        // Initialize autocomplete
+        autocomplete(input, violationsData);
+    }
+
+    // Function to send AJAX request to update violation
+    function updateViolation(violationId, index, newViolation) {
+        fetch(`/tasfile/${violationId}/updateViolation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ index: index, violation: newViolation })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success(data.message);
+            } else {
+                toastr.error(data.message);
+            }
+        })
+        .catch(error => {
+            toastr.error('An error occurred while updating the violation.');
+            console.error('Error:', error);
+        });
+    }
+
+    // Function to send AJAX request to delete violation
+    function deleteViolationRequest(violationId, index) {
+        fetch(`/tasfile/${violationId}/deleteViolation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ index: index })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success(data.message);
+            } else {
+                toastr.error(data.message);
+            }
+        })
+        .catch(error => {
+            toastr.error('An error occurred while deleting the violation.');
+            console.error('Error:', error);
+        });
+    }
+   
+</script>
+
+
+                                
+                            </div>
                         <div class="col-lg-6">
     <!-- Additional details section -->
-    <h5 class="fw-bold mb-3 bi bi-collection me-1"> Additional Details</h5>
+    <h6 class="fw-bold mb-3">Additional Details</h6>
     <div class="row">
         <div class="col-md-6 mb-3">
             <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
@@ -226,7 +370,7 @@
             <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
         </div>
         <div class="col-md-12 mb-2">
-    <label class="bi bi-bookmarks-fill form-label"> Remarks</label>
+    <label for="remarks{{ $violation->id }}" class="bi bi-bookmarks-fill form-label"> Remarks</label>
 
     @if(is_array($violation->remarks))
         @foreach ($violation->remarks as $index => $remark)
@@ -238,28 +382,58 @@
                 $timestamp = $parts[1] ?? '';
                 $user = $parts[2] ?? '';
             @endphp
-            <div class="row mb-2">
-                <div class="col-md-12">
-                    <!-- Remarks input -->
-                    <div class="input-group">
-                        <span class="input-group-text bi bi-clipboard-check"></span>
-                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
-                    </div>
+            <div class="row mb-2" id="remark_row_{{ $violation->id }}_{{ $index }}">
+            <div class="col-md-12">
+                <div class="input-group">
+                    <span class="input-group-text bi bi-clipboard-check"></span>
+                    <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
+                    <button type="button" class="btn btn-danger bi bi-x-lg" onclick="deleteRemark('{{ $violation->id }}', {{ $index }})"></button>
                 </div>
-
             </div>
+        </div>
         @endforeach
     @endif
-  
 </div>
 
 
 
 
+<script>
+    function deleteRemark(violationId, index) {
+            // Assuming you have jQuery included in your project
+            // You can also use plain JavaScript if preferred
+
+            // Send an AJAX request to delete the remark
+        $.ajax({
+            url: '/delete-remark',
+            type: 'POST',
+            data: {
+                violation_id: violationId,
+                index: index,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Remove the HTML element of the deleted remark
+                $('#remark_row_' + violationId + '_' + index).remove();
+                // Show success notification using Toastr
+                toastr.success('Remark deleted successfully');
+            },
+            error: function(xhr, status, error) {
+                // Handle the error
+                console.error(xhr.responseText);
+                // Show error notification using Toastr
+                toastr.error('An error occurred while deleting the remark');
+            }
+        });
+    }
+    
+
+</script>
+</form>
 <div class="col-md-12 mb-3">
-    <label class="bi bi-folder-fill form-label"> File Attachments</label>
+    <label class="bi bi-folder-fill form-label">File Attachments</label>
     @php
-        $attachments = explode(',', $violation->file_attach);
+        $attachments = $violation->file_attach;
     @endphp
     @if (!empty($attachments))
         @foreach ($attachments as $attachment)
@@ -267,25 +441,73 @@
                 <input type="file" class="form-control" name="file_attach_existing[]">
                 <input type="text" class="form-control" value="{{ $attachment }}" readonly>
                 <div class="input-group-append">
-                    <button type="button" class="btn btn-danger" data-attachment="{{ $attachment }}">Delete</button>
+                    <button type="button" class="btn btn-danger bi bi-x-lg" data-attachment="{{ $attachment }}"></button>
                 </div>
             </div>
         @endforeach
     @endif
+</div>
+<form id="attachmentForm" method="POST" enctype="multipart/form-data">
+    @csrf
     <div class="input-group mt-2">
-        <input type="file" class="form-control" name="file_attach_new[]">
-        <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span> 
+        <input type="file" class="form-control" name="file_attach_existing[]" multiple>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Attach Files</button>
+</form>
+
+<!-- Script with Toastr notifications -->
+<script>
+$(document).ready(function() {
+    $('#attachmentForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            type: 'POST',
+            url: '{{ route("tasfile.attach", $violation->id) }}',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                toastr.success(response.message); // Display success message
+                location.reload(); // Reload the page to see the updated attachments
+            },
+            error: function(xhr, status, error) {
+                toastr.error(xhr.responseJSON.message); // Display error message
+            }
+        });
+    });
+
+    // Handle attachment removal
+    $(document).on('click', '.btn-danger', function() {
+        var attachment = $(this).data('attachment');
+        if (confirm('Are you sure you want to remove this attachment?')) {
+            $.ajax({
+                type: 'DELETE',
+                url: '{{ route("tasfile.removeAttachment", $violation->id) }}',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    attachment: attachment
+                },
+                success: function(response) {
+                    toastr.success(response.message); // Display success message
+                    location.reload(); // Reload the page to see the updated attachments
+                },
+                error: function(xhr, status, error) {
+                    toastr.error(xhr.responseJSON.message); // Display error message
+                }
+            });
+        }
+    });
+});
+</script>
+
     </div>
 </div>
-
-        
-
-
-    </div>
-</div>
-<!-- HISTORY -->
-       <!--                  <div class="col-md-12">
-                      
+<!-- History section -->
+                    <!--      <div class="col-md-12">
+                            
                             <h6 class="fw-bold mt-4">History</h6>
                             <div class="table-responsive">
     <table class="table table-striped">
@@ -336,16 +558,16 @@
         </tbody>
     </table>
 </div> 
+
                         </div>-->
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+              
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete</button>
                 </div>
-            </form>
+       
         </div>
     </div>
 </div>
@@ -357,7 +579,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this violation?
+                Are you sure you want to delete this Case?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -374,7 +596,9 @@
 @endforeach
 
 
-  
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     
   </main><!-- End #main -->
 

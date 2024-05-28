@@ -40,8 +40,7 @@
                             <th>Record Status</th>
                             <th>Case No</th>
                             <th>Top</th>
-                            <th>Driver</th>
-                            
+                            <th>Driver</th>                     
                             <th>Apprehending Officer</th>
                             <th>Department</th>
                             <th>Type of Vehicle</th>
