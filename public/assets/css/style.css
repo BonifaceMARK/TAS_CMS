@@ -1754,3 +1754,17 @@ ul.list-unstyled li {
 .toast-error {
   background-color: #2b3597   !important; /* Red background color */
 }
+    /* Custom style for Toastr notifications */
+    .toast {
+      border-radius: 8px;
+      background-color: #333;
+      color: #fff;
+      font-family: Arial, sans-serif;
+  }
+  .toast.toast-info {
+    background-color: #17a2b8;
+}
+
+.toast.toast-warning {
+    background-color: #ffc107;
+}

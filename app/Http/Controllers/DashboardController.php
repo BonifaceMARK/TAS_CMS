@@ -19,6 +19,8 @@ use App\Models\G5ChatMessage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use DateTime;
 
 
@@ -867,38 +869,36 @@ class DashboardController extends Controller
     }
 
     public function detailstasfile(Request $request, $id)
-{
-    try {
-        // Find the TasFile by its ID or throw a ModelNotFoundException
-        $tasFile = TasFile::findOrFail($id);
-
-        // Retrieve related ApprehendingOfficers
-        $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
-
-        // Retrieve related TrafficViolations
-        $violations = json_decode($tasFile->violation, true);
-        $relatedViolations = [];
-        if ($violations) {
-            $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-        }
-        
-        $remarks = json_decode($tasFile->remarks);
-        // Check if $remarks is an array
-        if (is_array($remarks)) {
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+    
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+    
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            // Check if $tasFile->remarks is already an array
+            $remarks = is_array($tasFile->remarks) ? $tasFile->remarks : [];
+    
+            // Reverse the array if it's an array
             $remarks = array_reverse($remarks);
-        } else {
-            // If $remarks is not an array, set it to an empty array
-            $remarks = [];
+    
+            // Return the view with TasFile and related data
+            return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+    
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
         }
-        // dd($remarks);
-        // Return the view with TasFile and related data
-        return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
-
-    } catch (ModelNotFoundException $e) {
-        // Handle case where TasFile with $id is not found
-        return response()->view('errors.404', [], 404);
     }
-}
+    
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////// UPDATE PAGE CONTEST ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -941,64 +941,66 @@ public function updateContest()
     return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
 }
 public function removeAttachment(Request $request, $id)
-{
-    $tasFile = TasFile::findOrFail($id);
-    $attachmentToRemove = $request->input('attachment');
+    {
+        $tasFile = TasFile::findOrFail($id);
+        $attachmentToRemove = $request->input('attachment');
 
-    if ($attachmentToRemove) {
-        $attachments = $tasFile->file_attach ?? [];
-        if (($key = array_search($attachmentToRemove, $attachments)) !== false) {
-            unset($attachments[$key]);
-            $tasFile->file_attach = array_values($attachments); // Reindex array
-            $tasFile->save();
+        if ($attachmentToRemove) {
+            $attachments = json_decode($tasFile->file_attach, true) ?? [];
 
-            // Optionally, delete the file from the storage
-            Storage::delete($attachmentToRemove);
+            // Check if the attachment exists in the array
+            if (($key = array_search($attachmentToRemove, $attachments)) !== false) {
+                unset($attachments[$key]);
+                $tasFile->file_attach = json_encode(array_values($attachments)); // Reindex array and encode back to JSON
+                $tasFile->save();
+
+                // Optionally, delete the file from the storage
+                Storage::delete($attachmentToRemove);
+            }
         }
+
+        return response()->json(['success' => 'Attachment removed successfully.']);
     }
-
-    return response()->json(['success' => 'Attachment removed successfully.']);
-}
-
-public function attachFiles(Request $request, $id)
-{
-    // Validate the incoming files
-    $request->validate([
-        'file_attach_existing.*' => 'required|file|max:10240',
-    ]);
-
-    // Find the TasFile instance by ID
-    $tasFile = TasFile::findOrFail($id);
-
-    // Initialize an empty array for new attachments
-    $newAttachments = [];
-
-    // Process each uploaded file
-    foreach ($request->file('file_attach_existing') as $file) {
-        // Generate a unique file name
-        $fileName = $tasFile->case_no . "_documents_" . (count($newAttachments) + 1) . "_" . time();
-        // Store the file in the 'attachments' directory and get the file path
-        $filePath = $file->storeAs('attachments', $fileName, 'public');
-        // Add the file path to the new attachments array
-        $newAttachments[] = 'attachments/' . $fileName;
+    public function attachFiles(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'file_attach_existing.*' => 'required|file|max:10240',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+    
+        // Find the TasFile instance by ID
+        $tasFile = TasFile::findOrFail($id);
+    
+        // Process existing attachments
+        if ($request->hasFile('file_attach_existing')) {
+            $filePaths = [];
+            $cx = 1;
+            foreach ($request->file('file_attach_existing') as $file) {
+                // Check if the file was actually uploaded
+                if ($file->isValid()) {
+                    $x = $tasFile->case_no . "_documents_" . $cx . "_";
+                    $fileName = $x . time();
+                    $file->storeAs('attachments', $fileName, 'public');
+                    $filePaths[] = 'attachments/' . $fileName;
+                    $cx++;
+                } else {
+                    // File upload failed, return an error response
+                    return response()->json(['message' => 'Failed to upload files.'], 422);
+                }
+            }
+            $tasFile->file_attach = json_encode($filePaths);
+        }
+    
+        // Save the updated model
+        $tasFile->save();
+    
+        // Redirect back with a success message
+        return response()->json(['message' => 'Files attached successfully.']);
     }
-
-    // Get the existing attachments from the model
-    $existingAttachments = $tasFile->file_attach ? json_decode($tasFile->file_attach, true) : [];
-
-    // Merge the existing attachments with the new attachments
-    $allAttachments = array_merge($existingAttachments, $newAttachments);
-
-    // Update the file_attach attribute with the merged attachments
-    $tasFile->file_attach = json_encode($allAttachments);
-
-    // Save the updated model
-    $tasFile->save();
-
-    // Redirect back with a success message
-    return redirect()->back()->with('success', 'Files attached successfully.');
-}
-
+    
 
 
 public function updateTas(Request $request, $id)
