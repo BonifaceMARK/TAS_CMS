@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use DateTime;
-use Illuminate\Support\Arr;
+
 
 class DashboardController extends Controller
 {
@@ -175,65 +175,57 @@ class DashboardController extends Controller
     public function caseIndex(){
         return view('case_archives');
     }
-    public function tasView()
-    {
-        $tasFiles = TasFile::orderBy('case_no', 'desc')->get();
-        $officers = collect();
+
+   public function tasView()
+{
+    $pageSize = 15; // Define the default page size
+    $tasFiles = TasFile::all()->sortByDesc('case_no');
+    $officers = collect();
     
-        foreach ($tasFiles as $tasFile) {
-            $officerName = $tasFile->apprehending_officer;
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-            $officers = $officers->merge($officersForFile);
-            $tasFile->relatedofficer = $officersForFile;
-    
-            // Ensure remarks is properly decoded to array
-            if (is_string($tasFile->remarks)) {
-                $remarks = json_decode($tasFile->remarks, true);
-                if ($remarks === null) {
-                    $remarks = [];
-                }
-            } else if (is_array($tasFile->remarks)) {
-                $remarks = $tasFile->remarks;
-            } else {
+    foreach ($tasFiles as $tasFile) {
+        $officerName = $tasFile->apprehending_officer;
+        $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+        $officers = $officers->merge($officersForFile);
+        $tasFile->relatedofficer = $officersForFile;
+        
+        if (is_string($tasFile->remarks)) {
+            $remarks = json_decode($tasFile->remarks, true);
+            if ($remarks === null) {
                 $remarks = [];
             }
-            $tasFile->remarks = $remarks;
-    
-            // Ensure violation is properly decoded to array
-            if (is_string($tasFile->violation)) {
-                $violations = json_decode($tasFile->violation, true);
-                if ($violations === null) {
-                    $violations = [];
-                }
-            } else if (is_array($tasFile->violation)) {
-                $violations = $tasFile->violation;
-            } else {
-                $violations = [];
-            }
-    
-            if (!empty($violations)) {
+        } else if (is_array($tasFile->remarks)) {
+            $remarks = $tasFile->remarks;
+        } else {
+            $remarks = [];
+        }
+        $tasFile->remarks = $remarks;
+
+        $violations = json_decode($tasFile->violation);
+        if ($violations) {
+            if (is_array($violations)) {
                 $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             } else {
-                $relatedViolations = [];
+                $relatedViolations = TrafficViolation::where('code', $violations)->get();
             }
-            $tasFile->relatedViolations = $relatedViolations;
+        } else {
+            $relatedViolations = [];
         }
-    
-        return view('tas.view', compact('tasFiles'));
+        $tasFile->relatedViolations = $relatedViolations;
     }
+
+    return view('tas.view', compact('tasFiles'));
+}
+
     
     
     
     public function admitmanage()
     {
-         // Retrieve data: count of traffic violations per plate number
-        $trafficData = Admitted::select('violation', DB::raw('COUNT(*) as total'))
-                           ->groupBy('violation')
-                           ->get();
-
-
-        $admitteds = Admitted::all(); // Retrieve all admitted cases
-        return view('admitted.manage', compact('admitteds','trafficData'));
+        $officers = ApprehendingOfficer::select('officer', 'department')->get();
+        // dd($recentViolationsToday[1]);
+        $violations = TrafficViolation::all();
+        // return view('tas.manage',compact('officers','violations'));
+        return view('admitted.manage', compact('officers','violations'));
     }
     public function admitview(){
         // Retrieve admitted data
@@ -254,7 +246,41 @@ class DashboardController extends Controller
             $admit->relatedViolations = $relatedViolations;
         }
 
-        // Pass the modified admitted data to the view
+        $pageSize = 15; // Define the default page size
+        $admitted = Admitted::all()->sortByDesc('resolution_no');
+        $officers = collect();
+        
+        foreach ($admitted as $admit) {
+            $officerName = $admit->apprehending_officer;
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+            $officers = $officers->merge($officersForFile);
+            $admit->relatedofficer = $officersForFile;
+            
+            if (is_string($admit->remarks)) {
+                $remarks = json_decode($admit->remarks, true);
+                if ($remarks === null) {
+                    $remarks = [];
+                }
+            } else if (is_array($admit->remarks)) {
+                $remarks = $admit->remarks;
+            } else {
+                $remarks = [];
+            }
+            $admit->remarks = $remarks;
+    
+            $violations = json_decode($admit->violation);
+            if ($violations) {
+                if (is_array($violations)) {
+                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+                } else {
+                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
+                }
+            } else {
+                $relatedViolations = [];
+            }
+            $admit->relatedViolations = $relatedViolations;
+        }
+    
         return view('admitted.view', compact('admitted'));
     }
     public function saveRemarks(Request $request) {
@@ -292,23 +318,28 @@ class DashboardController extends Controller
             'remarks' => 'required|string',
             'tas_file_id' => 'required|exists:tas_files,id',
         ]);
+    
         try {
             $id = $request->input('tas_file_id');
             $remarks = $request->input('remarks');
-            $admitted = admitted::findOrFail($id);
-            $existingRemarks = json_decode($admitted->remarks, true) ?? [];
+            $tasFile = admitted::findOrFail($id);
+            $existingRemarks = json_decode($tasFile->remarks, true) ?? [];
             $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
-            $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
+            $newRemark = $remarks . ' - ' . $timestamp .' - '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
+    
             DB::beginTransaction();
-            $admitted->update(['remarks' => $updatedRemarksJson]);
+            $tasFile->update(['remarks' => $updatedRemarksJson]);
             DB::commit();
-            return redirect()->back()->with('success', 'Remarks Updated');
+    
+            // Send back a response with 201 Created status code
+            // Here, we are also returning a success message in the response body
+            return response()->json(['message' => 'Remarks saved successfully.'], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
-            return back()->with('error', 'Failed to save remarks. Please try again later.');
+            return response()->json(['error' => $th->getMessage()], 500); // You can return a different error status code if needed
         }
     }
     public function submitForm(Request $request)
@@ -439,32 +470,32 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-    public function updateAdmitted(Request $request){
-        $data = $request->only([
-            'resolution_no',
-            'top',
-            'name',
-            'violation',
-            'transaction_no',
-            'transaction_date',
-            'plate_no',
-            'contact_no',
-            'remarks',
-            'file_attach',
-        ]);
+    // public function updateAdmitted(Request $request){
+    //     $data = $request->only([
+    //         'resolution_no',
+    //         'top',
+    //         'name',
+    //         'violation',
+    //         'transaction_no',
+    //         'transaction_date',
+    //         'plate_no',
+    //         'contact_no',
+    //         'remarks',
+    //         'file_attach',
+    //     ]);
 
-        try {
-            // Find the admitted case by ID
-            $admitted = Admitted::findOrFail($request->id);
+    //     try {
+    //         // Find the admitted case by ID
+    //         $admitted = Admitted::findOrFail($request->id);
 
-            // Update the admitted case with the provided data
-            $admitted->update($data);
+    //         // Update the admitted case with the provided data
+    //         $admitted->update($data);
 
-            return response()->json(['message' => 'Admitted case updated successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update admitted case', 'message' => $e->getMessage()], 500);
-        }
-    }
+    //         return response()->json(['message' => 'Admitted case updated successfully']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'Failed to update admitted case', 'message' => $e->getMessage()], 500);
+    //     }
+    // }
     public function profile(Request $request){
         $userId = $request->id;
         $user = User::find($userId);
@@ -665,9 +696,104 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
     }
-
+    public function updateTas(Request $request, $id)
+    {
+        try {
+            // Find the violation by ID
+            $violation = TasFile::findOrFail($id);
     
-  
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'case_no' => 'nullable|string|max:255',
+                'top' => 'nullable|string|max:255',
+                'driver' => 'nullable|string|max:255',
+                'apprehending_officer' => 'nullable|string|max:255',
+                'violation' => 'nullable|array',
+                'transaction_no' => 'nullable|string|max:255',
+                'date_received' => 'nullable|date',
+                'plate_no' => 'nullable|string|max:255',
+                'contact_no' => 'nullable|string|max:255',
+                'remarks.*.text' => 'nullable|string',
+                'file_attach.*' => 'nullable|file|max:10240',
+            ]);
+    
+            // Process remarks
+            if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
+                $remarksArray = [];
+                foreach ($validatedData['remarks'] as $remark) {
+                    $remarksArray[] = $remark['text'];
+                }
+                $validatedData['remarks'] = json_encode($remarksArray);
+            }
+    
+            // Handle file uploads and append new attachments to existing ones
+            if ($request->hasFile('file_attach')) {
+                $newAttachments = [];
+                foreach ($request->file('file_attach') as $file) {
+                    $filename = $validatedData['case_no'] . "_documents_" . time() . "_" . $file->getClientOriginalName();
+                    $file->storeAs('attachments', $filename, 'public'); // Store in public/attachments directory
+                    $newAttachments[] = 'attachments/' . $filename; // Store relative path in database
+                }
+                $currentAttachments = json_decode($violation->file_attach, true) ?? [];
+                $allAttachments = array_merge($currentAttachments, $newAttachments);
+                $validatedData['file_attach'] = json_encode($allAttachments);
+            }
+    
+            // Merge new violations into existing violations array
+            if (!empty($validatedData['violation'])) {
+                $existingViolations = json_decode($violation->violation, true) ?? [];
+                $newViolations = array_filter($validatedData['violation'], function($value) {
+                    return $value !== null;
+                });
+                $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
+            }
+    
+            // Update the violation with validated data
+            $violation->update($validatedData);
+    
+            // If new violations were added, add them to the TasFile model
+            if (!empty($newViolations)) {
+                foreach ($newViolations as $newViolation) {
+                    $violation->addViolation($newViolation);
+                }
+            }
+    
+            // Set success message
+            return back()->with('success', 'Violation updated successfully');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error updating Violation: ' . $e->getMessage());
+    
+            // Set error message
+            return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
+        }
+    }
+    
+    
+    
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            // Log the request data for debugging
+            \Log::info('Request data: ', $request->all());
+
+            $tasFile = TasFile::findOrFail($id);
+
+            // Log the received status for debugging
+            \Log::info('Received status: ' . $request->status);
+
+            $tasFile->status = $request->status;
+            $tasFile->save();
+
+            return redirect()->back()->with('success', 'Status updated successfully.');
+        } catch (\Exception $e) {
+            // Log any errors for debugging
+            \Log::error('Error updating status: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
+        }
+    }
+
+
     public function finishCase(Request $request, $id)
     {
         $tasFile = TasFile::findOrFail($id);
@@ -790,19 +916,81 @@ class DashboardController extends Controller
         // Pass data to the view using compact
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
- 
+    public function updateContest()
+    {
+        // Fetch all traffic violations
         
+        
+        // Fetch recent TasFiles ordered by case number descending
+        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
+        
+        // Fetch all codes (assuming TrafficViolation model provides codes)
+        $codes = TrafficViolation::all();
+        
+        // Prepare a collection for officers
+        $officers = collect();
+       
+        
+        // Iterate through each TrafficViolation record
+        foreach ($recentViolationsToday as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+ 
+        }
+  
+        // Pass data to the view, including the new variable $violationData
+        return view('tas.edit', compact('recentViolationsToday', 'codes', 'officers' ));
+    }
+    public function updateAdmitted()
+    {
+        // Fetch all traffic violations
+        
+        
+        // Fetch recent TasFiles ordered by case number descending
+        $recentViolationsToday = Admitted::all()->sortByDesc('resolution_no');
+        
+        // Fetch all codes (assuming TrafficViolation model provides codes)
+        $codes = TrafficViolation::all();
+        
+        // Prepare a collection for officers
+        $officers = collect();
+       
+        
+        // Iterate through each TrafficViolation record
+        foreach ($recentViolationsToday as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+ 
+        }
+  
+        // Pass data to the view, including the new variable $violationData
+        return view('admitted.edit', compact('recentViolationsToday', 'codes', 'officers' ));
+    }
     public function historyIndex()
     {
 
         return view('history');
     }
 
-    public function editAdmit()
-    {
+    // public function editAdmit()
+    // {
 
-        return view('admitted.edit');
-    }
+    //     return view('admitted.edit');
+    // }
     public function fetchRemarks($id){
         $tasFile = TasFile::findOrFail($id);
         $remarks = json_decode($tasFile->remarks);
@@ -871,10 +1059,10 @@ class DashboardController extends Controller
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
             $tasFile = TasFile::findOrFail($id);
-    
+
             // Retrieve related ApprehendingOfficers
             $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
-    
+
             // Retrieve related TrafficViolations
             $violations = json_decode($tasFile->violation, true);
             $relatedViolations = [];
@@ -882,293 +1070,121 @@ class DashboardController extends Controller
                 $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             }
             
-            // Retrieve and format remarks
-            $remarks = $this->formatRemarks($tasFile->remarks);
-    
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
             // Return the view with TasFile and related data
             return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
-    
+
         } catch (ModelNotFoundException $e) {
             // Handle case where TasFile with $id is not found
             return response()->view('errors.404', [], 404);
         }
     }
-    
-    // Function to format remarks
-    private function formatRemarks($remarks)
+    public function detailsadmitted(Request $request, $id)
     {
-        // Check if $remarks is already an array
-        if (is_array($remarks)) {
-            // Reverse the array
-            return array_reverse($remarks);
-        }
-        
-        // Convert the JSON string of remarks to an array
-        $remarksArray = json_decode($remarks, true);
-        
-        // Check if $remarksArray is an array
-        if (is_array($remarksArray)) {
-            // Reverse the array
-            return array_reverse($remarksArray);
-        }
-        
-        // Return an empty array if $remarks is neither an array nor a JSON string
-        return [];
-    }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////// UPDATE PAGE CONTEST ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-public function updateContest()
-{
-    // Fetch all traffic violations
-    $violations = TrafficViolation::all();
-    
-    // Fetch recent TasFiles ordered by case number descending
-    $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
-    
-    // Fetch all codes (assuming TrafficViolation model provides codes)
-    $codes = TrafficViolation::all();
-    
-    // Prepare a collection for officers
-    $officers = collect();
-    
-    // Iterate through each TrafficViolation record
-    foreach ($violations as $violation) {
-        // Extract the name of the apprehending officer for the current TrafficViolation
-        $officerName = $violation->apprehending_officer;
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $admitted = admitted::findOrFail($id);
 
-        // Query the ApprehendingOfficer model for officers with the given name
-        $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $admitted->apprehending_officer)->get();
 
-        // Merge the officers into the collection
-        $officers = $officers->merge($officersForFile);
-
-        // Decode the violation data if it's stored as JSON
-        $violationData = json_decode($violation->violation, true);
-
-        // Assign the decoded violation data back to the violation object
-        $violation->violationData = $violationData;
-
-        // Convert the remarks attribute to an array using the correct delimiter
-        $violation->remarks = explode(" - ", $violation->remarks);
-    }
-
-    // Pass data to the view
-    return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
-}
-public function removeAttachment(Request $request, $id)
-{
-    $tasFile = TasFile::findOrFail($id);
-    $attachmentToRemove = $request->input('attachment');
-
-    if ($attachmentToRemove) {
-        $attachments = $tasFile->file_attach ?? [];
-        if (($key = array_search($attachmentToRemove, $attachments)) !== false) {
-            unset($attachments[$key]);
-            $tasFile->file_attach = array_values($attachments); // Reindex array
-            $tasFile->save();
-
-            // Optionally, delete the file from the storage
-            Storage::delete($attachmentToRemove);
-        }
-    }
-
-    return response()->json(['success' => 'Attachment removed successfully.']);
-}
-
-public function attachFiles(Request $request, $id)
-{
-    // Validate the incoming files
-    $request->validate([
-        'file_attach_existing.*' => 'required|file|max:10240',
-    ]);
-
-    // Find the TasFile instance by ID
-    $tasFile = TasFile::findOrFail($id);
-
-    // Initialize an empty array for new attachments
-    $newAttachments = [];
-
-    // Process each uploaded file
-    foreach ($request->file('file_attach_existing') as $file) {
-        // Generate a unique file name
-        $fileName = $tasFile->case_no . "_documents_" . (count($newAttachments) + 1) . "_" . time();
-        // Store the file in the 'attachments' directory and get the file path
-        $filePath = $file->storeAs('attachments', $fileName, 'public');
-        // Add the file path to the new attachments array
-        $newAttachments[] = 'attachments/' . $fileName;
-    }
-
-    // Get the existing attachments from the model
-    $existingAttachments = $tasFile->file_attach ? json_decode($tasFile->file_attach, true) : [];
-
-    // Merge the existing attachments with the new attachments
-    $allAttachments = array_merge($existingAttachments, $newAttachments);
-
-    // Update the file_attach attribute with the merged attachments
-    $tasFile->file_attach = json_encode($allAttachments);
-
-    // Save the updated model
-    $tasFile->save();
-
-    // Redirect back with a success message
-    return redirect()->back()->with('success', 'Files attached successfully.');
-}
-
-
-
-public function updateTas(Request $request, $id)
-{
-    try {
-        // Find the violation by ID
-        $violation = TasFile::findOrFail($id);
-
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'case_no' => 'nullable|string|max:255',
-            'top' => 'nullable|string|max:255',
-            'driver' => 'nullable|string|max:255',
-            'apprehending_officer' => 'nullable|string|max:255',
-            'violation' => 'nullable|array',
-            'transaction_no' => 'nullable|string|max:255',
-            'date_received' => 'nullable|date',
-            'plate_no' => 'nullable|string|max:255',
-            'contact_no' => 'nullable|string|max:255',
-            'remarks.*.text' => 'nullable|string',
-        ]);
-
-        // Process remarks
-        if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
-            $remarksArray = [];
-            foreach ($validatedData['remarks'] as $remark) {
-                $remarksArray[] = $remark['text'];
+            // Retrieve related TrafficViolations
+            $violations = json_decode($admitted->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             }
-            $validatedData['remarks'] = json_encode($remarksArray);
-        }
-
-        // Merge new violations into existing violations array
-        if (!empty($validatedData['violation'])) {
-            $existingViolations = json_decode($violation->violation, true) ?? [];
-            $newViolations = array_filter($validatedData['violation'], function($value) {
-                return $value !== null;
-            });
-            $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
-        }
-
-        // Update the violation with validated data
-        $violation->update($validatedData);
-
-        // If new violations were added, add them to the TasFile model
-        if (!empty($newViolations)) {
-            foreach ($newViolations as $newViolation) {
-                $violation->addViolation($newViolation);
+            
+            $remarks = json_decode($admitted->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
             }
-            // Refresh the model after adding new violations
-            $violation = TasFile::findOrFail($id);
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('admitted.detailsview', compact('admitted', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
         }
-
-        return back()->with('success', 'Violation updated successfully');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error updating Violation: ' . $e->getMessage());
-
-        // Set error message
-        return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
     }
-}
-public function updateStatus(Request $request, $id)
-{
-    try {
-        // Log the request data for debugging
-        \Log::info('Request data: ', $request->all());
+    public function finishtasfile(Request $request, $id)
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
 
-        $tasFile = TasFile::findOrFail($id);
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
 
-        // Log the received status for debugging
-        \Log::info('Received status: ' . $request->status);
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
 
-        $tasFile->status = $request->status;
-        $tasFile->save();
-
-        return redirect()->back()->with('success', 'Status updated successfully.');
-    } catch (\Exception $e) {
-        // Log any errors for debugging
-        \Log::error('Error updating status: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
-    }
-}
-
-public function UPDATEVIO(Request $request, $id)
-{
-    $tasFile = TasFile::findOrFail($id);
-    $violationIndex = $request->input('index');
-    $newViolation = $request->input('violation');
-
-    // Retrieve existing violations
-    $violations = json_decode($tasFile->violation, true) ?? [];
-
-    if (isset($violations[$violationIndex])) {
-        $violations[$violationIndex] = $newViolation;
-        $tasFile->violation = json_encode($violations);
-        $tasFile->save();
-    }
-
-    return response()->json(['message' => 'Violation updated successfully', 'violations' => json_decode($tasFile->violation)]);
-}
-
-public function DELETEVIO(Request $request, $id)
-{
-    $tasFile = TasFile::findOrFail($id);
-    $violationIndex = $request->input('index');
-
-    // Retrieve existing violations
-    $violations = json_decode($tasFile->violation, true) ?? [];
-
-    if (isset($violations[$violationIndex])) {
-        array_splice($violations, $violationIndex, 1);
-        $tasFile->violation = json_encode($violations);
-        $tasFile->save();
-    }
-
-    return response()->json(['message' => 'Violation deleted successfully', 'violations' => json_decode($tasFile->violation)]);
-}
-public function deleteRemark(Request $request)
-{
-    // Retrieve the violation ID and index from the request
-    $violationId = $request->input('violation_id');
-    $index = $request->input('index');
-
-    try {
-        // Find the TasFile instance by violation ID
-        $violation = TasFile::find($violationId);
-
-        if (!$violation) {
-            // Handle if violation not found
-            return response()->json(['error' => 'Violation not found'], 404);
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
         }
-
-        // Retrieve existing remarks
-        $remarks = $violation->remarks;
-
-        // Check if the remark exists at the specified index
-        if (isset($remarks[$index])) {
-            // Remove the remark at the specified index
-            unset($remarks[$index]);
-
-            // Update the remarks attribute and save the TasFile instance
-            $violation->remarks = $remarks;
-            $violation->save();
-
-            // Return success response
-            return response()->json(['message' => 'Remark deleted successfully']);
-        } else {
-            // Handle if remark not found at the specified index
-            return response()->json(['error' => 'Remark not found at index ' . $index], 404);
-        }
-    } catch (\Exception $e) {
-        // Handle any exceptions
-        return response()->json(['error' => $e->getMessage()], 500);
     }
-}
+    public function fetchFinishData($id)
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('tas.finish', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
 }
 
