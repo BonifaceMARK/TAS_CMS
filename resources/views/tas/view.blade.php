@@ -59,25 +59,21 @@
                     <tbody>
                         @foreach ($tasFiles as $tasFile)
                         <tr class="table-row" data-bs-toggle="modal" data-bs-target="#exampleModal{{ $tasFile->id }}">
-                        <td class="symbol-cell {{ symbolBgColor($tasFile->symbols) }}" onclick="openModal('{{ $tasFile->symbols }}')">
-                            @if($tasFile->symbols === 'complete')
-                                <span class="text-white"><i class="bi bi-check-circle-fill"></i> Complete</span>
-                            @elseif($tasFile->symbols === 'incomplete')
-                                <span class="text-white"><i class="bi bi-exclamation-circle-fill"></i> Incomplete</span>
-                            @elseif($tasFile->symbols === 'deleting')
-                                <span class="text-white"><i class="bi bi-trash-fill"></i> Deleting</span>
-                            @else
-                                <span class="text-white"><i class="bi bi-question-circle-fill"></i> Incomplete</span>
-                            @endif
-                        </td>
-
-
-
+                            <td class="symbol-cell {{ symbolBgColor($tasFile->symbols) }}" onclick="openModal('{{ $tasFile->symbols }}')">
+                                @if($tasFile->symbols === 'complete')
+                                    <span class="text-white"><i class="bi bi-check-circle-fill"></i> Complete</span>
+                                @elseif($tasFile->symbols === 'incomplete')
+                                    <span class="text-white"><i class="bi bi-exclamation-circle-fill"></i> Incomplete</span>
+                                @elseif($tasFile->symbols === 'deleting')
+                                    <span class="text-white"><i class="bi bi-trash-fill"></i> Deleting</span>
+                                @else
+                                    <span class="text-white"><i class="bi bi-question-circle-fill"></i> Incomplete</span>
+                                @endif
+                            </td>
                             <td>{{ $tasFile->case_no  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
                             <td>{{ $tasFile->top ?? 'N/A' }}</td>
                             <td>{{ $tasFile->driver  ?? 'N/A' }}</td>
-                           
                             <td>{{ $tasFile->apprehending_officer ?? 'N/A' }}</td>
                             <td>
                                 @if ($tasFile->relatedofficer)
@@ -89,29 +85,21 @@
                             <td>{{ $tasFile->plate_no  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->typeofvehicle  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->violation  ?? 'N/A' }}</td>
-                            
-                            
                             <td>{{ $tasFile->date_received  ?? 'N/A' }}</td>
-                            
                             <td>{{ $tasFile->created_at  ?? 'N/A' }}</td>
-                        
                             <td style="background-color: {{ getStatusColor($tasFile->status) }}">
-    @if($tasFile->status === 'closed')
-        <span><i class="bi bi-check-circle-fill"></i> Closed</span>
-    @elseif($tasFile->status === 'in-progress')
-        <span><i class="bi bi-arrow-right-circle-fill"></i> In Progress</span>
-    @elseif($tasFile->status === 'settled')
-        <span><i class="bi bi-check-circle-fill"></i> Settled</span>
-    @elseif($tasFile->status === 'unsettled')
-        <span><i class="bi bi-exclamation-circle-fill"></i> Unsettled</span>
-    @else
-        <span><i class="bi bi-question-circle-fill"></i> Unknown</span>
-    @endif
-</td>
-
-
- 
-
+                                @if($tasFile->status === 'closed')
+                                    <span><i class="bi bi-check-circle-fill"></i> Closed</span>
+                                @elseif($tasFile->status === 'in-progress')
+                                    <span><i class="bi bi-arrow-right-circle-fill"></i> In Progress</span>
+                                @elseif($tasFile->status === 'settled')
+                                    <span><i class="bi bi-check-circle-fill"></i> Settled</span>
+                                @elseif($tasFile->status === 'unsettled')
+                                    <span><i class="bi bi-exclamation-circle-fill"></i> Unsettled</span>
+                                @else
+                                    <span><i class="bi bi-question-circle-fill"></i> Unknown</span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -321,118 +309,15 @@
 </script>
 
 
-<script>
-    // Function to open a URL in a new tab and print
-    function openInNewTabAndPrint(url) {
-        const win = window.open(url, '_blank');
-        win.onload = function () {
-            win.print();
-        };
-    }
-</script>
-
-{{-- <script>
-    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'id']));
-
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget; // Button that triggered the modal
-            var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
-            var modalBody = modal.querySelector('.modal-body');
-            
-            // Generate the URL for fetching violation details
-            var fetchUrl = fetchViolationUrl.replace('id', modalId);
-            console.log(fetchUrl);
-            
-            // Delay the fetch request by 1.5 seconds
-            setTimeout(() => {
-                // Fetch content for the modal via AJAX or a fetch request
-                fetch(fetchUrl)
-                    .then(response => response.text())
-                    .then(html => {
-                        modalBody.innerHTML = html;
-                    })
-                    .catch(err => {
-                        console.error('Failed to load modal content', err);
-                        modalBody.innerHTML = '<p>Error loading content</p>';
-                    });
-            }, 1500); // 1.5 seconds delay
-        });
-    });
-</script>
-
-<script defer>
-    $(document).ready(function () {
-    // Check if there's a cached modal ID and open it
-    var cachedModalId = localStorage.getItem('modalId');
-    if (cachedModalId) {
-        $('#' + cachedModalId).modal('show');
-    }
-
-    $('.modal').on('shown.bs.modal', function (e) {
-        // Cache the ID of the opened modal
-        localStorage.setItem('modalId', e.target.id);
-    });
-
-    $('.modal').on('hidden.bs.modal', function () {
-        // Remove cached modal ID when the modal is closed
-        localStorage.removeItem('modalId');
-    });
-
-    // Function to initialize modal scripts
-    function initializeModalScripts() {
-        $('.remarksForm').on('submit', function (e) {
-            e.preventDefault();
-            const form = $(this);
-            const saveRemarksBtn = form.find('#saveRemarksBtn');
-            const spinner = saveRemarksBtn.find('.spinner-border');
-
-            // Show spinner and disable button
-            spinner.removeClass('d-none');
-            saveRemarksBtn.prop('disabled', true);
-
-            // Perform AJAX request
-            $.ajax({
-                type: form.attr('method'),
-                url: form.attr('action'),
-                data: form.serialize(),
-                success: function (response) {
-                    // Hide spinner and enable button
-                    spinner.addClass('d-none');
-                    saveRemarksBtn.prop('disabled', false);
-
-                    // Update the remarks section with new data
-                    const remarksList = form.closest('.modal-content').find('.remarks-list');
-                    remarksList.empty();
-                    response.remarks.forEach(function (remark) {
-                        remarksList.append('<li>' + remark + '</li>');
-                    });
-
-                    // Display success alert
-                    alert('Remarks saved successfully.');
-                },
-                error: function () {
-                    // Hide spinner and enable button
-                    spinner.addClass('d-none');
-                    saveRemarksBtn.prop('disabled', false);
-
-                    // Display error alert
-                    alert('Failed to save remarks. Please try again later.');
-                }
-            });
-        });
-    }
-
-    // Initialize modal scripts on page load
-    initializeModalScripts();
-});
-    
-</script> --}}
-
-
-
-
-
+    <script>
+        // Function to open a URL in a new tab and print
+        function openInNewTabAndPrint(url) {
+            const win = window.open(url, '_blank');
+            win.onload = function () {
+                win.print();
+            };
+        }
+    </script>
   </main><!-- End #main -->
 
  @include('layouts.footer')

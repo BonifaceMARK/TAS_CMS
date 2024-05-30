@@ -50,18 +50,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');
     Route::get('/manageTAS', [DashboardController::class, 'tasManage'])->name('tas.manage');
     Route::get('/viewTAS', [DashboardController::class, 'tasView'])->name('tas.view');
+    Route::get('/dzxccczxc', [DashboardController::class, 'tasfetch'])->name('tas.fetch');
     Route::get('/archives', [DashboardController::class, 'caseIndex'])->name('case.view');
     Route::post('/manageTAS', [DashboardController::class, 'submitForm'])->name('submitForm.tas');
     Route::get('/admitTAS', [DashboardController::class, 'admitview'])->name('admitted.view');
-    Route::get('/admit.manageform', [DashboardController::class, 'admitmanage'])->name('admitted.manage');
-    Route::post('/admit.manageform', [DashboardController::class, 'admittedsubmit'])->name('admittedsubmit.tas');
-    Route::get('/apprehending.officer', [DashboardController::class, 'officergg'])->name('see.offi');
-    Route::post('/store.officer', [DashboardController::class, 'save_offi'])->name('save.offi');
+    Route::get('/admitTAS/admit.manageform', [DashboardController::class, 'admitmanage'])->name('admitted.manage');
+    Route::post('/admitTAS/admit.manageform', [DashboardController::class, 'admittedsubmit'])->name('admittedsubmit.tas');
+    Route::get('/apprehendingofficer', [DashboardController::class, 'officergg'])->name('see.offi');
+    Route::post('/apprehendingofficer/store.officer', [DashboardController::class, 'save_offi'])->name('save.offi');
     Route::get('/violation', [DashboardController::class, 'violationadd'])->name('see.vio');
-    Route::post('/save.violation', [DashboardController::class, 'addvio'])->name('add.violation');
+    Route::post('/violation/save.violation', [DashboardController::class, 'addvio'])->name('add.violation');
     Route::get('/editofficer', [DashboardController::class, 'editoffi'])->name('edit.offi');
     Route::post('/admit-remarks', [DashboardController::class, 'admitremark'])->name('admitremark');
-    Route::post('/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
+    Route::post('/viewTAS/save-remarks', [DashboardController::class, 'saveRemarks'])->name('save.remarks');
     Route::get('/getChartData', [DashboardController::class, 'getChartData']);
     Route::get('/{id}/profile', [DashboardController::class, 'profile'])->name('profile');
     Route::get('/{id}/profile/edit', [DashboardController::class, 'edit'])->name('profile.edit');
@@ -69,28 +70,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/{id}/profile/change_password', [DashboardController::class, 'change'])->name('profile.change');
     Route::post('/{id}/profile/update_password', [DashboardController::class, 'updatePassword'])->name('profile.update_password');
     Route::get('/manage-user', [DashboardController::class, 'management'])->name('user_management');
-    Route::get('/users/{id}/edit', [DashboardController::class, 'edit'])->name('users.edit');
-    Route::delete('/users/{user}', [DashboardController::class, 'userdestroy'])->name('users.destroy');
-    Route::get('/add-user', [DashboardController::class, 'add_user'])->name('add.user');
-    Route::post('/store-user', [DashboardController::class, 'store_user'])->name('store.user');
+    Route::get('/manage-user/users/{id}/edit', [DashboardController::class, 'edit'])->name('users.edit');
+    Route::delete('/manage-user/users/{user}', [DashboardController::class, 'userdestroy'])->name('users.destroy');
+    Route::get('/manage-user/add-user', [DashboardController::class, 'add_user'])->name('add.user');
+    Route::post('/manage-user/store-user', [DashboardController::class, 'store_user'])->name('store.user');
     Route::get('/chat', [DashboardController::class, 'chatIndex'])->name('chat.index');
-    Route::post('/storeChat', [DashboardController::class, 'storeMessage'])->name('chat.store');
+    Route::post('/chat/storeChat', [DashboardController::class, 'storeMessage'])->name('chat.store');
     Route::put('/admitted-cases/{id}', [DashboardController::class, 'updateAdmittedCase'])->name('admitted-cases.update');
     Route::get('/edit/contested', [DashboardController::class, 'updateContest'])->name('update.contest.index');
     Route::get('/edit/admitted', [DashboardController::class, 'updateAdmitted'])->name('update.admit.index');
     Route::get('/officers/{departmentName}', [DashboardController::class, 'getByDepartmentName']);
-    Route::put('/violations/{id}', [DashboardController::class, 'updateTas'])->name('violations.updateTas');
-    Route::delete('/violations/{id}', [DashboardController::class, 'deleteTas'])->name('violations.delete');
+    Route::put('/edit/contested/violations/{id}', [DashboardController::class, 'updateTas'])->name('violations.updateTas');
+    Route::delete('/edit/contested/violations/{id}', [DashboardController::class, 'deleteTas'])->name('violations.delete');
     Route::get('/history', [DashboardController::class, 'historyIndex'])->name('history.index');
     Route::get('/AdmittedEdit', [DashboardController::class, 'editAdmit'])->name('edit.admit');
-    Route::get('/print.subpoena/{id}', [DashboardController::class, 'printsub'])->name('print.sub');
+    Route::get('/print/{id}', [DashboardController::class, 'printsub'])->name('print.sub');
     Route::post('/update-status/{id}', [DashboardController::class, 'updateStatus'])->name('update.status');
     Route::post('/finish-case/{id}', [DashboardController::class, 'finishCase'])->name('finish.case');
     Route::put('/officers/{id}', [DashboardController::class, 'updateoffi'])->name('officers.update');
-    Route::put('/edit/violation/{id}', [DashboardController::class, 'updateviolation'])->name('edit.violation');
+    Route::put('/edit/{id}/violation', [DashboardController::class, 'updateviolation'])->name('edit.violation');
     Route::get('/edit/violation', [DashboardController::class, 'edivio'])->name('edit.vio');
 
-    Route::get('violation/details/{id}', function ($id) {
+    Route::get('edit/violation/details/{id}', function ($id) {
         $violation = TrafficViolation::findOrFail($id);
         return view('ao.detailsviolation', compact('violation'));
     })->name('fetchingviolation');
@@ -100,7 +101,7 @@ Route::middleware(['auth'])->group(function () {
         return view('ao.detailsoffi', compact('officer'));
     })->name('fetchingofficer');
 
-    Route::get('tasfile/details/{id}', [DashboardController::class, 'detailstasfile'])->name('fetchingtasfile');
+    Route::get('/viewTAS/tasfile{id}/details/', [DashboardController::class, 'detailstasfile'])->name('fetchingtasfile');
     Route::get('admitted/details/{id}', [DashboardController::class, 'detailsadmitted'])->name('fetchingadmitted');
     Route::get('/fetchFinishData/{id}', [DashboardController::class, 'fetchFinishData'])->name('fetchFinishData');
     Route::post('/finishCase/{id}', [DashboardController::class, 'finishCase'])->name('finish.case');

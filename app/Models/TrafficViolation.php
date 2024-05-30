@@ -21,4 +21,8 @@ class TrafficViolation extends Model
     {
         return $this->belongsToMany(admitted::class, 'id');
     }
+    public function setviolationAttribute($value)
+    {
+        $this->attributes['violation'] = strtoupper($value);
+    }
 }

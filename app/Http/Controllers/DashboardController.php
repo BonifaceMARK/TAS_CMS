@@ -137,7 +137,7 @@ class DashboardController extends Controller
     public function tasManage(){
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
         // dd($recentViolationsToday[1]);
-        $violations = TrafficViolation::all();
+        $violations = TrafficViolation::orderBy('code', 'asc')->get();
         return view('tas.manage',compact('officers','violations'));
     }
     public function updateAdmittedCase(Request $request, $id){
@@ -223,7 +223,7 @@ class DashboardController extends Controller
     {
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
         // dd($recentViolationsToday[1]);
-        $violations = TrafficViolation::all();
+        $violations = TrafficViolation::orderBy('code', 'asc')->get();
         // return view('tas.manage',compact('officers','violations'));
         return view('admitted.manage', compact('officers','violations'));
     }
@@ -628,7 +628,7 @@ class DashboardController extends Controller
     }
     public function edivio(){
 
-    $violations = TrafficViolation::all();
+    $violations = TrafficViolation::orderBy('code', 'asc')->get();
 
     // dd($officers[1]);
     return view('ao.editvio', compact('violations'));
@@ -804,7 +804,7 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'Case finished successfully.');
     }
 
-    public function printsub($id)
+    public function printsub(Request $request, $id)
     {
         $tasFile = TasFile::findOrFail($id);
         $changes = $tasFile;
@@ -874,8 +874,18 @@ class DashboardController extends Controller
         ];
 
         // dd($compactData);
-
-        return view('sub.print', compact('tasFile', 'compactData'));
+        $status = $request->input('details');
+        switch ($status) {
+            case "subpeona":
+                return view('sub.print', compact('tasFile', 'compactData'));
+            case "motionrelease1":
+                return view('sub.motionreleasep1', compact('tasFile', 'compactData'));
+            case "motionrelease2":
+                return view('sub.motionreleasep2', compact('tasFile', 'compactData'));
+            default:
+                // Handle default case if necessary
+                return view('sub.print', compact('tasFile', 'compactData'));
+        }
     }
 
     function deleteTas($id){

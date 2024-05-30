@@ -155,9 +155,15 @@
 </div>
 
 <div class="modal-footer">
-    <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">
+    {{-- <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">
         <span class="bi bi-printer"></span> Print Subpeona
-    </a>
+    </a>  --}}
+    <form action="{{ route('print.sub', ['id' => $tasFile->id]) }}" method="GET" target="_blank">
+
+        <button type="submit" class="btn btn-primary " name="details" value="motionrelease1">Motion w/Manual Resolution</button>
+        <button type="submit" class="btn btn-primary " name="details" value="motionrelease2">Motion w/out Manual Resolution</button>
+        <button type="submit" class="btn btn-primary " name="details" value="subpeona">Subpeona</button>
+    </form>
     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finishModal{{ $tasFile->id }}">Finish</button>
     <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
         @csrf

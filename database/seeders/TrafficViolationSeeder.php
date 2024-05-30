@@ -10,311 +10,59 @@ class TrafficViolationSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
-        $violations = [
-            [
-                'code' => '1A.a',
-                'violation' => 'DRIVING WITHOUT DL'
-            ],
-            [
-                'code' => '1A.b',
-                'violation' => 'DRIVING WITH INVALID, FAKE, EXPIRED, WITHOUT CONDUCTOR’S LICENSE'
-            ],
-            [
-                'code' => '1D',
-                'violation' => 'DRIVING UNDER THE INFLUENCE OF ALCOHOL/DRUGS'
-            ],
-            [
-                'code' => '1E.1a',
-                'violation' => 'RECKLESS DRIVING (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1b',
-                'violation' => 'UNSAFE LOAD (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1c',
-                'violation' => 'OPEN DOOR (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1d',
-                'violation' => 'SWERVING (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1e',
-                'violation' => 'BEATING THE RED LIGHT (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1f',
-                'violation' => 'ACCIDENT (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1g',
-                'violation' => 'UNSAFE MV (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1h',
-                'violation' => 'BACKING (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1i',
-                'violation' => 'TAIL GATING (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1j',
-                'violation' => 'OVER SPEEDING (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1k',
-                'violation' => 'BACKING AGAINST TRAFFIC (NON-PRO)'
-            ],
-            [
-                'code' => '1E.1l',
-                'violation' => 'COUNTERFLOW (EXPRESSWAY) (NON-PRO)'
-            ],
-            [
-                'code' => '1E.2a',
-                'violation' => 'RECKLESS DRIVING (PRO)'
-            ],
-            [
-                'code' => '1E.2b',
-                'violation' => 'UNSAFE LOAD (PRO)'
-            ],
-            [
-                'code' => '1E.2c',
-                'violation' => 'OPEN DOOR (PRO)'
-            ],
-            [
-                'code' => '1E.2d',
-                'violation' => 'SWERVING (PRO)'
-            ],
-            [
-                'code' => '1E.2e',
-                'violation' => 'BEATING THE RED LIGHT (PRO)'
-            ],
-            [
-                'code' => '1E.2f',
-                'violation' => 'ACCIDENT (PRO)'
-            ],
-            [
-                'code' => '1E.2g',
-                'violation' => 'UNSAFE MV (PRO)'
-            ],
-            [
-                'code' => '1E.2h',
-                'violation' => 'BACKING (PRO)'
-            ],
-            [
-                'code' => '1E.2i',
-                'violation' => 'TAIL GATING (PRO)'
-            ],
-            [
-                'code' => '1E.2j',
-                'violation' => 'OVER SPEEDING (PRO)'
-            ],
-            [
-                'code' => '1E.2k',
-                'violation' => 'BACKING AGAINST TRAFFIC (PRO)'
-            ],
-            [
-                'code' => '1E.2l',
-                'violation' => 'COUNTERFLOW (EXPRESSWAY) (PRO)'
-            ],
-            [
-                'code' => '1G.1',
-                'violation' => 'NOT WEARING SEATBELT DRIVER/PASSENGER (FOR HIRE/PRIVATE)'
-            ],
-            [
-                'code' => '1G.2',
-                'violation' => 'NO SEATBELT SIGNAGE (FOR HIRE)'
-            ],
-            [
-                'code' => '1H.a',
-                'violation' => 'NO HELMET'
-            ],
-            [
-                'code' => '1H.b',
-                'violation' => 'NO ICC STICKER'
-            ],
-            [
-                'code' => '1I.a',
-                'violation' => 'FAILURE TO CARRY DL'
-            ],
-            [
-                'code' => '1I.b',
-                'violation' => 'FAILURE TO SURRENDER DL, NO OR CR- W/ PLATE NUMBER'
-            ],
-            [
-                'code' => '1I.c',
-                'violation' => 'NO OR CR- W/ PLATE NUMBER'
-            ],
-            [
-                'code' => '1J.1',
-                'violation' => 'ILLEGAL PARKING'
-            ],
-            [
-                'code' => '1J.2',
-                'violation' => 'DTS, TRUCK BAN, TRICYCLE BAN, ILLEGAL ENTRY, DTO'
-            ],
-            [
-                'code' => '1J.3',
-                'violation' => 'EXCESS PASSENGER'
-            ],
-            [
-                'code' => '1J.4',
-                'violation' => 'NO/INSUFFICIENT CANVASS COVER'
-            ],
-            [
-                'code' => '1J.5',
-                'violation' => 'HITCHING'
-            ],
-            [
-                'code' => '1J.6',
-                'violation' => 'FAILURE TO DIM HEADLIGHTS'
-            ],
-            [
-                'code' => '1J.9',
-                'violation' => 'DRIVING AGAINST THE TRAFFIC, COUNTERFLOW (WITHIN MANILA)'
-            ],
-            [
-                'code' => '1J.10',
-                'violation' => 'ILLEGAL TURN, ILLEGAL U-TURN'
-            ],
-            [
-                'code' => '1J.11',
-                'violation' => 'ILLEGAL OVERTAKING'
-            ],
-            [
-                'code' => '1J.14',
-                'violation' => 'FAILURE TO GIVE WAY'
-            ],
-            [
-                'code' => '1J.22',
-                'violation' => 'ONOZ/OVERTAKING ON NO OVERTAKING ZONE'
-            ],
-            [
-                'code' => '1J.31',
-                'violation' => 'ILLEGAL RIGHT TURN'
-            ],
-            [
-                'code' => '1J.32',
-                'violation' => 'ILLEGAL LEFT TURN'
-            ],
-            [
-                'code' => '1J.34',
-                'violation' => 'UNSAFE TOWING'
-            ],
-            [
-                'code' => '1J.35',
-                'violation' => 'OBSTRUCTION, SLOW MOVING, OVERSTAYING, ILLEGAL LOADING/UNLOADING'
-            ],
-            [
-                'code' => '1J.37 AND 4-2',
-                'violation' => 'REFUSED TO CONVEY PASSENGER (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.38 AND 4-3',
-                'violation' => 'OVERCHARGING/UNDERCHARGING'
-            ],
-            [
-                'code' => '1J.39 AND 4-5',
-                'violation' => 'NO CPC (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.41 AND 4-9',
-                'violation' => 'DEFECTIVE LIGHTS (FOR HIRE) (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.42 AND 4-10',
-                'violation' => 'FAILURE TO PROVIDE FARE DISCOUNT (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.45 AND 4-18',
-                'violation' => 'NO SIGN BOARD (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.46 AND 4-19',
-                'violation' => 'ILLEGAL TERMINAL/PICK AND DROP (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.48 AND 4-21',
-                'violation' => 'FAILURE TO PROVIDE FIRE EXTINGUISHER AND STOP AND GO SIGNAGE (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.49 AND 4-22',
-                'violation' => 'CUTTING TRIP (WITH PLATE NUMBER)'
-            ],
-            [
-                'code' => '1J.50 AND 4-23',
-                'violation' => 'NO FARE MATRIX'
-            ],
-            [
-                'code' => '1J.51 AND 4-25',
-                'violation' => 'BREACH OF FRANCHISE'
-            ],
-            [
-                'code' => '2A',
-                'violation' => 'UNREGISTERED MV'
-            ],
-            [
-                'code' => '2B',
-                'violation' => 'CHANGE COLOR/UNAUTHORIZED MODIFICATION/CHANGE ENGINE'
-            ],
-            [
-                'code' => '2D',
-                'violation' => 'NO/DEFECTIVE LIGHTS, NO EWD (PRIVATE/FOR HIRE), UNECESSARY LIGHTS, PD-96'
-            ],
-            [
-                'code' => '2E',
-                'violation' => 'TAMPERING/NO PLATE/IMPROVISED PLATE (PRIVATE)'
-            ],
-            [
-                'code' => '2H',
-                'violation' => 'NO RED FLAG, NO STICKER, NO TRADE NAME, UNREGISTERED TOP LOAD, NO EXTENSION LIGHT, EXTENDED LOAD W/O RED FLAG'
-            ],
-            [
-                'code' => '3C',
-                'violation' => 'EXCESS LOAD/CAPACITY'
-            ],
-            [
-                'code' => '4-1',
-                'violation' => 'COLORUM/OUT OF LINE'
-            ],
-            [
-                'code' => '4-4',
-                'violation' => 'BODY MARKINGS/SECTION 33'
-            ],
-            [
-                'code' => '4-6',
-                'violation' => 'SPURIOUS DOCUMENTS, FAKE OR/CR, PLATES, STICKERS AND TAGS (FOR HIRE)'
-            ],
-            [
-                'code' => '4-7',
-                'violation' => 'DISCOURTEOUS/ARROGANT DRIVER'
-            ],
-            [
-                'code' => '4-17',
-                'violation' => 'NO PANEL ROUTE'
-            ],
-            [
-                'code' => '4-24',
-                'violation' => 'NO INTERNATIONAL SYMBOL OF ACCESSIBILITY'
-            ],
-            [
-                'code' => '1.RA 10666',
-                'violation' => 'SAFETY OF CHILDREN ABOARD MOTORCYCLES'
-            ],
-            [
-                'code' => '1.DD.A',
-                'violation' => 'DISTRACTED DRIVING RA 10913'
-            ]
+        $data = [
+            ["code" => "1.j.1", "violation" => "Parking Violations"],
+            ["code" => "1.j.3", "violation" => "Allowing passengers on top or cover of a motor vehicle"],
+            ["code" => "1.j.5", "violation" => "Permitting passenger to ride on step board or mudguard of MV"],
+            ["code" => "1J.50 AND 4-23", "violation" => "NO FARE MATRIX"],
+            ["code" => "2.d", "violation" => "MV operating with defective/improper/unauthorized accessories, devices, equipment and parts"],
+            ["code" => "1.RA 10666", "violation" => "SAFETY OF CHILDREN ABOARD MOTORCYCLES"],
+            ["code" => "1.DD.A", "violation" => "Distracted Driving (RA 10913)"],
+            ["code" => "1.j.7", "violation" => "Driving in a place not intended for traffic or false parking"],
+            ["code" => "4.1.a", "violation" => "Private MV operating as a PUV without authority from the LTFRB"],
+            ["code" => "4.5", "violation" => "NO FRANCHISE/CERTIFICATE OF PUBLIC CONVENIENCE OR EVIDENCE OF FRANCHISE PRESENTED DURING APPREHENSION OR CARRIED INSIDE THE MOTOR VEHICLE"],
+            ["code" => "1.j.8", "violation" => "Hitching or permitting a person or to hitch to a motor vehicle"],
+            ["code" => "4.1.e", "violation" => "PUV with expired CPC and without a pending application (1)"],
+            ["code" => "4.1.c", "violation" => "PUV operating differently from its authorized denomination"],
+            ["code" => "1.e", "violation" => "Reckless Driving"],
+            ["code" => "4.6", "violation" => "FRAUD AND FALSITIES SUCH AS PRESENTATION OF FAKE AND SPURIOUS CPC, OR/CR, PLATES, STICKERS AND TAGS"],
+            ["code" => "1.j.46", "violation" => "Pick and Drop of Passengers outside the terminal"],
+            ["code" => "1.j.51", "violation" => "Breach of franchise conditions"],
+            ["code" => "4.19", "violation" => "PICK AND DROP OF PASSENGERS OUTSIDE THE TERMINAL (PUJ, PUB, UV)"],
+            ["code" => "4.25", "violation" => "BREACH OF FRANCHISE CONDITIONS UNDER 2011 REVISED TERMS AND CONDITIONS OF CPC NOT OTHERWISE HEREIN PROVIDED."],
+            ["code" => "1.j.41", "violation" => "Operating the unit/s with defective parts"],
+            ["code" => "4.9", "violation" => "OPERATING THE UNIT/S WITH DEFECTIVE PARTS AND ACCESSORIES"],
+            ["code" => "1.j.37", "violation" => "Refusal to render service to the public"],
+            ["code" => "4.2", "violation" => "REFUSAL TO RENDER SERVICE TO THE PUBLIC OR CONVEY PASSENGER TO DESTINATION"],
+            ["code" => "1.j.38", "violation" => "Overcharging/Undercharging of fare"],
+            ["code" => "4.3", "violation" => "OVERCHARGING/UNDERCHARGING OF FARE"],
+            ["code" => "1.j.39", "violation" => "No evidence of franchise presented during apprehension"],
+            ["code" => "2.a", "violation" => "Driving an unregistered Motor Vehicle"],
+            ["code" => "1.g.1", "violation" => "Failure to wear the prescribed seatbelt device and/or failure to require the front seat passenger to wear seatbelt"],
+            ["code" => "1.j.35", "violation" => "Obstructing the free passage of other vehicles"],
+            ["code" => "1.j.45", "violation" => "No sign board"],
+            ["code" => "4.18", "violation" => "NO SIGN BOARD (PUJ, PUB, UV)"],
+            ["code" => "1.j.49", "violation" => "Trip cutting"],
+            ["code" => "4.22", "violation" => "TRIP CUTTING (PUJ, PUB, UV)"],
+            ["code" => "1.h", "violation" => "Failure to wear the standard protective MC helmet or failure to require the back rider to wear standard protective MC helmet (R.A 10054)"],
+            ["code" => "1.i", "violation" => "FAILURE TO CARRY DRIVER'S LICENSE, CERTIFICATE OF REGISTRATION OR OFFICIAL RECEIPT WHILE DRIVING A MOTOR VEHICLE"],
+            ["code" => "1.j.2", "violation" => "Disregarding Traffic Signs"],
+            ["code" => "4.1.b", "violation" => "PUV operating outside of its approved route or area"],
+            ["code" => "4.17", "violation" => "NO PANEL ROUTE (PUJ, PUB, UV)"],
+            ["code" => "2.f", "violation" => "Smoke Belching (Section 46, R.A. 8749)"],
+            ["code" => "2.e", "violation" => "Failure to attach or improper attachment/tampering of MV license plates and/or third plate sticker."],
+            ["code" => "1.a", "violation" => "Includes inappropriate or invalid driver's license"],
+            ["code" => "4.7", "violation" => "EMPLOYING RECKLESS, INSOLENT, DISCOURTEOUS OR ARROGANT DRIVERS"],
+            ["code" => "2.b", "violation" => "Change in color and other unauthorized modifications"],
+            ["code" => "WS", "violation" => "Wearing Slipper"],
         ];
-        
-        foreach ($violations as $violation) {
+
+        foreach ($data as $item) {
             TrafficViolation::create([
-                'code' => $violation['code'],
-                'violation' => $violation['violation']
+                'code' => $item['code'],
+                'violation' => $item['violation'],
             ]);
         }
     }

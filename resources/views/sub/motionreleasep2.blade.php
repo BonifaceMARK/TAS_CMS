@@ -333,15 +333,20 @@ input, textarea {
                 modal.style.display = 'block';
             }
         
+            function closeModal() {
+                modal.style.display = 'none';
+                alert('You can reopen the form by pressing Ctrl + Y');
+            }
             // Close the modal when the close button is clicked
             closeBtn.onclick = () => {
-                modal.style.display = 'none';
+                closeModal();
             }
         
             // Close the modal when clicking outside of it
             window.onclick = (event) => {
+                
                 if (event.target == modal) {
-                    modal.style.display = 'none';
+                    closeModal();
                 }
             }
         
@@ -386,7 +391,7 @@ input, textarea {
             });
     
             // Trigger the hidden button to open the modal for demonstration
-            // openModalBtn.click();
+            openModalBtn.click();
         });
     </script>
 </body>

@@ -159,38 +159,34 @@ input, textarea {
 </head>
 <body>
     <button id="openModalBtn" hidden>Open Form</button>
-
+    <div id="notification" class="notification"></div>
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <form id="myForm">
                 <h2>Fill out this form</h2>
                 <label for="carmakex">CAR MAKE:</label>
-                <input type="text" id="carmakex" name="carmakex" >
+                <input type="text" id="carmakex" name="carmakex" required>
                 <label for="tasdatex">TAS Resolution Date:</label>
-                <input type="date" id="tasdatex" name="tasdatex" >
+                <input type="date" id="tasdatex" name="tasdatex" required>
+                <label for="manresx">TAS Manual Resolution Date:</label>
+                <input type="date" id="manresx" name="manresx" required>
                 <label for="crnox">Certificate of Registration No</label>
-                <input type="text" id="crnox" name="crnox"  placeholder="(xxxxxxxx)">
-                <input type="date" id="crdatex" name="crdatex" >
+                <input type="text" id="crnox" name="crnox" required placeholder="(xxxxxxxx)">
+                <input type="date" id="crdatex" name="crdatex" required>
                 <label for="rornox">Registration Official Receipt No:</label>
-                <input type="text" id="rornox" name="rornox" >
-                <input type="date" id="rordatex" name="rordatex" >
-                <label for="orpnox">Official Receipt of Payment No:</label>
-                <input type="text" id="orpnox" name="orpnox" >
-                <input type="date" id="orpdatex" name="orpdatex" >
-                <label for="srnox">Storage Fee Official Receipt No:</label>
-                <input type="text" id="srnox" name="srnox" >
-                <input type="date" id="srdatex" name="srdatex" >
+                <input type="text" id="rornox" name="rornox" required>
+                <input type="date" id="rordatex" name="rordatex" required>
                 <label for="mvirnox">MVIS Inspection Report No. </label>
-                <input type="text" id="mvirnox" name="mvirnox" >
-                <input type="date" id="mvirdatex" name="mvirdatex" >
+                <input type="text" id="mvirnox" name="mvirnox" required>
+                <input type="date" id="mvirdatex" name="mvirdatex" required>
                 <label for="mrnox">MR No:</label>
-                <input type="text" id="mrnox" name="mrnox" >
-                <input type="date" id="mrdatex" name="mrdatex" >
+                <input type="text" id="mrnox" name="mrnox" required>
+                <input type="date" id="mrdatex" name="mrdatex" required>
                 <label for="mrmvdatex">Motion to Release Motor Vehicle Date:</label>
-                <input type="date" id="mrmvdatex" name="mrmvdatex" >
+                <input type="date" id="mrmvdatex" name="mrmvdatex" required>
                 <label for="dateappx">Date of Apprehension:</label>
-                <input type="date" id="dateappx" name="dateappx" >
+                <input type="date" id="dateappx" name="dateappx" required>
 
                 <button type="submit">FILL OUT</button>
             </form>
@@ -280,17 +276,14 @@ input, textarea {
                         <b>TAS Resolution approved by the TAS Director dated <span id="tasdate">  </span></b>
                     </li>
                     <li>
+                        <b>TAS Manual Resolution approved by TAS Director dated <span id="manres">  </span></b>
+                    </li>
+                    <li>
                         Certificate of Registration No.<span id="crno"></span> dated <span id="crdate"></span>
                     </li>
                     <li>
                         Registration Official Receipt No. <span id="rorno"> </span> dated <span id="rordate"></span>
                     </li>
-                    <li>
-                        Official receipt of payment no. <span id="orpno"> </span>  dated <span id="orpdate"> </span> 
-                    </li>
-                    <li>
-                        Storage fee official receipt no. <span id="srno"> </span>  dated <span id="srdate"> </span>
-                    </li>    
                     <li>
                         MVIS Inspection Report No. <span id="mvirno"></span> dated <span id="mvirdate"></span> Paid under MR No. <span id="mrno"> </span> dated <span id="mrdate"></span>
                     </li>
@@ -328,20 +321,31 @@ input, textarea {
             const year = d.getFullYear();
             return `${month}/${day}/${year}`;
             }
+            function showNotification(message) {
+                notification.textContent = message;
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000); 
+            }
             // Open the modal when the button is clicked
             openModalBtn.onclick = () => {
                 modal.style.display = 'block';
             }
-        
+            function closeModal() {
+                modal.style.display = 'none';
+                alert('You can reopen the form by pressing Ctrl + Y');
+            }
             // Close the modal when the close button is clicked
             closeBtn.onclick = () => {
-                modal.style.display = 'none';
+                closeModal();
             }
         
             // Close the modal when clicking outside of it
             window.onclick = (event) => {
+                
                 if (event.target == modal) {
-                    modal.style.display = 'none';
+                    closeModal();
                 }
             }
         
@@ -354,14 +358,11 @@ input, textarea {
                 document.getElementById('carmake').textContent = document.getElementById('carmakex').value;
                 document.getElementById('carmaket').textContent = document.getElementById('carmakex').value;
                 document.getElementById('tasdate').textContent = formatDateToMMDDYYYY(document.getElementById('tasdatex').value);
+                document.getElementById('manres').textContent = formatDateToMMDDYYYY(document.getElementById('manresx').value);
                 document.getElementById('crno').textContent = document.getElementById('crnox').value;
                 document.getElementById('crdate').textContent = formatDateToMMDDYYYY(document.getElementById('crdatex').value);
                 document.getElementById('rorno').textContent = document.getElementById('rornox').value;
                 document.getElementById('rordate').textContent = formatDateToMMDDYYYY(document.getElementById('rordatex').value);
-                document.getElementById('orpno').textContent = document.getElementById('orpnox').value;
-                document.getElementById('orpdate').textContent = formatDateToMMDDYYYY(document.getElementById('orpdatex').value);
-                document.getElementById('srno').textContent = document.getElementById('srnox').value;
-                document.getElementById('srdate').textContent = formatDateToMMDDYYYY(document.getElementById('srdatex').value);
                 document.getElementById('mvirno').textContent = document.getElementById('mvirnox').value;
                 document.getElementById('mvirdate').textContent = formatDateToMMDDYYYY(document.getElementById('mvirdatex').value);
                 document.getElementById('mrno').textContent = document.getElementById('mrnox').value;
@@ -374,7 +375,7 @@ input, textarea {
                 modal.style.display = 'none';
         
                 // Optionally, you can reset the form after submission
-                // form.reset();
+                form.reset();
             }
         
             // Add event listener for the keyboard shortcut
@@ -386,7 +387,7 @@ input, textarea {
             });
     
             // Trigger the hidden button to open the modal for demonstration
-            // openModalBtn.click();
+            openModalBtn.click();
         });
     </script>
 </body>
