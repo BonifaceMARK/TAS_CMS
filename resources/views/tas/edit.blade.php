@@ -180,26 +180,51 @@
         <!-- Always include one input field for remarks --> 
         <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" >
         </div>
-        <div class="col-md-12 mb-3">
-    <label class="form-label">File Attachments</label>
-    @php
-        $attachments = explode(',', $violation->file_attach);
-    @endphp
-    @if (!empty($attachments))
-        @foreach ($attachments as $attachment)
-            <div class="input-group mt-2">
-                <input type="text" class="form-control" value="{{ $attachment }}" readonly>
-                <div class="input-group-append">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="delete_file[]" value="{{ $attachment }}">
-                        <label class="form-check-label">Delete</label>
+    </div>
+
+    <div class="text-end">
+                            <button type="submit" class="btn btn-success mt-3">Save changes</button>
+                        </div>
+ <hr>
+</form>
+  <!-- File Attachments Section -->
+  <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h6 class="fw-bold mb-3">File Attachments</h6>
+                                @php
+                                    $attachments = json_decode($violation->file_attach, true);
+                                @endphp
+
+                                @if (!empty($attachments))
+                                    @foreach ($attachments as $attachment)
+                                        <div class="input-group mt-2">
+                                            <input type="text" class="form-control" value="{{ $attachment }}" readonly>
+                                           <!-- Button to trigger the deletion confirmation -->
+<div class="input-group-append">
+    <button type="button" class="btn btn-danger bi bi-trash3-fill delete-attachment" data-attachment="{{ $attachment }}">Delete</button>
+</div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                                <form id="attachmentForm" method="POST" enctype="multipart/form-data" data-route="{{ route('tasfile.attach', $violation->id) }}">
+    @csrf
+    <div class="input-group mt-2"> 
+        <input type="file" class="form-control" name="file_attach_existing[]" multiple>
+        <button type="submit" class="btn btn-primary">Attach Files</button>
+    </div>
+</form>
+
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        @endforeach
-    @endif
-    <div class="input-group mt-2">
-        <input type="file" class="form-control" name="file_attach[]">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete Case</button>
+                </div>
+       
+        </div>
     </div>
 </div>
 
