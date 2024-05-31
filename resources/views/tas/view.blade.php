@@ -46,11 +46,11 @@
                             <th>Apprehending Officer</th>
                             <th>Department</th>
                             <th>Type of Vehicle</th>
-                            <th>Violation</th>  
-                             
+                            
+                            <th>Transaction No</th>
                             <th>Date Received</th>        
                             <th>Plate No.</th>
-                            <th>Date Recorded</th>  
+                     
                             <th>Case Status</th>
                             
                         </tr>
@@ -84,9 +84,12 @@
                             </td>
                             <td>{{ $tasFile->plate_no  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->typeofvehicle  ?? 'N/A' }}</td>
-                            <td>{{ $tasFile->violation  ?? 'N/A' }}</td>
+                            
+                            <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
+                            
                             <td>{{ $tasFile->date_received  ?? 'N/A' }}</td>
-                            <td>{{ $tasFile->created_at  ?? 'N/A' }}</td>
+                            <td>{{ $tasFile->plate_no  ?? 'N/A' }}</td>
+                   
                             <td style="background-color: {{ getStatusColor($tasFile->status) }}">
                                 @if($tasFile->status === 'closed')
                                     <span><i class="bi bi-check-circle-fill"></i> Closed</span>
@@ -148,7 +151,28 @@
         </form>
       </div>
     </div>
+</div>
+<div class="modal fade" id="finishModal{{ $tasFile->id }}" tabindex="-1" role="dialog" aria-labelledby="finishModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="{{ route('finish.case', ['id' => $tasFile->id]) }}" method="POST"> @csrf <div class="modal-header">
+            <h5 class="modal-title" id="finishModalLabel">Finish Case</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="fine_fee">Fine Fee</label>
+              <input type="number" step="0.01" class="form-control" id="fine_fee" name="fine_fee" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Finish</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
+
 @endforeach
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -19,6 +19,8 @@ use App\Models\G5ChatMessage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use DateTime;
 
 
@@ -1168,6 +1170,206 @@ class DashboardController extends Controller
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
             $tasFile = TasFile::findOrFail($id);
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+    
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+    
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            // Check if $tasFile->remarks is already an array
+            $remarks = is_array($tasFile->remarks) ? $tasFile->remarks : [];
+    
+            // Reverse the array if it's an array
+            $remarks = array_reverse($remarks);
+    
+            // Return the view with TasFile and related data
+            return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+    
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
+    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////// UPDATE PAGE CONTEST ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public function updateContest()
+{
+    // Fetch all traffic violations
+    $violations = TrafficViolation::all();
+    
+    // Fetch recent TasFiles ordered by case number descending
+    $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
+    
+    // Fetch all codes (assuming TrafficViolation model provides codes)
+    $codes = TrafficViolation::all();
+    
+    // Prepare a collection for officers
+    $officers = collect();
+    
+    // Iterate through each TrafficViolation record
+    foreach ($violations as $violation) {
+        // Extract the name of the apprehending officer for the current TrafficViolation
+        $officerName = $violation->apprehending_officer;
+
+        // Query the ApprehendingOfficer model for officers with the given name
+        $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+
+        // Merge the officers into the collection
+        $officers = $officers->merge($officersForFile);
+
+        // Decode the violation data if it's stored as JSON
+        $violationData = json_decode($violation->violation, true);
+
+        // Assign the decoded violation data back to the violation object
+        $violation->violationData = $violationData;
+
+        // Convert the remarks attribute to an array using the correct delimiter
+        $violation->remarks = explode(" - ", $violation->remarks);
+    }
+
+    // Pass data to the view
+    return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
+}
+public function removeAttachment(Request $request, $id)
+    {
+        $tasFile = TasFile::findOrFail($id);
+        $attachmentToRemove = $request->input('attachment');
+
+        if ($attachmentToRemove) {
+            $attachments = json_decode($tasFile->file_attach, true) ?? [];
+
+            // Check if the attachment exists in the array
+            if (($key = array_search($attachmentToRemove, $attachments)) !== false) {
+                unset($attachments[$key]);
+                $tasFile->file_attach = json_encode(array_values($attachments)); // Reindex array and encode back to JSON
+                $tasFile->save();
+
+                // Optionally, delete the file from the storage
+                Storage::delete($attachmentToRemove);
+            }
+        }
+
+        return response()->json(['success' => 'Attachment removed successfully.']);
+    }
+    public function attachFiles(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'file_attach_existing.*' => 'required|file|max:10240',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+    
+        // Find the TasFile instance by ID
+        $tasFile = TasFile::findOrFail($id);
+    
+        // Process existing attachments
+        if ($request->hasFile('file_attach_existing')) {
+            $filePaths = [];
+            $cx = 1;
+            foreach ($request->file('file_attach_existing') as $file) {
+                // Check if the file was actually uploaded
+                if ($file->isValid()) {
+                    $x = $tasFile->case_no . "_documents_" . $cx . "_";
+                    $fileName = $x . time();
+                    $file->storeAs('attachments', $fileName, 'public');
+                    $filePaths[] = 'attachments/' . $fileName;
+                    $cx++;
+                } else {
+                    // File upload failed, return an error response
+                    return response()->json(['message' => 'Failed to upload files.'], 422);
+                }
+            }
+            $tasFile->file_attach = json_encode($filePaths);
+        }
+    
+        // Save the updated model
+        $tasFile->save();
+    
+        // Redirect back with a success message
+        return response()->json(['message' => 'Files attached successfully.']);
+    }
+    
+
+
+public function updateTas(Request $request, $id)
+{
+    try {
+        // Find the violation by ID
+        $violation = TasFile::findOrFail($id);
+
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'case_no' => 'nullable|string|max:255',
+            'top' => 'nullable|string|max:255',
+            'driver' => 'nullable|string|max:255',
+            'apprehending_officer' => 'nullable|string|max:255',
+            'violation' => 'nullable|array',
+            'transaction_no' => 'nullable|string|max:255',
+            'date_received' => 'nullable|date',
+            'plate_no' => 'nullable|string|max:255',
+            'contact_no' => 'nullable|string|max:255',
+            'remarks.*.text' => 'nullable|string',
+        ]);
+
+        // Process remarks
+        if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
+            $remarksArray = [];
+            foreach ($validatedData['remarks'] as $remark) {
+                $remarksArray[] = $remark['text'];
+            }
+            $validatedData['remarks'] = json_encode($remarksArray);
+        }
+
+        // Merge new violations into existing violations array
+        if (!empty($validatedData['violation'])) {
+            $existingViolations = json_decode($violation->violation, true) ?? [];
+            $newViolations = array_filter($validatedData['violation'], function($value) {
+                return $value !== null;
+            });
+            $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
+        }
+
+        // Update the violation with validated data
+        $violation->update($validatedData);
+
+        // If new violations were added, add them to the TasFile model
+        if (!empty($newViolations)) {
+            foreach ($newViolations as $newViolation) {
+                $violation->addViolation($newViolation);
+            }
+            // Refresh the model after adding new violations
+            $violation = TasFile::findOrFail($id);
+        }
+
+        return back()->with('success', 'Violation updated successfully');
+    } catch (\Exception $e) {
+        // Log the error
+        Log::error('Error updating Violation: ' . $e->getMessage());
+
+        // Set error message
+        return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
+    }
+}
+public function updateStatus(Request $request, $id)
+{
+    try {
+        // Log the request data for debugging
+        \Log::info('Request data: ', $request->all());
+
+        $tasFile = TasFile::findOrFail($id);
 
             // Retrieve related ApprehendingOfficers
             $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();

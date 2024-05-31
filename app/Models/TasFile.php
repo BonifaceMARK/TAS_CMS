@@ -40,11 +40,13 @@ class TasFile extends Model
 {
     return $this->hasOne(ApprehendingOfficer::class, 'officer');
 }
-    public function relatedViolations()
-    {
-        // Assuming 'violation' is a JSON-encoded field in the TasFile table
-        return $this->hasMany(TrafficViolation::class, 'code');
-    }
+
+public function relatedViolations()
+{
+    // Assuming 'violation' is a JSON-encoded field in the TasFile table
+    return $this->hasMany(TrafficViolation::class, 'code');
+}
+
     public function setTopAttribute($value)
     {
         $this->attributes['top'] = strtoupper($value);
