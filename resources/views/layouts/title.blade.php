@@ -17,6 +17,7 @@
   <link href="{{ asset('assets/css/carcar.css') }}" rel="stylesheet">
   <link href="{{asset('assets/img/logo.png')}}" rel="icon">
   <link href="{{asset('assets/img/logo.png')}}" rel="apple-touch-icon">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -45,7 +46,7 @@
   <!-- Template Main CSS File -->
   <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
   
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   
   
   <!-- =======================================================

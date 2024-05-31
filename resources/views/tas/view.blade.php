@@ -161,7 +161,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'id']));
+    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'ID_PLACEHOLDER']));
 
     function initializeModalScripts(modalId) {
         $('#modal-body-' + modalId + ' .remarksForm').on('submit', function (e) {
@@ -188,7 +188,7 @@
                     showAlert(response.message);
 
                     // Reload the modal body content
-                    var fetchUrl = fetchViolationUrl.replace('id', modalId);
+                    var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
                     fetch(fetchUrl)
                         .then(response => {
                             if (!response.ok) {
@@ -215,6 +215,44 @@
                 }
             });
         });
+
+        // Handle Finish Case form submission
+        $('#finishCaseFormTemplate').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const spinner = submitBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            submitBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+
+                    // Show success message
+                    showAlert(response.message);
+
+                    // Close the modal
+                    $('#finishModalTemplate').modal('hide');
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+
+                    // Show error message
+                    showAlert('Failed to finish case. Please try again later.', 'danger');
+                }
+            });
+        });
     }
 
     function showAlert(message, type = 'success') {
@@ -235,7 +273,7 @@
             var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
             var modalBody = modal.querySelector('.modal-body');
             
-            var fetchUrl = fetchViolationUrl.replace('id', modalId);
+            var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
             console.log('Fetching URL: ', fetchUrl);
             
             setTimeout(() => {
@@ -249,10 +287,11 @@
                     .then(html => {
                         modalBody.innerHTML = html;
                         initializeModalScripts(modalId);
-                    })
-                    .catch(err => {
-                        console.error('Failed to load modal content:', err);
-                        modalBody.innerHTML = '<p>Error loading content</p>';
+
+                        // Attach the Finish Case modal dynamically
+                        const finishModalHtml = $('#finishModalTemplate').html();
+                        $('#modal-body-' + modalId).append(finishModalHtml);
+                        $('#finishCaseFormTemplate').attr('action', '{{ route('finish.case', ['id' => 'modalId']) }}');
                     });
             }, 1500); // 1.5 seconds delay
         });
@@ -276,7 +315,7 @@
         });
     });
 </script>
- 
+
 <script>
     // Function to open a URL in a new tab and print
     function openInNewTabAndPrint(url) {

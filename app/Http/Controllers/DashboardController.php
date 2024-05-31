@@ -259,7 +259,8 @@ class DashboardController extends Controller
         // Pass the modified admitted data to the view
         return view('admitted.view', compact('admitted'));
     }
-    public function saveRemarks(Request $request) {
+    public function saveRemarks(Request $request)
+    {
         $request->validate([
             'remarks' => 'required|string',
             'tas_file_id' => 'required|exists:tas_files,id',
@@ -271,7 +272,11 @@ class DashboardController extends Controller
             $tasFile = TasFile::findOrFail($id);
             $existingRemarks = json_decode($tasFile->remarks, true) ?? [];
             $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
-            $newRemark = $remarks . ' - ' . $timestamp .' - '. Auth::user()->fullname;
+            $newRemark = [
+                'text' => $remarks,
+                'timestamp' => $timestamp,
+                'author' => Auth::user()->fullname
+            ];
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
     
@@ -288,6 +293,8 @@ class DashboardController extends Controller
             return response()->json(['error' => $th->getMessage()], 500); // You can return a different error status code if needed
         }
     }
+    
+    
     //admitted remarks
     public function admitremark(Request $request){
         $request->validate([
@@ -1002,66 +1009,86 @@ public function removeAttachment(Request $request, $id)
     }
     
 
-
-public function updateTas(Request $request, $id)
-{
-    try {
-        // Find the violation by ID
-        $violation = TasFile::findOrFail($id);
-
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'case_no' => 'nullable|string|max:255',
-            'top' => 'nullable|string|max:255',
-            'driver' => 'nullable|string|max:255',
-            'apprehending_officer' => 'nullable|string|max:255',
-            'violation' => 'nullable|array',
-            'transaction_no' => 'nullable|string|max:255',
-            'date_received' => 'nullable|date',
-            'plate_no' => 'nullable|string|max:255',
-            'contact_no' => 'nullable|string|max:255',
-            'remarks.*.text' => 'nullable|string',
-        ]);
-
-        // Process remarks
-        if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
-            $remarksArray = [];
-            foreach ($validatedData['remarks'] as $remark) {
-                $remarksArray[] = $remark['text'];
-            }
-            $validatedData['remarks'] = json_encode($remarksArray);
-        }
-
-        // Merge new violations into existing violations array
-        if (!empty($validatedData['violation'])) {
-            $existingViolations = json_decode($violation->violation, true) ?? [];
-            $newViolations = array_filter($validatedData['violation'], function($value) {
-                return $value !== null;
-            });
-            $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
-        }
-
-        // Update the violation with validated data
-        $violation->update($validatedData);
-
-        // If new violations were added, add them to the TasFile model
-        if (!empty($newViolations)) {
-            foreach ($newViolations as $newViolation) {
-                $violation->addViolation($newViolation);
-            }
-            // Refresh the model after adding new violations
+    public function updateTas(Request $request, $id)
+    {
+        try {
+            // Find the violation by ID
             $violation = TasFile::findOrFail($id);
+
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'case_no' => 'nullable|string|max:255',
+                'top' => 'nullable|string|max:255',
+                'driver' => 'nullable|string|max:255',
+                'apprehending_officer' => 'nullable|string|max:255',
+                'violation' => 'nullable|array',
+                'transaction_no' => 'nullable|string|max:255',
+                'date_received' => 'nullable|date',
+                'plate_no' => 'nullable|string|max:255',
+                'contact_no' => 'nullable|string|max:255',
+                'remarks.*.text' => 'nullable|string',
+                'file_attach_existing.*' => 'nullable|file|max:10240', // Added file validation rules
+            ]);
+
+            // Attach files
+            if ($request->hasFile('file_attach_existing')) {
+                $filePaths = [];
+                $cx = 1;
+                foreach ($request->file('file_attach_existing') as $file) {
+                    // Check if the file was actually uploaded
+                    if ($file->isValid()) {
+                        $x = $violation->case_no . "_documents_" . $cx . "_";
+                        $fileName = $x . time();
+                        $file->storeAs('attachments', $fileName, 'public');
+                        $filePaths[] = 'attachments/' . $fileName;
+                        $cx++;
+                    } else {
+                        // File upload failed, return an error response
+                        return back()->with('error', 'Failed to upload files.');
+                    }
+                }
+                $violation->file_attach = json_encode($filePaths);
+            }
+
+            // Process remarks
+            if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
+                $remarksArray = [];
+                foreach ($validatedData['remarks'] as $remark) {
+                    $remarksArray[] = $remark['text'];
+                }
+                $validatedData['remarks'] = json_encode($remarksArray);
+            }
+
+            // Merge new violations into existing violations array
+            if (!empty($validatedData['violation'])) {
+                $existingViolations = json_decode($violation->violation, true) ?? [];
+                $newViolations = array_filter($validatedData['violation'], function ($value) {
+                    return $value !== null;
+                });
+                $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
+            }
+
+            // Update the violation with validated data
+            $violation->update($validatedData);
+
+            // If new violations were added, add them to the TasFile model
+            if (!empty($newViolations)) {
+                foreach ($newViolations as $newViolation) {
+                    $violation->addViolation($newViolation);
+                }
+                // Refresh the model after adding new violations
+                $violation = TasFile::findOrFail($id);
+            }
+
+            return back()->with('success', 'Violation updated successfully');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error updating Violation: ' . $e->getMessage());
+
+            // Set error message
+            return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
-
-        return back()->with('success', 'Violation updated successfully');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error updating Violation: ' . $e->getMessage());
-
-        // Set error message
-        return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
     }
-}
 public function updateStatus(Request $request, $id)
 {
     try {

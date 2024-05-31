@@ -140,7 +140,7 @@
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
-            <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
+            <form id="editViolationForm{{ $violation->id }}"  action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
@@ -283,11 +283,9 @@
         </div>
     </div>
 
-    <div class="text-end">
-                            <button type="submit" class="btn btn-success mt-3">Save changes</button>
-                        </div>
+  
  <hr>
-</form>
+
   <!-- File Attachments Section -->
   <div class="row mt-4">
                             <div class="col-md-12">
@@ -307,24 +305,25 @@
                                         </div>
                                     @endforeach
                                 @endif
-                                <form id="attachmentForm" method="POST" enctype="multipart/form-data" data-route="{{ route('tasfile.attach', $violation->id) }}">
-    @csrf
-    <div class="input-group mt-2">
-        <input type="file" class="form-control" name="file_attach_existing[]" multiple>
-        <button type="submit" class="btn btn-primary">Attach Files</button>
-    </div>
-</form>
-
-                            </div>
+ 
+        <div class="input-group mt-2">
+            <input type="file" class="form-control" name="file_attach_existing[]" multiple>
+            <button type="submit" class="btn btn-primary">Attach Files</button>
+        </div>
+ 
+ 
+                           </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              
+                  
+                            <button type="submit" class="btn btn-success ">Save changes</button>
+ 
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete Case</button>
                 </div>
-       
+                </form>
         </div>
     </div>
 </div>

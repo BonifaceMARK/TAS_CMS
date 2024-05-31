@@ -102,24 +102,20 @@ public function relatedViolations()
     {
         return $value ? json_decode($value, true) : [];
     }
-    public function setRemarksAttribute($value)
-    {
-        if (is_array($value)) {
-            // Convert the array of remarks to a comma-separated string
-            $this->attributes['remarks'] = implode(',', $value);
-        } else {
-            // If it's already a string, simply assign it
-            $this->attributes['remarks'] = $value;
-        }
-    }
-    
+  // Define accessor for 'remarks' field
+public function getRemarksAttribute($value)
+{
+    // Convert the comma-separated string of remarks to an array
+    return $value ? json_decode($value, true) : [];
+}
 
-    // Define accessor for 'remarks' field
-    public function getRemarksAttribute($value)
-    {
-        // Convert the comma-separated string of remarks to an array
-        return $value ? explode(',', $value) : [];
-    }
+// Define mutator for 'remarks' field
+public function setRemarksAttribute($value)
+{
+    // Convert the array of remarks to JSON before saving
+    $this->attributes['remarks'] = $value ? json_encode($value) : null;
+}
+
 
     public function checkCompleteness()
     {
