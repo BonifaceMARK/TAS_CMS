@@ -1,4 +1,4 @@
-@extends('layouts.title')
+
 
 @section('title', env('APP_NAME'))
 
@@ -174,16 +174,16 @@
         console.log('Selected violation:', code);
     }
 </script>
-<!-- Modal -->
 <div class="modal fade" id="violationsModal" tabindex="-1" aria-labelledby="violationsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="violationsModalLabel">List of Violations</h5>
+                <input type="text" id="violationSearch" class="form-control" placeholder="Search..." style="width: 300px; margin-left: 40px;">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <table class="table">
+                <table class="table" id="violationsTable">
                     <thead>
                         <tr>
                             <th>Code</th>
@@ -210,8 +210,29 @@
         </div>
     </div>
 </div>
-
- 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('violationSearch').addEventListener('keyup', function () {
+        var input = document.getElementById('violationSearch');
+        var filter = input.value.toLowerCase();
+        var table = document.getElementById('violationsTable');
+        var trs = table.getElementsByTagName('tr');
+        
+        // Loop through all table rows, and hide those who don't match the search query
+        for (var i = 1; i < trs.length; i++) { // start at 1 to skip the header row
+            var tds = trs[i].getElementsByTagName('td');
+            var match = false;
+            for (var j = 0; j < tds.length; j++) {
+                if (tds[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+            trs[i].style.display = match ? '' : 'none';
+        }
+    });
+});
+</script>
   <script>
     function selectViolation(selectedViolation) {
       var input = document.getElementById('validationTooltipViolation');

@@ -1,4 +1,3 @@
-@extends('layouts.title')
 
 @section('title', env('APP_NAME'))
 
@@ -14,18 +13,7 @@
 
 
   <main id="main" class="main">
-  <section class="section">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="card-title">Traffic Adjudication Service</h5>
-    <div class="datatable-search">
-        <input class="datatable-input" id="searchInput" placeholder="Search..." type="search" title="Search within table">
-    </div>
-</div>
-
-                    @if (session('success'))
+    @if (session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
@@ -35,240 +23,414 @@
         {{ session('error') }}
     </div>
 @endif
-</div>
-<div class="card">
-                <div class="card-body">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{{-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js" defer></script> --}}
 
-               
-                    <!-- Table with stripped rows -->
-                    <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
-                        <!-- Datatable top section -->
-                        <div class="datatable-top">
-                            <div class="datatable-dropdown">
-                                <label>
-                                    <select class="datatable-selector" id="datatable-selector">
-                                        <option value="5">5</option>
-                                        <option value="10" selected>10</option>
-                                        <option value="15">15</option>
-                                        <option value="100" selected>100</option>
-                                        <option value="-1">All</option>
-                                    </select> entries per page
-                                </label>
-                            </div>
-                        </div>
-                        <div class="datatable-container">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover datatable datatable-table" id="dataTable">
-                                    <!-- Table header -->
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>Resolution No.</th>
-                                            <th>Department</th>
-                                            <th>Apprehending Officer</th>
-                                            <th>Driver</th>
-                                            <th>Top</th>
-                                            <th>Violation</th>
-                                            <th>Transaction No</th>
-                                            <th>Contact No</th>
-                                            <th>Transaction Date</th>
-                                            <th>Attachment</th>
-                                        </tr>
-                                    </thead>
-                                    <!-- Table body -->
-                                    <tbody>
-                                        @if ($admitted)
-                                            @foreach ($admitted as $admit)
-                                                <tr data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
-                                                    <td>{{ $admit->resolution_no }}</td>
-                                                    <td>{{ $admit->apprehending_officer }}</td>
-                                                    <td>{{ $admit->driver }}</td>
-                                                    <td>{{ $admit->top }}</td>
-                                                    <td>{{ $admit->violation }}</td>
-                                                    <td>{{ $admit->transaction_no }}</td>
-                                                    <td>{{ $admit->contact_no }}</td>
-                                                    <td>{{ $admit->created_at }}</td>
-                                                    <td>
-                                                        @if ($admit->file_attach)
-                                                            @php
-                                                                $filePaths = json_decode($admit->file_attach);
-                                                            @endphp
-                                                            @if ($filePaths)
-                                                                <ul class="list-unstyled">
-                                                                    @foreach ($filePaths as $filePath)
-                                                                        <li>
-                                                                            <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            @endif
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="datatable-bottom">
-                            <div class="datatable-info">
-                            Showing {{ $admitted->count() }} entries
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- End Table with stripped rows -->
+
+    <section class="section">
+      <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Traffic Adjudication Service<span></span></h5>
+                <table class="table table-borderless datatable">
+                    <!-- Table header -->
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Record Status</th>
+                            <th>Resolution No.</th>
+                            <th>Transaction No</th>
+                            <th>Top</th>
+                            <th>Driver</th>
+                            
+                            <th>Apprehending Officer</th>
+                            <th>Department</th>
+                            <th>Type of Vehicle</th>
+                            <th>Violation</th>  
+                             
+                            <th>Date Received</th>        
+                            <th>Plate No.</th>
+                            <th>Date Recorded</th>  
+                            <th>Case Status</th>
+                            
+                        </tr>
+                    </thead>
+                    <!-- Table body -->
+                    <tbody>
+                        @foreach ($admitted as $admit)
+                        <tr class="table-row" data-bs-toggle="modal" data-bs-target="#exampleModal{{ $admit->id }}">
+                        <td class="symbol-cell {{ symbolBgColor($admit->symbols) }}" onclick="openModal('{{ $admit->symbols }}')">
+                            @if($admit->symbols === 'complete')
+                                <span class="text-white"><i class="bi bi-check-circle-fill"></i> Complete</span>
+                            @elseif($admit->symbols === 'incomplete')
+                                <span class="text-white"><i class="bi bi-exclamation-circle-fill"></i> Incomplete</span>
+                            @elseif($admit->symbols === 'deleting')
+                                <span class="text-white"><i class="bi bi-trash-fill"></i> Deleting</span>
+                            @else
+                                <span class="text-white"><i class="bi bi-question-circle-fill"></i> Incomplete</span>
+                            @endif
+                        </td>
+
+
+
+                            <td>{{ $admit->case_no  ?? 'N/A' }}</td>
+                            <td>{{ $admit->transaction_no ?? 'N/A' }}</td>
+                            <td>{{ $admit->top ?? 'N/A' }}</td>
+                            <td>{{ $admit->driver  ?? 'N/A' }}</td>
+                           
+                            <td>{{ $admit->apprehending_officer ?? 'N/A' }}</td>
+                            <td>
+                                @if ($admit->relatedofficer)
+                                    @foreach ($admit->relatedofficer as $officer)
+                                        {{$officer->department  ?? 'N/A' }}
+                                    @endforeach
+                                @endif
+                            </td>
+                            <td>{{ $admit->plate_no  ?? 'N/A' }}</td>
+                            <td>{{ $admit->typeofvehicle  ?? 'N/A' }}</td>
+                            <td>{{ $admit->violation  ?? 'N/A' }}</td>
+                            
+                            
+                            <td>{{ $admit->date_received  ?? 'N/A' }}</td>
+                            
+                            <td>{{ $admit->created_at  ?? 'N/A' }}</td>
+                        
+                            <td style="background-color: {{ getStatusColor($admit->status) }}">
+    @if($admit->status === 'closed')
+        <span><i class="bi bi-check-circle-fill"></i> Closed</span>
+    @elseif($admit->status === 'in-progress')
+        <span><i class="bi bi-arrow-right-circle-fill"></i> In Progress</span>
+    @elseif($admit->status === 'settled')
+        <span><i class="bi bi-check-circle-fill"></i> Settled</span>
+    @elseif($admit->status === 'unsettled')
+        <span><i class="bi bi-exclamation-circle-fill"></i> Unsettled</span>
+    @else
+        <span><i class="bi bi-question-circle-fill"></i> Unknown</span>
+    @endif
+</td>
+
+
+ 
+
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
-<script>
-    function stopAttachmentLink(event) {
-        event.stopPropagation(); // Prevent event from propagating to parent elements
-        event.preventDefault(); // Prevent the default behavior of anchor tags
-    };
-    document.addEventListener("DOMContentLoaded", function () {
-        const selector = document.getElementById("datatable-selector");
-        const table = document.getElementById("dataTable");
-        const rows = table.getElementsByTagName("tr");
-
-        selector.addEventListener("change", function () {
-            const value = parseInt(selector.value);
-            const totalRows = rows.length - 1; // Exclude header row
-            
-            let startIndex = 1;
-            let endIndex = value;
-
-            if (value === -1) {
-                // Show all rows
-                startIndex = 1;
-                endIndex = totalRows;
-            }
-
-            for (let i = 1; i <= totalRows; i++) {
-                if (i >= startIndex && i <= endIndex) {
-                    rows[i].style.display = "";
-                } else {
-                    rows[i].style.display = "none";
-                }
-            }
-        });
-    });
-</script>
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("searchInput");
-        const table = document.getElementById("dataTable");
-        const rows = table.getElementsByTagName("tr");
-
-        searchInput.addEventListener("keyup", function (event) {
-            const searchTerm = event.target.value.toLowerCase();
-
-            for (let i = 0; i < rows.length; i++) {  // Start loop from 0 to include header row
-                const row = rows[i];
-                const cells = row.getElementsByTagName("td");
-                let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    const cellText = cells[j].textContent.toLowerCase();
-                    if (cellText.includes(searchTerm)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            }
-        });
-    });
-</script>
-
-
-
+    </section>
+  
+{{-- @if (Auth::user()->role == 9 || Auth::user()->role == 2) --}}
 @foreach($admitted as $admit)
 <div class="modal fade" id="exampleModal{{ $admit->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Resolution No: <strong>{{ $admit->resolution_no }}</strong> | Details for: <strong>{{ $admit->name }}</strong></h5>
+                <h5 class="modal-title">
+                    <span class="bi bi-folder me-1"></span> Case Details - {{ $admit->resolution_no }}
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('admitremark') }}" method="POST">
-                @csrf
-                <input type="hidden" name="tas_file_id" value="{{ $admit->id }}">
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <hr>
-                            <p><strong>Resolution No:</strong> {{ $admit->resolution_no }}</p>
-                            <p><strong>Driver:</strong> {{ $admit->driver }}</p>
-                            <p><strong>Contact No:</strong> {{ $admit->contact_no}}</p>
-                            <p><strong>Top:</strong> {{ $admit->top ? $admit->top : 'N/A' }}</p>
-                            <p><strong>Transaction No:</strong> {{ $admit->transaction_no ? $admit->transaction_no : 'N/A' }}</p>
-                            <p><strong>Received Date:</strong> {{ $admit->date_received }}</p>
-                            <hr>
-                            <h6>Violation Details</h6>
-                            <p><strong>Plate No: {{$admit->plate_no}}</strong></p>
-                            <p><strong>Apprehending Officer:</strong><td> {{ $admit->apprehending_officer }}</td>
-                            <p><strong>Violations:</strong></p>
-                            <ul>
-                                @foreach ($admit->relatedViolations as $violation)
-                                    <li>
-                                        {{ $violation->id }} - {{ $violation->violation }}
-                                    </li>
-                                @endforeach
-                            </ul>
-                            
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Remarks</h6>
-                            @if ($admit->remarks)
-                                @php
-                                    $remarks = json_decode($admit->remarks);
-                                    // Check if $remarks is not null before reversing
-                                    $remarks = ($remarks !== null) ? array_reverse($remarks) : [];
-                                @endphp
-                                @if (!empty($remarks))
-                                    <ul>
-                                        @foreach ($remarks as $remark)
-                                            <li>{{ $remark }}</li>
-                                            <br><br>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <p>No remarks available.</p>
-                                @endif
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <h6>Add Remark</h6>
-                            <hr>
-                            <textarea class="form-control" name="remarks" rows="5"></textarea>
-                        </div>
-                    </div>
+
+            <div class="modal-body" id="modal-body-{{ $admit->id }}">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save Remarks</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </form>
+                Loading...
+            </div>
         </div>
     </div>
 </div>
+<div class="modal fade" id="finishModal{{ $admit->id }}" tabindex="-1" role="dialog" aria-labelledby="finishModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="{{ route('finish.case', ['id' => $admit->id]) }}" method="POST"> @csrf <div class="modal-header">
+            <h5 class="modal-title" id="finishModalLabel">Finish Case</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="fine_fee">Fine Fee</label>
+              <input type="number" step="0.01" class="form-control" id="fine_fee" name="fine_fee" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Finish</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endforeach
-</div>
-</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const fetchViolationUrl = @json(route('fetchingadmitted', ['id' => 'ID_PLACEHOLDER']));
+
+    function initializeModalScripts(modalId) {
+        $('#modal-body-' + modalId + ' .remarksForm').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const saveRemarksBtn = form.find('#saveRemarksBtn');
+            const spinner = saveRemarksBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            saveRemarksBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Show success message
+                    showAlert(response.message);
+
+                    // Reload the modal body content
+                    var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
+                    fetch(fetchUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(html => {
+                            $('#modal-body-' + modalId).html(html);
+                            initializeModalScripts(modalId);
+                        })
+                        .catch(err => {
+                            console.error('Failed to reload modal content', err);
+                            $('#modal-body-' + modalId).html('<p>Error loading content</p>');
+                        });
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Show error message
+                    showAlert('Failed to save remarks. Please try again later.', 'danger');
+                }
+            });
+        });
+
+        // Handle Finish Case form submission
+        $('#finishCaseFormTemplate').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const spinner = submitBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            submitBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+
+                    // Show success message
+                    showAlert(response.message);
+
+                    // Close the modal
+                    $('#finishModalTemplate').modal('hide');
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+
+                    // Show error message
+                    showAlert('Failed to finish case. Please try again later.', 'danger');
+                }
+            });
+        });
+    }
+
+    function showAlert(message, type = 'success') {
+        const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+        </div>`;
+        const alertElement = $(alertHtml).appendTo('body').hide().fadeIn();
+
+        setTimeout(() => {
+            alertElement.fadeOut(() => {
+                alertElement.remove();
+            });
+        }, 3000); // 3 seconds delay
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
+            var modalBody = modal.querySelector('.modal-body');
+            
+            var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
+            console.log('Fetching URL: ', fetchUrl);
+            
+            setTimeout(() => {
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                        initializeModalScripts(modalId);
+
+                        // Attach the Finish Case modal dynamically
+                        const finishModalHtml = $('#finishModalTemplate').html();
+                        $('#modal-body-' + modalId).append(finishModalHtml);
+                        $('#finishCaseFormTemplate').attr('action', '{{ route('finish.case', ['id' => 'modalId']) }}');
+                    });
+            }, 1500); // 1.5 seconds delay
+        });
+    });
+
+    $(document).ready(function () {
+        // Check if there's a cached modal ID and open it
+        var cachedModalId = localStorage.getItem('modalId');
+        if (cachedModalId) {
+            $('#' + cachedModalId).modal('show');
+        }
+
+        $('.modal').on('shown.bs.modal', function (e) {
+            // Cache the ID of the opened modal
+            localStorage.setItem('modalId', e.target.id);
+        });
+
+        $('.modal').on('hidden.bs.modal', function () {
+            // Remove cached modal ID when the modal is closed
+            localStorage.removeItem('modalId');
+        });
+    });
+</script>
+
+
+<script>
+    // Function to open a URL in a new tab and print
+    function openInNewTabAndPrint(url) {
+        const win = window.open(url, '_blank');
+        win.onload = function () {
+            win.print();
+        };
+    }
+</script>
+
+{{-- <script>
+    const fetchViolationUrl = @json(route('fetchingadmit', ['id' => 'id']));
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Button that triggered the modal
+            var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
+            var modalBody = modal.querySelector('.modal-body');
+            
+            // Generate the URL for fetching violation details
+            var fetchUrl = fetchViolationUrl.replace('id', modalId);
+            console.log(fetchUrl);
+            
+            // Delay the fetch request by 1.5 seconds
+            setTimeout(() => {
+                // Fetch content for the modal via AJAX or a fetch request
+                fetch(fetchUrl)
+                    .then(response => response.text())
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error('Failed to load modal content', err);
+                        modalBody.innerHTML = '<p>Error loading content</p>';
+                    });
+            }, 1500); // 1.5 seconds delay
+        });
+    });
+</script>
+
+<script defer>
+    $(document).ready(function () {
+    // Check if there's a cached modal ID and open it
+    var cachedModalId = localStorage.getItem('modalId');
+    if (cachedModalId) {
+        $('#' + cachedModalId).modal('show');
+    }
+
+    $('.modal').on('shown.bs.modal', function (e) {
+        // Cache the ID of the opened modal
+        localStorage.setItem('modalId', e.target.id);
+    });
+
+    $('.modal').on('hidden.bs.modal', function () {
+        // Remove cached modal ID when the modal is closed
+        localStorage.removeItem('modalId');
+    });
+
+    // Function to initialize modal scripts
+    function initializeModalScripts() {
+        $('.remarksForm').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const saveRemarksBtn = form.find('#saveRemarksBtn');
+            const spinner = saveRemarksBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            saveRemarksBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Update the remarks section with new data
+                    const remarksList = form.closest('.modal-content').find('.remarks-list');
+                    remarksList.empty();
+                    response.remarks.forEach(function (remark) {
+                        remarksList.append('<li>' + remark + '</li>');
+                    });
+
+                    // Display success alert
+                    alert('Remarks saved successfully.');
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+
+                    // Display error alert
+                    alert('Failed to save remarks. Please try again later.');
+                }
+            });
+        });
+    }
+
+    // Initialize modal scripts on page load
+    initializeModalScripts();
+});
+    
+</script> --}}
+
+
+
 
 
   </main><!-- End #main -->

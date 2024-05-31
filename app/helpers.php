@@ -17,5 +17,28 @@ if (!function_exists('getStatusColor')) {
     }
 }
 
-// Define other helper functions as needed...
+
+
+if (!function_exists('symbolBgColor')) {
+    /**
+     * Get the background color CSS class based on symbol status.
+     *
+     * @param string $symbol
+     * @return string
+     */
+    function symbolBgColor($symbol)
+    {
+        switch ($symbol) {
+            case 'complete':
+                return 'bg-success';
+            case 'incomplete':
+                return 'bg-danger';
+            case 'deleting':
+                return 'bg-warning';
+            default:
+                return 'bg-secondary';
+        }
+    }
+}
+
 

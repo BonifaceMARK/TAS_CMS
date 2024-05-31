@@ -1,3 +1,13 @@
+
+<script>
+    // Show loading screen when the page starts loading
+    $(window).on('load', function () {
+        $('#pageLoader').css('transition', 'opacity 1s').css('opacity', '0');
+        setTimeout(function() {
+            $('#pageLoader').css('display', 'none');
+        }, 1000);
+    });
+</script>
 <!-- Vendor JS Files -->
 <script src="{{ asset('assets/vendor/apexcharts/apexcharts.min.js') }}"></script>
 <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

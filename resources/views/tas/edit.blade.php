@@ -1,4 +1,4 @@
-@extends('layouts.title')
+
 
 @section('title', env('APP_NAME'))
 
@@ -44,47 +44,75 @@
     <div class="card recent-violations overflow-auto">
         <div class="card-body">
             <h5 class="card-title">Edit Contested Cases<span></span></h5>
-            <table class="table table-borderless datatable">
-                <thead>
-                    <tr>
-                        <th scope="col">Case No.</th>
-                        <th scope="col">TOP</th>
-                        <th scope="col">Driver</th>
-                        <th scope="col">Apprehending Officer</th>
-                        <th scope="col">Violation</th>
-                        <th scope="col">Transaction No:</th>
-                        <th scope="col">Date Received</th>
-                        <th scope="col">Plate No.</th>
-                        <th scope="col">Contact No.</th>
-                        <th scope="col">Remarks</th>
-                        <th scope="col">File Attachment</th>
-                        <th scope="col">Actions</th> <!-- Add this table header for actions -->
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($recentViolationsToday as $violation)
-                    <tr class="table-row">
-                        <td>{{ $violation->case_no }}</td>
-                        <td>{{ $violation->top }}</td>
-                        <td>{{ $violation->driver }}</td>
-                        <td>{{ $violation->apprehending_officer }}</td>
-                        <td>{{ $violation->violation }}</td>
-                        <td>{{ $violation->transaction_no }}</td>
-                        <td>{{ $violation->date_received }}</td>
-                        <td>{{ $violation->plate_no }}</td>
-                        <td>{{ $violation->contact_no }}</td>
-                        <td>{{ $violation->remarks }}</td>
-                        <td>
-    
-</td>
-
-                        <td>
-                            <button class="btn btn-primary editViolation" data-id="{{ $violation->id }}" data-bs-toggle="modal" data-bs-target="#editViolationModal{{ $violation->id }}">Edit</button>
-                        </td>
-                    </tr>
+            <table class="table table-striped table-bordered table-hover datatable">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Record Status</th>
+            <th scope="col">Case No.</th>
+            <th scope="col">TOP</th>
+            <th scope="col">Driver</th>
+            <th scope="col">Apprehending Officer</th>
+            <th scope="col">Department</th>
+            <th scope="col">Type of Vehicle</th>
+            <th scope="col">Violation</th>
+            <th scope="col">Transaction No.</th>
+            <th scope="col">Date Received</th>
+            <th scope="col">Plate No.</th>
+            <th scope="col">Date Recorded</th>
+            <th scope="col">Case Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($recentViolationsToday as $violation)
+        <tr class="table-row" data-bs-toggle="modal" data-bs-target="#editViolationModal{{ $violation->id }}">
+            <td class="align-middle symbol-cell {{ symbolBgColor($violation->symbols) }}" onclick="openModal('{{ $violation->symbols }}')">
+                @if($violation->symbols === 'complete')
+                    <span class="text-white"><i class="bi bi-check-circle-fill"></i> Complete</span>
+                @elseif($violation->symbols === 'incomplete')
+                    <span class="text-white"><i class="bi bi-exclamation-circle-fill"></i> Incomplete</span>
+                @elseif($violation->symbols === 'deleting')
+                    <span class="text-white"><i class="bi bi-trash-fill"></i> Deleting</span>
+                @else
+                    <span class="text-white"><i class="bi bi-question-circle-fill"></i> Incomplete</span>
+                @endif
+            </td>
+            <td class="align-middle">{{ $violation->case_no }}</td>
+            <td class="align-middle">{{ $violation->top }}</td>
+            <td class="align-middle">{{ $violation->driver }}</td>
+            <td class="align-middle">{{ $violation->apprehending_officer }}</td>
+            <td class="align-middle">
+                @if ($violation->relatedofficers && $violation->relatedofficers->isNotEmpty())
+                    @foreach ($violation->relatedofficers as $officer)
+                        {{ $officer->department }}
+                        @if (!$loop->last), @endif
                     @endforeach
-                </tbody>
-            </table>
+                @endif
+            </td>
+            <td class="align-middle">{{ $violation->typeofvehicle }}</td>
+            <td class="align-middle">{{ $violation->violation }}</td>
+            <td class="align-middle">{{ $violation->transaction_no }}</td>
+            <td class="align-middle">{{ $violation->date_received }}</td>
+            <td class="align-middle">{{ $violation->plate_no }}</td>
+            <td class="align-middle">{{ $violation->created_at }}</td>
+            <td class="align-middle" style="background-color: {{ getStatusColor($violation->status) }}">
+                @if($violation->status === 'closed')
+                    <span><i class="bi bi-check-circle-fill"></i> Closed</span>
+                @elseif($violation->status === 'in-progress')
+                    <span><i class="bi bi-arrow-right-circle-fill"></i> In Progress</span>
+                @elseif($violation->status === 'settled')
+                    <span><i class="bi bi-check-circle-fill"></i> Settled</span>
+                @elseif($violation->status === 'unsettled')
+                    <span><i class="bi bi-exclamation-circle-fill"></i> Unsettled</span>
+                @else
+                    <span><i class="bi bi-question-circle-fill"></i> Unknown</span>
+                @endif
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+
+
         </div>
     </div>
 </div><!-- End Recent Violations -->
@@ -92,7 +120,7 @@
 <!-- Modal -->
 @foreach($recentViolationsToday as $violation)
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
@@ -107,48 +135,79 @@
                 @method('PUT')
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-6"> 
                             <!-- Violation details section -->
-                            <h6 class="fw-bold mb-3">Violation Details</h6>
-                            <div class="mb-3">
-                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
-                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="top{{ $violation->id }}" class="form-label">TOP</label>
-                                <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
-                                <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
-                                <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="violation{{ $violation->id }}" class="form-label">Violation</label>
-                                <input type="text" class="form-control" id="violation{{ $violation->id }}" name="violation" value="{{ $violation->violation }}">
-                                @php
-                                    $violas = json_decode($violation->violation, true); 
-                                @endphp
-                                @if (!empty($violas))
-                                        @foreach($violas as $viola)
-                                        <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation" list="violations[]" value="{{ $viola }}">
-                                    @endforeach
-                                @endif
-                                <input type="text" class="form-control" id="remarks{{ $violation->id }}"  name="violation[]" list="violations" value="">
-                                <datalist id="violations">
-                                    <!-- Populate options dynamically using PHP or JavaScript -->
-                                    @foreach($violations as $violationlist)
-                                        <option value="{{ $violationlist->code }}">{{ $violationlist->violation }}</option>
-                                    @endforeach
-                                </datalist>
-                            </div>
+                            <h5 class="fw-bold mb-3 bi bi-card-list"> Violation Details</h5>
+                            <div class="row">
+    <div class="col-md-6">
+        <!-- Case No. -->
+        <div class="mb-3">
+            <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+            <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
+        </div>
+        <!-- TOP -->
+        <div class="mb-3">
+            <label for="top{{ $violation->id }}" class="form-label">TOP</label>
+            <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!-- Driver -->
+        <div class="mb-3">
+            <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
+            <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
+        </div>
+        <!-- Apprehending Officer -->
+        <div class="mb-3">
+            <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
+            <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
+        </div>
+    </div>
+</div>
+<div class="mb-3">
+    <label for="violation{{ $violation->id }}" class="bi bi-exclamation-diamond-fill form-label"> Violations</label>
+    @if(is_array($violation->violation))
+        @foreach($violation->violation as $index => $singleViolation)
+            @php
+                // Split the violation into text, timestamp, and user using the ' - ' separator
+                $parts = explode(" - ", $singleViolation);
+                // Extract text, timestamp, and user from the violation
+                $text = $parts[0] ?? '';
+                $timestamp = $parts[1] ?? '';
+                $user = $parts[2] ?? '';
+            @endphp
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <!-- Violation input field -->
+                    <div class="input-group">
+                        <span class="input-group-text">Violation</span>
+                        <input type="text" class="form-control" id="violation{{ $violation->id }}_{{ $index }}" name="violation[{{ $index }}][text]"  value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Violation">
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+</div>
+
+
+
+
+
+
+
+
+<div class="input-group">
+    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
+    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violations[]" value="" placeholder="Add new Violation">
+</div>
+
+
+
+                            
                         </div>
                         <div class="col-lg-6">
     <!-- Additional details section -->
-    <h6 class="fw-bold mb-3">Additional Details</h6>
+    <h5 class="fw-bold mb-3 bi bi-collection me-1"> Additional Details</h5>
     <div class="row">
         <div class="col-md-6 mb-3">
             <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
@@ -166,74 +225,67 @@
             <label for="contactNo{{ $violation->id }}" class="form-label">Contact No.</label>
             <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
         </div>
-        <div class="col-md-12 mb-3">
-            <label for="remarks{{ $violation->id }}" class="form-label">Remarks</label>
-            <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks" value="{{ $violation->remarks }}">
+        <div class="col-md-12 mb-2">
+    <label class="bi bi-bookmarks-fill form-label"> Remarks</label>
+
+    @if(is_array($violation->remarks))
+        @foreach ($violation->remarks as $index => $remark)
             @php
-                $remarks = json_decode($violation->remarks, true); 
+                // Split the remark into text, timestamp, and user using the ' - ' separator
+                $parts = explode(" - ", $remark);
+                // Extract text, timestamp, and user from the remark
+                $text = $parts[0] ?? '';
+                $timestamp = $parts[1] ?? '';
+                $user = $parts[2] ?? '';
             @endphp
-            @if (!empty($remarks))
-            @foreach($remarks as $remark)
-                <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" value="{{ $remark }}">
-            @endforeach
-        @endif
-        <!-- Always include one input field for remarks --> 
-        <input type="text" class="form-control" id="remarks{{ $violation->id }}" name="remarks[]" >
-        </div>
-    </div>
-
-    <div class="text-end">
-                            <button type="submit" class="btn btn-success mt-3">Save changes</button>
-                        </div>
- <hr>
-</form>
-  <!-- File Attachments Section -->
-  <div class="row mt-4">
-                            <div class="col-md-12">
-                                <h6 class="fw-bold mb-3">File Attachments</h6>
-                                @php
-                                    $attachments = json_decode($violation->file_attach, true);
-                                @endphp
-
-                                @if (!empty($attachments))
-                                    @foreach ($attachments as $attachment)
-                                        <div class="input-group mt-2">
-                                            <input type="text" class="form-control" value="{{ $attachment }}" readonly>
-                                           <!-- Button to trigger the deletion confirmation -->
-<div class="input-group-append">
-    <button type="button" class="btn btn-danger bi bi-trash3-fill delete-attachment" data-attachment="{{ $attachment }}">Delete</button>
-</div>
-                                        </div>
-                                    @endforeach
-                                @endif
-                                <form id="attachmentForm" method="POST" enctype="multipart/form-data" data-route="{{ route('tasfile.attach', $violation->id) }}">
-    @csrf
-    <div class="input-group mt-2"> 
-        <input type="file" class="form-control" name="file_attach_existing[]" multiple>
-        <button type="submit" class="btn btn-primary">Attach Files</button>
-    </div>
-</form>
-
-                            </div>
-                        </div>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <!-- Remarks input -->
+                    <div class="input-group">
+                        <span class="input-group-text bi bi-clipboard-check"></span>
+                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete Case</button>
+
+            </div>
+        @endforeach
+    @endif
+  
+</div>
+
+
+
+
+<div class="col-md-12 mb-3">
+    <label class="bi bi-folder-fill form-label"> File Attachments</label>
+    @php
+        $attachments = explode(',', $violation->file_attach);
+    @endphp
+    @if (!empty($attachments))
+        @foreach ($attachments as $attachment)
+            <div class="input-group mt-2">
+                <input type="file" class="form-control" name="file_attach_existing[]">
+                <input type="text" class="form-control" value="{{ $attachment }}" readonly>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger" data-attachment="{{ $attachment }}">Delete</button>
                 </div>
-       
-        </div>
+            </div>
+        @endforeach
+    @endif
+    <div class="input-group mt-2">
+        <input type="file" class="form-control" name="file_attach_new[]">
+        <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span> 
     </div>
 </div>
 
+        
+
 
     </div>
 </div>
-
-                        <div class="col-md-12">
-                            <!-- History section -->
+<!-- HISTORY -->
+       <!--                  <div class="col-md-12">
+                      
                             <h6 class="fw-bold mt-4">History</h6>
                             <div class="table-responsive">
     <table class="table table-striped">
@@ -272,11 +324,7 @@
         @endif
     </li>
 @endforeach
-
-
-
 </ul>
-
                         </td>
                     </tr>
                 @endforeach
@@ -287,11 +335,11 @@
             @endif
         </tbody>
     </table>
-</div>
-
-                        </div>
+</div> 
+                        </div>-->
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Save changes</button>
@@ -326,27 +374,6 @@
 @endforeach
 
 
-<!-- Modal -->
-<div class="modal fade" id="violationsModal" tabindex="-1" aria-labelledby="violationsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="violationsModalLabel">List of Violations</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          @foreach($violations as $violation)
-          <p class="violation" onclick="selectViolation('{{ $violation->code }}')">
-            <strong>{{ $violation->code }}</strong> - {{ $violation->violation }}
-          </p>
-          @endforeach
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
   
     
   </main><!-- End #main -->

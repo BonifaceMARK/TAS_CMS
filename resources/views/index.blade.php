@@ -1,4 +1,4 @@
-@extends('layouts.title')
+
 
 @section('title', env('APP_NAME'))
 
@@ -422,30 +422,30 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Cases Handled by {{ $officer->apprehending_officer ?: 'Unknown' }}</h5>
+                        <h5 class="modal-title">Cases Handled by {{ is_string($officer->apprehending_officer) ? htmlspecialchars($officer->apprehending_officer, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>Total Cases:</strong> {{ $officer->total_cases }}</p>
+                        <p><strong>Total Cases:</strong> {{ is_string($officer->total_cases) ? htmlspecialchars($officer->total_cases, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
                         <div class="list-group">
                             @php
-                                $caseNumbers = explode(',', $officer->case_numbers);
+                                $caseNumbers = is_string($officer->case_numbers) ? explode(',', $officer->case_numbers) : [];
                             @endphp
                             @foreach($caseNumbers as $caseNo)
                                 <div class="list-group-item">
-                                    <p><strong>Case No:</strong> {{ $caseNo }}</p>
+                                    <p><strong>Case No:</strong> {{ is_string($caseNo) ? htmlspecialchars($caseNo, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
                                     <!-- Retrieve other case details as needed -->
                                     <!-- For example: -->
                                     @php
                                         $case = App\Models\TasFile::where('case_no', $caseNo)->first();
                                     @endphp
                                     @if($case)
-                                        <p><strong>Driver:</strong> {{ $case->driver }}</p>
-                                        <p><strong>Violation:</strong> {{ $case->violation }}</p>
-                                        <p><strong>Date Received:</strong> {{ $case->date_received }}</p>
-                                        <p><strong>Contact No:</strong> {{ $case->contact_no }}</p>
-                                        <p><strong>Plate No:</strong> {{ $case->plate_no }}</p>
-                                        <p><strong>Remarks:</strong> {{ $case->remarks ?? 'No remarks' }}</p>
+                                        <p><strong>Driver:</strong> {{ is_string($case->driver) ? htmlspecialchars($case->driver, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
+                                        <p><strong>Violation:</strong> {{ is_string($case->violation) ? htmlspecialchars($case->violation, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
+                                        <p><strong>Date Received:</strong> {{ is_string($case->date_received) ? htmlspecialchars($case->date_received, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
+                                        <p><strong>Contact No:</strong> {{ is_string($case->contact_no) ? htmlspecialchars($case->contact_no, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
+                                        <p><strong>Plate No:</strong> {{ is_string($case->plate_no) ? htmlspecialchars($case->plate_no, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Unknown' }}</p>
+                                        
                                     @else
                                         <em>Case details not found.</em>
                                     @endif
@@ -461,10 +461,6 @@
 @else
     <p>No officers found.</p>
 @endif
-
-
-
-
 
 
 

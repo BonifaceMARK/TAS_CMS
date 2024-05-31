@@ -28,17 +28,17 @@ class DashboardController extends Controller
             $revenueThisMonth = TasFile::whereMonth('date_received', date('m'))->count();
 
             $previousMonthRevenue = TasFile::whereMonth('date_received', Carbon::now()->subMonth())->count();
-        
+
             // // Calculate the percentage change
             // $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
-        
+
             // $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
             $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
             $customersThisYear = TasFile::whereYear('date_received', now())->count();
             $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
             $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])->count() / 7;
             $admittedData = Admitted::all();
-            $tasFileData = TasFile::all();  
+            $tasFileData = TasFile::all();
             $chartData = $admittedData->map(function ($item) {
             $violationCount = 0;
             if ($item->violation) {
@@ -50,7 +50,7 @@ class DashboardController extends Controller
                 'violation_count' => $violationCount,
                 'transaction_date' => $item->transaction_date,
             ];
-        });      
+        });
         $departmentsData = ApprehendingOfficer::all();
         $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
         $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
@@ -93,13 +93,13 @@ class DashboardController extends Controller
         ->orderByDesc('total_cases')
         ->get();
 
-        
+
         return view('index', compact('officers','yearlyData','countByMonth','unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
     public function editViolation(Request $request, $id){
         $violation = Violation::find($id);
-        
+
 
         if (!$violation) {
             return redirect()->back()->with('error', 'Violation not found.');
@@ -137,7 +137,7 @@ class DashboardController extends Controller
     public function tasManage(){
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
         // dd($recentViolationsToday[1]);
-        $violations = TrafficViolation::all();
+        $violations = TrafficViolation::orderBy('code', 'asc')->get();
         return view('tas.manage',compact('officers','violations'));
     }
     public function updateAdmittedCase(Request $request, $id){
@@ -176,75 +176,56 @@ class DashboardController extends Controller
         return view('case_archives');
     }
 
-    public function tasView()
-    {
-        $pageSize = 15; // Define the default page size
-        $tasFiles = TasFile::all()->sortByDesc('case_no');
+   public function tasView()
+{
+    $pageSize = 15; // Define the default page size
+    $tasFiles = TasFile::all()->sortByDesc('case_no');
+    $officers = collect();
     
-        // Initialize a collection to hold related officers
-        $officers = collect();
-    
-        // Iterate through each TasFile record
-        foreach ($tasFiles as $tasFile) {
-            // Extract the name of the apprehending officer for the current TasFile
-            $officerName = $tasFile->apprehending_officer;
-            
-            // Query the ApprehendingOfficer model for officers with the given name
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-
-            $officers = $officers->merge($officersForFile);
-            
-   
-            $tasFile->relatedofficer = $officersForFile;
-
-            $remarks = json_decode($tasFile->remarks);
-            
-            if (is_array($remarks)) {
-                $remarks = array_reverse($remarks);
-            } else {
-                // If $remarks is not an array, set it to an empty array
+    foreach ($tasFiles as $tasFile) {
+        $officerName = $tasFile->apprehending_officer;
+        $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+        $officers = $officers->merge($officersForFile);
+        $tasFile->relatedofficer = $officersForFile;
+        
+        if (is_string($tasFile->remarks)) {
+            $remarks = json_decode($tasFile->remarks, true);
+            if ($remarks === null) {
                 $remarks = [];
             }
-            $tasFile->remarks = is_array($remarks) ? $remarks : [];
+        } else if (is_array($tasFile->remarks)) {
+            $remarks = $tasFile->remarks;
+        } else {
+            $remarks = [];
         }
+        $tasFile->remarks = $remarks;
 
-        foreach ($tasFiles as $tasFile) {
-
-            $violations = json_decode($tasFile->violation);
-    
-            if ($violations) {
-
-                if (is_array($violations)) {
-
-                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-                } else {
-
-                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
-                }
+        $violations = json_decode($tasFile->violation);
+        if ($violations) {
+            if (is_array($violations)) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
             } else {
-
-                $relatedViolations = [];
+                $relatedViolations = TrafficViolation::where('code', $violations)->get();
             }
-
-            $tasFile->relatedViolations = $relatedViolations;
+        } else {
+            $relatedViolations = [];
         }
-    
-
-        return view('tas.view', compact('tasFiles'));
+        $tasFile->relatedViolations = $relatedViolations;
     }
+
+    return view('tas.view', compact('tasFiles'));
+}
+
     
     
     
     public function admitmanage()
     {
-         // Retrieve data: count of traffic violations per plate number
-        $trafficData = Admitted::select('violation', DB::raw('COUNT(*) as total'))
-                           ->groupBy('violation')
-                           ->get();
-
-
-        $admitteds = Admitted::all(); // Retrieve all admitted cases
-        return view('admitted.manage', compact('admitteds','trafficData'));
+        $officers = ApprehendingOfficer::select('officer', 'department')->get();
+        // dd($recentViolationsToday[1]);
+        $violations = TrafficViolation::orderBy('code', 'asc')->get();
+        // return view('tas.manage',compact('officers','violations'));
+        return view('admitted.manage', compact('officers','violations'));
     }
     public function admitview(){
         // Retrieve admitted data
@@ -261,67 +242,104 @@ class DashboardController extends Controller
                 // If $violations is null, set $relatedViolations to an empty collection
                 $relatedViolations = [];
             }
-        
+
             $admit->relatedViolations = $relatedViolations;
         }
 
-        // Pass the modified admitted data to the view
+        $pageSize = 15; // Define the default page size
+        $admitted = Admitted::all()->sortByDesc('resolution_no');
+        $officers = collect();
+        
+        foreach ($admitted as $admit) {
+            $officerName = $admit->apprehending_officer;
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+            $officers = $officers->merge($officersForFile);
+            $admit->relatedofficer = $officersForFile;
+            
+            if (is_string($admit->remarks)) {
+                $remarks = json_decode($admit->remarks, true);
+                if ($remarks === null) {
+                    $remarks = [];
+                }
+            } else if (is_array($admit->remarks)) {
+                $remarks = $admit->remarks;
+            } else {
+                $remarks = [];
+            }
+            $admit->remarks = $remarks;
+    
+            $violations = json_decode($admit->violation);
+            if ($violations) {
+                if (is_array($violations)) {
+                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+                } else {
+                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
+                }
+            } else {
+                $relatedViolations = [];
+            }
+            $admit->relatedViolations = $relatedViolations;
+        }
+    
         return view('admitted.view', compact('admitted'));
     }
-    public function saveRemarks(Request $request){
+    public function saveRemarks(Request $request) {
         $request->validate([
             'remarks' => 'required|string',
-            'tas_file_id' => 'required|exists:tas_files,id', 
+            'tas_file_id' => 'required|exists:tas_files,id',
         ]);
-
+    
         try {
             $id = $request->input('tas_file_id');
             $remarks = $request->input('remarks');
             $tasFile = TasFile::findOrFail($id);
             $existingRemarks = json_decode($tasFile->remarks, true) ?? [];
             $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
-            $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
+            $newRemark = $remarks . ' - ' . $timestamp .' - '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
-        
+    
             DB::beginTransaction();
             $tasFile->update(['remarks' => $updatedRemarksJson]);
             DB::commit();
-        
-            // Send back a response with JavaScript to close the tab
-            $remarksHtml = view('remarksupdate', ['remarks' => $tasFile->remarks])->render();
-            return response()->json(['remarks' => $remarksHtml]);
-            // return back()->with('success', 'Remarks saved successfully.');
+    
+            // Send back a response with 201 Created status code
+            // Here, we are also returning a success message in the response body
+            return response()->json(['message' => 'Remarks saved successfully.'], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
-            return back()->withErrors([$th->getMessage()]);
+            return response()->json(['error' => $th->getMessage()], 500); // You can return a different error status code if needed
         }
-        
     }
     //admitted remarks
     public function admitremark(Request $request){
         $request->validate([
             'remarks' => 'required|string',
-            'tas_file_id' => 'required|exists:tas_files,id', 
+            'tas_file_id' => 'required|exists:tas_files,id',
         ]);
+    
         try {
             $id = $request->input('tas_file_id');
             $remarks = $request->input('remarks');
-            $admitted = admitted::findOrFail($id);
-            $existingRemarks = json_decode($admitted->remarks, true) ?? [];
+            $tasFile = admitted::findOrFail($id);
+            $existingRemarks = json_decode($tasFile->remarks, true) ?? [];
             $timestamp = Carbon::now('Asia/Manila')->format('g:ia m/d/y');
-            $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
+            $newRemark = $remarks . ' - ' . $timestamp .' - '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
+    
             DB::beginTransaction();
-            $admitted->update(['remarks' => $updatedRemarksJson]);
+            $tasFile->update(['remarks' => $updatedRemarksJson]);
             DB::commit();
-            return redirect()->back()->with('success', 'Remarks Updated');
+    
+            // Send back a response with 201 Created status code
+            // Here, we are also returning a success message in the response body
+            return response()->json(['message' => 'Remarks saved successfully.'], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
-            return back()->with('error', 'Failed to save remarks. Please try again later.');
+            return response()->json(['error' => $th->getMessage()], 500); // You can return a different error status code if needed
         }
     }
     public function submitForm(Request $request)
@@ -342,11 +360,11 @@ class DashboardController extends Controller
                 'file_attachment.*' => 'nullable|file|max:5120',
                 'typeofvehicle' => 'required|string', // Add validation for typeofvehicle
             ]);
-    
+
             DB::beginTransaction();
-    
+
             $existingTasFile = TasFile::where('case_no', $validatedData['case_no'])->first();
-    
+
             if (!$existingTasFile) {
                 $tasFile = new TasFile([
                     'case_no' => $validatedData['case_no'],
@@ -361,7 +379,7 @@ class DashboardController extends Controller
                     'status' => $validatedData['status'],
                     'typeofvehicle' => $validatedData['typeofvehicle'], // Add typeofvehicle field to be saved
                 ]);
-    
+
                 if ($request->hasFile('file_attachment')) {
                     $filePaths = [];
                     $cx = 1;
@@ -374,14 +392,14 @@ class DashboardController extends Controller
                     }
                     $tasFile->file_attach = json_encode($filePaths);
                 }
-    
+
                 $tasFile->save();
             } else {
                 return redirect()->back()->with('error', 'Case no. already exists.');
             }
-    
+
             DB::commit();
-    
+
             return redirect()->back()->with('success', 'Form submitted successfully!');
         } catch (ValidationException $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -390,7 +408,7 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-    
+
     public function admittedsubmit(Request $request) // admitted
     {
          // dd($request->all());
@@ -422,9 +440,9 @@ class DashboardController extends Controller
                     'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                     'plate_no' => $validatedData['plate_no'],
                     'contact_no' => $validatedData['contact_no'],
-                    
+
                 ]);
-                
+
                 if ($request->hasFile('file_attachment')) {
                     $filePaths = [];
                     $cx = 1;
@@ -437,7 +455,7 @@ class DashboardController extends Controller
                     }
                     $admitted->file_attach = json_encode($filePaths);
                 }
-    
+
                 $admitted->save();
             } else {
                 return redirect()->back()->with('error', 'resolution no. already exists.');
@@ -446,49 +464,49 @@ class DashboardController extends Controller
             return redirect()->back()->with('success', 'Form submitted successfully!');
         } catch (ValidationException $e) {
             return redirect()->back()->with('error', $e->getMessage());
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-    public function updateAdmitted(Request $request){
-        $data = $request->only([
-            'resolution_no',
-            'top',
-            'name',
-            'violation',
-            'transaction_no',
-            'transaction_date',
-            'plate_no',
-            'contact_no',
-            'remarks',
-            'file_attach',
-        ]);
+    // public function updateAdmitted(Request $request){
+    //     $data = $request->only([
+    //         'resolution_no',
+    //         'top',
+    //         'name',
+    //         'violation',
+    //         'transaction_no',
+    //         'transaction_date',
+    //         'plate_no',
+    //         'contact_no',
+    //         'remarks',
+    //         'file_attach',
+    //     ]);
 
-        try {
-            // Find the admitted case by ID
-            $admitted = Admitted::findOrFail($request->id);
+    //     try {
+    //         // Find the admitted case by ID
+    //         $admitted = Admitted::findOrFail($request->id);
 
-            // Update the admitted case with the provided data
-            $admitted->update($data);
+    //         // Update the admitted case with the provided data
+    //         $admitted->update($data);
 
-            return response()->json(['message' => 'Admitted case updated successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update admitted case', 'message' => $e->getMessage()], 500);
-        }
-    }
+    //         return response()->json(['message' => 'Admitted case updated successfully']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'Failed to update admitted case', 'message' => $e->getMessage()], 500);
+    //     }
+    // }
     public function profile(Request $request){
         $userId = $request->id;
-        $user = User::find($userId); 
-    
+        $user = User::find($userId);
+
         if (!$user) {
             return redirect()->route('dashboard')->with('error', 'User not found.');
         }
         return view('profile', ['user' => $user]);
     }
     public function edit($id){
-        $user = User::findOrFail($id); 
+        $user = User::findOrFail($id);
         return view('edit_profile', compact('user'));
     }
     public function update(Request $request, $id){
@@ -497,14 +515,23 @@ class DashboardController extends Controller
                 'fullname' => 'required|string|max:255',
                 'username' => 'required|string|max:255|unique:users,username,' . $id,
                 'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+                'role' => 'nullable|string|max:255',
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:6144'
             ]);
             $user = User::findOrFail($id);
+            if ($request->hasFile('profile_picture')) {
+                $profilePicture = $request->file('profile_picture');
+                $filename = Auth::user()->id . '_' . $profilePicture->getClientOriginalName();
+                // Store the uploaded file in storage/app/public/profiles directory
+                $path = $profilePicture->storeAs('public/profiles', $filename);
+            }
             $user->update([
                 'fullname' => $request->input('fullname'),
                 'username' => $request->input('username'),
                 'email' => $request->input('email'),
+                'role' => $request->input('role'),
             ]);
-    
+
             return redirect()->back()->with('success', 'Profile updated successfully.');
         } catch (QueryException $e) {
             return redirect()->back()->with('error', 'Database error: ' . $e->getMessage());
@@ -512,8 +539,9 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
+    
     public function change($id){
-        $user = User::findOrFail($id); 
+        $user = User::findOrFail($id);
         return view('change_password', compact('user'));
     }
     public function updatePassword(Request $request){
@@ -522,17 +550,17 @@ class DashboardController extends Controller
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->with('error', 'Current password does not match.');
             }
-    
+
             $user->password = Hash::make($request->new_password);
             $user->save();
-    
+
             return back()->with('success', 'Password updated successfully.');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }
     public function management(){
-        $users = User::all(); 
+        $users = User::all();
 
         return view('user_management', ['users' => $users]);
     }
@@ -553,11 +581,11 @@ class DashboardController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8',
             ]);
-    
+
             // Begin a database transaction
             DB::beginTransaction();
-    
-            
+
+
             $user = new User([
                 'fullname' => $request->input('fullname'),
                 'username' => $request->input('username'),
@@ -566,31 +594,44 @@ class DashboardController extends Controller
                 'email_verified_at' => now(),
                 'password' => bcrypt($request->input('password')),
             ]);
-    
-            
+
+
             $user->save();
-    
-            
+
+
             DB::commit();
-    
-            
+
+
             return redirect()->route('user_management')->with('success', 'User created successfully');
         } catch (\Exception $e) {
-            
+
             DB::rollBack();
-    
-            
+
+
             Log::error('Error creating user: ' . $e->getMessage());
-    
-           
+
+
             return redirect()->back()->with('error', 'Error creating user: ' . $e->getMessage());
         }
-    }   
-    public function violationadd(){
-        return view('addvio');
     }
-    public function officergg(){ 
-        return view('addoffi');
+    public function violationadd(){
+        return view('ao.addvio');
+    }
+    public function officergg(){
+        return view('ao.addoffi');
+    }    public function editoffi(){
+
+        $officers = ApprehendingOfficer::all();
+
+        // dd($officers[1]);
+        return view('ao.editoffi', compact('officers'));
+    }
+    public function edivio(){
+
+    $violations = TrafficViolation::orderBy('code', 'asc')->get();
+
+    // dd($officers[1]);
+    return view('ao.editvio', compact('violations'));
     }
     //add officer
     public function save_offi(Request $request){
@@ -626,7 +667,7 @@ class DashboardController extends Controller
 
             return redirect()->back()->with('error', 'Error creating Officer: ' . $e->getMessage());
         }
-    } 
+    }
     // add violation//
     public function addvio(Request $request){
         try {
@@ -634,86 +675,59 @@ class DashboardController extends Controller
                 'code' => 'string',
                 'violation' => 'string',
             ]);
-    
-           
+
+
             DB::beginTransaction();
             $user = new TrafficViolation([
                 'code' => $request->input('code'),
                 'violation' => $request->input('violation'),
                 ]);
-    
-            
+
+
             $user->save();
-    
+
             DB::commit();
-    
+
             return redirect()->back()->with('success', 'Violation created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating Violation: ' . $e->getMessage());
-    
+
             return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
-    }   
+    }
     public function updateTas(Request $request, $id)
     {
         try {
             // Find the violation by ID
             $violation = TasFile::findOrFail($id);
-            
+    
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'case_no' => 'nullable|string|max:255',
                 'top' => 'nullable|string|max:255',
                 'driver' => 'nullable|string|max:255',
                 'apprehending_officer' => 'nullable|string|max:255',
-                'violation' => 'nullable|array', // Changed to array, as we expect multiple violations
+                'violation' => 'nullable|array',
                 'transaction_no' => 'nullable|string|max:255',
                 'date_received' => 'nullable|date',
                 'plate_no' => 'nullable|string|max:255',
                 'contact_no' => 'nullable|string|max:255',
-                'remarks.*' => 'nullable|string',
-                'delete_file.*' => 'nullable|string', // Added validation for delete_file array
-                'file_attach.*' => 'nullable|file|max:10240', // Adjust max file size as needed
+                'remarks.*.text' => 'nullable|string',
+                'file_attach.*' => 'nullable|file|max:10240',
             ]);
-            
-            // If 'remarks' is set and is an array, join the array elements into a single string
+    
+            // Process remarks
             if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
-                $validatedData['remarks'] = implode(', ', $validatedData['remarks']);
-            }
-        
-            // Trim the 'remarks' field only if it is a string
-            if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
-                $validatedData['remarks'] = trim($validatedData['remarks']);
-            }
-            
-            // Check if file deletion option is selected
-            if ($request->has('delete_file')) {
-                // Get the checked attachments to delete
-                $attachmentsToDelete = $validatedData['delete_file'] ?? [];
-                
-                // Remove the checked attachments from the current file attachments
-                $attachments = json_decode($violation->file_attach, true) ?? [];
-                $newAttachments = array_diff($attachments, $attachmentsToDelete);
-                
-                // Update the file_attach attribute in the database
-                $violation->update(['file_attach' => json_encode($newAttachments)]);
-                
-                // Append deletion action to history
-                foreach ($attachmentsToDelete as $attachment) {
-                    $history[] = [
-                        'action' => 'DELETE_ATTACHMENT',
-                        'user_id' => auth()->id(), // Assuming you have user authentication
-                        'username' => auth()->user()->username,
-                        'timestamp' => now(),
-                        'attachment' => $attachment,
-                    ];
+                $remarksArray = [];
+                foreach ($validatedData['remarks'] as $remark) {
+                    $remarksArray[] = $remark['text'];
                 }
+                $validatedData['remarks'] = json_encode($remarksArray);
             }
-            
-            // Check if new attachments are uploaded
+    
+            // Handle file uploads and append new attachments to existing ones
             if ($request->hasFile('file_attach')) {
-                // Handle file uploads and append new attachments to existing ones
                 $newAttachments = [];
                 foreach ($request->file('file_attach') as $file) {
                     $filename = $validatedData['case_no'] . "_documents_" . time() . "_" . $file->getClientOriginalName();
@@ -723,80 +737,54 @@ class DashboardController extends Controller
                 $currentAttachments = json_decode($violation->file_attach, true) ?? [];
                 $allAttachments = array_merge($currentAttachments, $newAttachments);
                 $validatedData['file_attach'] = json_encode($allAttachments);
-                
-                // Append addition action to history
-                foreach ($newAttachments as $attachment) {
-                    $history[] = [
-                        'action' => 'ADD_ATTACHMENT',
-                        'user_id' => auth()->id(), // Assuming you have user authentication
-                        'username' => auth()->user()->username,
-                        'timestamp' => now(),
-                        'attachment' => $attachment,
-                    ];
-                }
             }
-            
+    
             // Merge new violations into existing violations array
             if (!empty($validatedData['violation'])) {
                 $existingViolations = json_decode($violation->violation, true) ?? [];
                 $newViolations = array_filter($validatedData['violation'], function($value) {
                     return $value !== null;
                 });
-                $validatedData['violation'] = array_unique(array_merge($existingViolations, $newViolations));
+                $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
             }
-            
-            // Capture changes
-            $changes = [];
-            foreach ($validatedData as $field => $newValue) {
-                if ($violation->$field !== $newValue) {
-                    $changes[$field] = [
-                        'old_value' => $violation->$field,
-                        'new_value' => $newValue,
-                    ];
-                }
-            }
-            
-            // Append new changes to existing history
-            $history = $violation->history ?? [];
-            if (isset($history)) {
-                $history[] = [
-                    'action' => 'EDIT',
-                    'user_id' => auth()->id(), // Assuming you have user authentication
-                    'username' => auth()->user()->username,
-                    'timestamp' => now(),
-                    'changes' => $changes,
-                ];
-            }
-            
+    
             // Update the violation with validated data
             $violation->update($validatedData);
-            
-            // Save updated history along with violation
-            $violation->history = $history;
-            $violation->save();
-        
+    
+            // If new violations were added, add them to the TasFile model
+            if (!empty($newViolations)) {
+                foreach ($newViolations as $newViolation) {
+                    $violation->addViolation($newViolation);
+                }
+            }
+    
             // Set success message
             return back()->with('success', 'Violation updated successfully');
         } catch (\Exception $e) {
             // Log the error
             Log::error('Error updating Violation: ' . $e->getMessage());
-        
+    
             // Set error message
             return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
     }
-
+    
+    
+    
     public function updateStatus(Request $request, $id)
     {
         try {
+            // Log the request data for debugging
+            \Log::info('Request data: ', $request->all());
+
             $tasFile = TasFile::findOrFail($id);
-            
+
             // Log the received status for debugging
             \Log::info('Received status: ' . $request->status);
-            
+
             $tasFile->status = $request->status;
             $tasFile->save();
-    
+
             return redirect()->back()->with('success', 'Status updated successfully.');
         } catch (\Exception $e) {
             // Log any errors for debugging
@@ -804,7 +792,8 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
         }
     }
-    
+
+
     public function finishCase(Request $request, $id)
     {
         $tasFile = TasFile::findOrFail($id);
@@ -814,13 +803,14 @@ class DashboardController extends Controller
 
         return redirect()->back()->with('success', 'Case finished successfully.');
     }
-    
-    public function printsub($id)
+
+    public function printsub(Request $request, $id)
     {
         $tasFile = TasFile::findOrFail($id);
         $changes = $tasFile;
         $officerName = $changes->apprehending_officer;
         $officers = ApprehendingOfficer::where('officer', $officerName)->get();
+
         if (!empty($changes->violation)) {
             $violations = json_decode($changes->violation);
             if ($violations !== null) {
@@ -833,7 +823,6 @@ class DashboardController extends Controller
         }
 
         $holidays = [
-            // List of holidays, format: 'MM-DD' or 'YYYY-MM-DD'
             '01-01', // New Year's Day
             '04-09', // Araw ng Kagitingan
             '05-01', // Labor Day
@@ -851,39 +840,54 @@ class DashboardController extends Controller
             '10-31', // Halloween
             '04-20', // 420 (Cannabis Culture)
             '07-04', // Independence Day (United States)
-            '10-31', // Halloween
             '05-14', // Additional holiday declared by the government
             '11-15', // Regional holiday
         ];
-        // Get the current date and format it as "Month Day, Year"
-        $startDate = $changes->date_received; // Example output: "May 6, 2024"
-        
 
-        // Add the specified number of days
-        
-        $date = new DateTime($startDate);
-        $numDays = 4;
-        $date->modify("+" . $numDays . " days");
-        $newDate = $date->format('F j, Y');
+        // Get the current date
+        $startDate = Carbon::now();
+        $formattedDate = $startDate->format('F j, Y');
+
+        // Calculate the new date excluding weekends and holidays
+        $currentDate = clone $startDate; // Clone to avoid modifying the original start date
+        $numDays = 3;
+
         while ($numDays > 0) {
-            $date->modify('+1 day');
-            if ($date->format('N') >= 6 || in_array($date->format('m-d'), $holidays)) {
-                continue; 
+            $currentDate->addDay();
+
+            // Check if the current day is a weekend or a holiday
+            if ($currentDate->isWeekend() || in_array($currentDate->format('m-d'), $holidays)) {
+                continue; // Skip weekends and holidays
             }
-            
+
             $numDays--;
         }
-        $endDate = $date->format('F j, Y');
+
+        $endDate = $currentDate->format('F j, Y');
+
         $compactData = [
             'changes' => $changes,
             'officers' => $officers,
             'relatedViolations' => $relatedViolations,
-            'date' => $newDate,
+            'date' => $formattedDate,
             'hearing' => $endDate,
         ];
+
         // dd($compactData);
-        return view('sub.print', compact('tasFile', 'compactData'));
+        $status = $request->input('details');
+        switch ($status) {
+            case "subpeona":
+                return view('sub.print', compact('tasFile', 'compactData'));
+            case "motionrelease1":
+                return view('sub.motionreleasep1', compact('tasFile', 'compactData'));
+            case "motionrelease2":
+                return view('sub.motionreleasep2', compact('tasFile', 'compactData'));
+            default:
+                // Handle default case if necessary
+                return view('sub.print', compact('tasFile', 'compactData'));
+        }
     }
+
     function deleteTas($id){
         try {
             $violation = TasFile::findOrFail($id);
@@ -902,10 +906,10 @@ class DashboardController extends Controller
         )
         ->groupBy(DB::raw('MONTH(date_received)'))
         ->get();
-    
+
         // Define colors for each month
         $colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8000', '#8000ff', '#0080ff', '#ff0080', '#80ff00', '#00ff80'];
-    
+
         // Prepare the data for the chart
         $months = [];
         $counts = [];
@@ -918,35 +922,279 @@ class DashboardController extends Controller
                 $backgroundColors[] = $colors[$index % count($colors)]; // Assign color based on index
             }
         }
-    
+
         // Pass data to the view using compact
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
-    public function updateContest(){
+    public function updateContest()
+    {
+        // Fetch all traffic violations
+        
+        
+        // Fetch recent TasFiles ordered by case number descending
+        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
+        
+        // Fetch all codes (assuming TrafficViolation model provides codes)
         $codes = TrafficViolation::all();
-        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
-        ->get();
-        $violations = TrafficViolation::all();
-        return view('tas.edit',compact('recentViolationsToday','violations','codes'));
+        
+        // Prepare a collection for officers
+        $officers = collect();
+       
+        
+        // Iterate through each TrafficViolation record
+        foreach ($recentViolationsToday as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+ 
+        }
+  
+        // Pass data to the view, including the new variable $violationData
+        return view('tas.edit', compact('recentViolationsToday', 'codes', 'officers' ));
     }
-
+    public function updateAdmitted()
+    {
+        // Fetch all traffic violations
+        
+        
+        // Fetch recent TasFiles ordered by case number descending
+        $recentViolationsToday = Admitted::all()->sortByDesc('resolution_no');
+        
+        // Fetch all codes (assuming TrafficViolation model provides codes)
+        $codes = TrafficViolation::all();
+        
+        // Prepare a collection for officers
+        $officers = collect();
+       
+        
+        // Iterate through each TrafficViolation record
+        foreach ($recentViolationsToday as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+ 
+        }
+  
+        // Pass data to the view, including the new variable $violationData
+        return view('admitted.edit', compact('recentViolationsToday', 'codes', 'officers' ));
+    }
     public function historyIndex()
     {
-      
+
         return view('history');
     }
 
-    public function editAdmit()
-    {
-        
-        return view('admitted.edit');
-    }
+    // public function editAdmit()
+    // {
+
+    //     return view('admitted.edit');
+    // }
     public function fetchRemarks($id){
         $tasFile = TasFile::findOrFail($id);
         $remarks = json_decode($tasFile->remarks);
 
         return response()->json(['remarks' => $remarks]);
     }
-  
+    public function updateoffi(Request $request, $id)
+    {
+        try {
+            // Validate incoming request
+            $request->validate([
+                'officer' => 'required|string',
+                'department' => 'required|string',
+            ]);
+
+            // Update officer details
+            $officer = ApprehendingOfficer::findOrFail($id);
+            $officer->officer = $request->input('officer');
+            $officer->department = $request->input('department');
+            $officer->save();
+
+            // Redirect back with success message
+            return back()->with('success', 'Officer details updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle case where officer with $id is not found
+            return back()->with('error', 'Officer not found.');
+        } catch (ValidationException $e) {
+            // Handle validation errors
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            // Handle other unexpected errors
+            return back()->with('error', 'Failed to update officer details. Please try again.');
+        }
+    }
+    public function updateviolation(Request $request, $id)
+    {
+        try {
+            // Validate incoming request
+            $request->validate([
+                'officer' => 'required|string',
+                'department' => 'required|string',
+            ]);
+
+            // Update officer details
+            $officer = ApprehendingOfficer::findOrFail($id);
+            $officer->officer = $request->input('officer');
+            $officer->department = $request->input('department');
+            $officer->save();
+
+            // Redirect back with success message
+            return back()->with('success', 'Officer details updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle case where officer with $id is not found
+            return back()->with('error', 'Officer not found.');
+        } catch (ValidationException $e) {
+            // Handle validation errors
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            // Handle other unexpected errors
+            return back()->with('error', 'Failed to update officer details. Please try again.');
+        }
+    }
+
+    public function detailstasfile(Request $request, $id)
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
+    public function detailsadmitted(Request $request, $id)
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $admitted = admitted::findOrFail($id);
+
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $admitted->apprehending_officer)->get();
+
+            // Retrieve related TrafficViolations
+            $violations = json_decode($admitted->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            $remarks = json_decode($admitted->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('admitted.detailsview', compact('admitted', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
+    public function finishtasfile(Request $request, $id)
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('tas.detailsview', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
+    public function fetchFinishData($id)
+    {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $tasFile = TasFile::findOrFail($id);
+
+            // Retrieve related ApprehendingOfficers
+            $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
+
+            // Retrieve related TrafficViolations
+            $violations = json_decode($tasFile->violation, true);
+            $relatedViolations = [];
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            }
+            
+            $remarks = json_decode($tasFile->remarks);
+            // Check if $remarks is an array
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            // dd($remarks);
+            // Return the view with TasFile and related data
+            return view('tas.finish', compact('tasFile', 'relatedOfficers', 'relatedViolations', 'remarks'));
+
+        } catch (ModelNotFoundException $e) {
+            // Handle case where TasFile with $id is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
 }
 

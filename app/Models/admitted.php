@@ -18,36 +18,60 @@ class admitted extends Model
         'violation',
         'transaction_no',
         'date_received',
-        'plate_no',
         'contact_no', 
+        'plate_no',
         'remarks',
         'file_attach',
+        'history',
+        'status', 
+        'typeofvehicle',
+        'fine_fee',
+        'symbols', 
     ];
-    public function trafficViolations()
+    public function setofficerAttribute($value)
     {
-        return $this->hasMany(TrafficViolation::class, 'violation');
+        $this->attributes['apprehending_officer'] = strtoupper($value);
+    }
+    public function relatedOfficer()
+{
+    return $this->hasOne(ApprehendingOfficer::class, 'officer');
+}
+    public function relatedViolations()
+    {
+        // Assuming 'violation' is a JSON-encoded field in the TasFile table
+        return $this->hasMany(TrafficViolation::class, 'code');
     }
     public function setTopAttribute($value)
     {
         $this->attributes['top'] = strtoupper($value);
     }
-    public function setResolutionnoAttribute($value)
-    {
-        $this->attributes['resolution_no'] = strtoupper($value);
-    }
+
     // Define mutator for 'name' field
     public function setNameAttribute($value)
     {
         $this->attributes['name'] = strtoupper($value);
     }
-
-    // Define mutator for 'violation' field
     public function setViolationAttribute($value)
     {
-        $this->attributes['violation'] = strtoupper($value);
+        if (is_array($value)) {
+            // Convert the array of violations to a comma-separated string
+            $this->attributes['violation'] = implode(',', $value);
+        } else {
+            // If it's already a string, simply assign it
+            $this->attributes['violation'] = $value;
+        }
     }
 
-    // Define mutator for 'transaction_no' field
+    public function getViolationAttribute($value)
+    {
+        // Check if the value is already a string, then return it
+        if (is_string($value)) {
+            return $value;
+        }
+        
+        // If it's an array, convert it to a string
+        return $value ? implode(',', $value) : '';
+    }
     public function setTransactionNoAttribute($value)
     {
         $this->attributes['transaction_no'] = strtoupper($value);
@@ -62,14 +86,62 @@ class admitted extends Model
     {
         $this->attributes['driver'] = strtoupper($value);
     }
-    public function setofficerAttribute($value)
-    {
-        $this->attributes['apprehending_officer'] = strtoupper($value);
-    }
+    
     // Define mutator for 'plate_no' field
     public function setPlateNoAttribute($value)
     {
         $this->attributes['plate_no'] = strtoupper($value);
     }
-    
+    public function getHistoryAttribute($value)
+    {
+        return $value ? json_decode($value, true) : [];
+    }
+    public function checkCompleteness()
+    {
+        try {
+            $fillableAttributes = $this->getFillable();
+            $incompleteSymbols = [];
+
+            foreach ($fillableAttributes as $attribute) {
+                // Skip updating non-existent columns
+                if (!Schema::hasColumn('tas_files', $attribute)) {
+                    continue;
+                }
+
+                if ($attribute !== 'history' && empty($this->$attribute)) {
+                    $incompleteSymbols[$attribute] = 'incomplete';
+                }
+            }
+
+            if (empty($incompleteSymbols)) {
+                $this->symbols = 'complete';
+            } else {
+                $this->symbols = json_encode($incompleteSymbols);
+            }
+
+            $this->save();
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error updating symbols attribute: ' . $e->getMessage());
+
+            // You can handle the error based on your requirement
+            // For example, you can throw a custom exception, return a response, or perform any other action.
+            throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
+        }
+    }
+      // Method to add a new violation
+      public function addViolation($newViolation)
+      {
+          // Retrieve existing violations
+          $violations = $this->violation ?? [];
+  
+          // Add the new violation
+          $violations[] = $newViolation;
+  
+          // Update the violation attribute
+          $this->violation = $violations;
+  
+          // Save the model
+          $this->save();
+      }
 }
