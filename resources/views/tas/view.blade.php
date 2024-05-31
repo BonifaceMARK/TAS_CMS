@@ -39,8 +39,10 @@
                         <tr>
                             <th>Record Status</th>
                             <th>Case No</th>
+                            <th>Transaction No</th>
                             <th>Top</th>
-                            <th>Driver</th>                     
+                            <th>Driver</th>
+                            
                             <th>Apprehending Officer</th>
                             <th>Department</th>
                             <th>Type of Vehicle</th>
@@ -72,6 +74,7 @@
 
 
                             <td>{{ $tasFile->case_no  ?? 'N/A' }}</td>
+                            <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
                             <td>{{ $tasFile->top ?? 'N/A' }}</td>
                             <td>{{ $tasFile->driver  ?? 'N/A' }}</td>
                            
@@ -83,6 +86,7 @@
                                     @endforeach
                                 @endif
                             </td>
+                            <td>{{ $tasFile->plate_no  ?? 'N/A' }}</td>
                             <td>{{ $tasFile->typeofvehicle  ?? 'N/A' }}</td>
                             
                             <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
@@ -155,13 +159,33 @@
         </form>
       </div>
     </div>
+</div>
+<div class="modal fade" id="finishModal{{ $tasFile->id }}" tabindex="-1" role="dialog" aria-labelledby="finishModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="{{ route('finish.case', ['id' => $tasFile->id]) }}" method="POST"> @csrf <div class="modal-header">
+            <h5 class="modal-title" id="finishModalLabel">Finish Case</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="fine_fee">Fine Fee</label>
+              <input type="number" step="0.01" class="form-control" id="fine_fee" name="fine_fee" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Finish</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
 @endforeach
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'id']));
+    const fetchViolationUrl = @json(route('fetchingtasfile', ['id' => 'ID_PLACEHOLDER']));
 
     function initializeModalScripts(modalId) {
         $('#modal-body-' + modalId + ' .remarksForm').on('submit', function (e) {
@@ -188,7 +212,7 @@
                     showAlert(response.message);
 
                     // Reload the modal body content
-                    var fetchUrl = fetchViolationUrl.replace('id', modalId);
+                    var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
                     fetch(fetchUrl)
                         .then(response => {
                             if (!response.ok) {
@@ -215,6 +239,44 @@
                 }
             });
         });
+
+        // Handle Finish Case form submission
+        $('#finishCaseFormTemplate').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const spinner = submitBtn.find('.spinner-border');
+
+            // Show spinner and disable button
+            spinner.removeClass('d-none');
+            submitBtn.prop('disabled', true);
+
+            // Perform AJAX request
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+
+                    // Show success message
+                    showAlert(response.message);
+
+                    // Close the modal
+                    $('#finishModalTemplate').modal('hide');
+                },
+                error: function () {
+                    // Hide spinner and enable button
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+
+                    // Show error message
+                    showAlert('Failed to finish case. Please try again later.', 'danger');
+                }
+            });
+        });
     }
 
     function showAlert(message, type = 'success') {
@@ -235,7 +297,7 @@
             var modalId = modal.getAttribute('id').replace('exampleModal', ''); 
             var modalBody = modal.querySelector('.modal-body');
             
-            var fetchUrl = fetchViolationUrl.replace('id', modalId);
+            var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
             console.log('Fetching URL: ', fetchUrl);
             
             setTimeout(() => {
@@ -249,10 +311,11 @@
                     .then(html => {
                         modalBody.innerHTML = html;
                         initializeModalScripts(modalId);
-                    })
-                    .catch(err => {
-                        console.error('Failed to load modal content:', err);
-                        modalBody.innerHTML = '<p>Error loading content</p>';
+
+                        // Attach the Finish Case modal dynamically
+                        const finishModalHtml = $('#finishModalTemplate').html();
+                        $('#modal-body-' + modalId).append(finishModalHtml);
+                        $('#finishCaseFormTemplate').attr('action', '{{ route('finish.case', ['id' => 'modalId']) }}');
                     });
             }, 1500); // 1.5 seconds delay
         });
@@ -276,7 +339,8 @@
         });
     });
 </script>
- 
+
+
 <script>
     // Function to open a URL in a new tab and print
     function openInNewTabAndPrint(url) {

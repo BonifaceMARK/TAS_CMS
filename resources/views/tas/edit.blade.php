@@ -1,4 +1,4 @@
-@extends('layouts.title')
+
 
 @section('title', env('APP_NAME'))
 
@@ -45,7 +45,7 @@
         <div class="card-body">
             <h5 class="card-title">Edit Contested Cases<span></span></h5>
             <table class="table table-striped table-bordered table-hover datatable">
-            <thead class="thead-light">
+    <thead class="thead-dark">
         <tr>
             <th scope="col">Record Status</th>
             <th scope="col">Case No.</th>
@@ -138,7 +138,7 @@
 </div>
 @foreach($recentViolationsToday as $violation)
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
+<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
             <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -784,5 +784,4 @@ function editViolation(violationId, index) {
         </tbody>
     </table>
 </div> 
-
                         </div>-->
