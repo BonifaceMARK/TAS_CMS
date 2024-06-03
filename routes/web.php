@@ -88,6 +88,9 @@ Route::post('/tas-files/{id}/add-attachment', [DashboardController::class, 'addA
 Route::post('/tasfile/{id}/attach', [DashboardController::class, 'attachFiles'])->name('tasfile.attach');
     Route::get('tasfile/details/{id}',                  [DashboardController::class, 'detailstasfile'])->name('fetchingtasfile');
     Route::delete('/tasfile/{id}/remove-attachment', [DashboardController::class, 'removeAttachment'])->name('tasfile.removeAttachment');
+
+    Route::get('/vehicle-type-data', [DashboardController::class, 'getVehicleTypeData']);
+
 });
 Route::get('/fetch-remarks/?id={id}',                   [DashboardController::class, 'fetchRemarks'])->name('fetch.remarks'); 
 Route::get('/subpoena', function () {
