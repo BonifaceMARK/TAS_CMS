@@ -1257,4 +1257,4 @@ public function removeAttachment(Request $request, $id)
         // Redirect back with a success message
         return response()->json(['message' => 'Files attached successfully.']);
     }
-    
+}
