@@ -54,7 +54,7 @@
       <ul class="dropdown-menu" aria-labelledby="admittedCaseDropdown">
         <li><a class="dropdown-item" href="{{ route('admitted.manage') }}">Add Admitted Case</a></li>
         <li><a class="dropdown-item" href="{{ route('admitted.view') }}">View Admitted Cases</a></li>
-        <li><a class="dropdown-item" href="{{ route('edit.admit') }}">Update Admitted Cases</a></li>
+        <li><a class="dropdown-item" href="{{ route('update.admit.index') }}">Update Admitted Cases</a></li>
       </ul>
     </li>
 
@@ -118,7 +118,7 @@
       <ul class="dropdown-menu" aria-labelledby="admittedCaseDropdown">
         <li><a class="dropdown-item" href="{{ route('admitted.manage') }}"><span class="bi bi-plus-circle"> Add</span></a></li>
         <li><a class="dropdown-item" href="{{ route('admitted.view') }}"><span class="bi bi-eye"> View</span></a></li>
-        <li><a class="dropdown-item" href="{{ route('edit.admit') }}"><span class="bi bi-pencil-square"> Update</span></a></li>
+        <li><a class="dropdown-item" href="{{ route('update.admit.index') }}"><span class="bi bi-pencil-square"> Update</span></a></li>
       </ul>
     </li>
 

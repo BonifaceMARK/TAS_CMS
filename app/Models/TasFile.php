@@ -150,23 +150,20 @@ public function setRemarksAttribute($value)
             throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
         }
     }
-
-    public function addViolation($newViolation)
-    {
-        // Retrieve existing violations
-        $violations = json_decode($this->violation, true) ?? [];
-
-        // Check if the new violation already exists
-        if (!in_array($newViolation, $violations)) {
-            // Add the new violation if it doesn't already exist
-            $violations[] = $newViolation;
-
-            // Update the violation attribute
-            $this->violation = json_encode($violations);
-
-            // Save the model
-            $this->save();
-        }
-    }
-    
+      // Method to add a new violation
+      public function addViolation($newViolation)
+      {
+          // Retrieve existing violations
+          $violations = $this->violation ?? [];
+  
+          // Add the new violation
+          $violations[] = $newViolation;
+  
+          // Update the violation attribute
+          $this->violation = $violations;
+  
+          // Save the model
+          $this->save();
+      }
+   
 }
