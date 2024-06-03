@@ -1,4 +1,4 @@
-
+@extends('layouts.title')
 
 @section('title', env('APP_NAME'))
 
@@ -45,7 +45,7 @@
         <div class="card-body">
             <h5 class="card-title">Edit Contested Cases<span></span></h5>
             <table class="table table-striped table-bordered table-hover datatable">
-    <thead class="thead-dark">
+            <thead class="thead-light">
         <tr>
             <th scope="col">Record Status</th>
             <th scope="col">Case No.</th>
@@ -117,32 +117,11 @@
     </div>
 </div><!-- End Recent Violations -->
 
-<!-- Include the confirmation modal outside the loop -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this attachment?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <!-- Ensure the ID attribute is set -->
-                <button type="submit" class="btn btn-danger" id="confirmDelete">Delete</button>
-            </div>
-        </div>
-    </div>
-</div>
 @foreach($recentViolationsToday as $violation)
 <div class="modal fade" id="editViolationModal{{ $violation->id }}" tabindex="-1" aria-labelledby="editViolationModalLabel{{ $violation->id }}" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 80%;">
         <div class="modal-content">
-            <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            
                 <div class="modal-header">
                     <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
                         <span><i class="bi bi-pencil-square"></i></span>
@@ -152,206 +131,192 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             
-                <div class="modal-body">
-                <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <!-- Violation details section -->
-            <h6 class="fw-bold mb-3">Violation Details</h6>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Case No.</th>
-                        <td>
-                            <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>TOP</th>
-                        <td>
-                            <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Driver</th>
-                        <td>
-                            <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Apprehending Officer</th>
-                        <td>
-                            <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Violations section -->
-            <h6 class="fw-bold mb-3">Violations</h6>
-            <div id="violationsContainer{{ $violation->id }}">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Violation</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (!empty($violation->violation))
-                            @foreach(json_decode($violation->violation) as $index => $violationItem)
-                                <tr id="violationField{{ $violation->id }}_{{ $index }}">
-                                    <td>
-                                        <input type="text" class="form-control" id="violation{{ $violation->id }}_{{ $index }}" name="violations[]" value="{{ $violationItem }}" list="suggestions">
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-success " onclick="editViolation('{{ $violation->id }}', {{ $index }})">Save Edit</button>
-                                        <button type="button" class="btn btn-danger bi bi-trash3-fill" onclick="deleteViolation('{{ $violation->id }}', {{ $index }})"></button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endif
-                    </tbody>
-                </table>
-
-                <div class="input-group mt-2">
-                    <span class="bi bi-bookmark-plus input-group-text custom-new-badge" onclick="addNewViolation({{ $violation->id }})"></span>
-                    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violation[]" value="" placeholder="Add new Violation">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <!-- Additional details section -->
-            <h6 class="fw-bold mb-3">Additional Details</h6>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Transaction No.</th>
-                        <td>
-                            <input type="text" class="form-control" id="transactionNo{{ $violation->id }}" name="transaction_no" value="{{ $violation->transaction_no }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Date Received</th>
-                        <td>
-                            <input type="date" class="form-control" id="dateReceived{{ $violation->id }}" name="date_received" value="{{ $violation->date_received }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Plate No.</th>
-                        <td>
-                            <input type="text" class="form-control" id="plateNo{{ $violation->id }}" name="plate_no" value="{{ $violation->plate_no }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Contact No.</th>
-                        <td>
-                            <input type="text" class="form-control" id="contactNo{{ $violation->id }}" name="contact_no" value="{{ $violation->contact_no }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Remarks</th>
-                        <td>
-                            @if(is_array($violation->remarks))
-                                @foreach ($violation->remarks as $index => $remark)
-                                    @php
-                                        // Split the remark into text, timestamp, and user using the ' - ' separator
-                                        $parts = explode(" - ", $remark);
-                                        // Extract text, timestamp, and user from the remark
-                                        $text = $parts[0] ?? '';
-                                        $timestamp = $parts[1] ?? '';
-                                        $user = $parts[2] ?? '';
-                                    @endphp
-                                    <div class="row mb-2" id="remark_row_{{ $violation->id }}_{{ $index }}">
-                                        <div class="col-md-12">
-                                            <div class="input-group">
-                                                <span class="input-group-text bi bi-clipboard-check"></span>
-                                                <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
-                                                <button type="button" class="btn btn-danger bi bi-trash3-fill" onclick="deleteRemark('{{ $violation->id }}', {{ $index }})"></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @endif
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="text-end">
-                            <button type="submit" class="btn btn-success mt-3">Save changes</button>
-                        </div>
- <hr>
-</form>
-  <!-- File Attachments Section -->
-  <div class="row mt-4">
-                            <div class="col-md-12">
-                                <h6 class="fw-bold mb-3">File Attachments</h6>
-                                @php
-                                    $attachments = json_decode($violation->file_attach, true);
-                                @endphp
-
-                                @if (!empty($attachments))
-                                    @foreach ($attachments as $attachment)
-                                        <div class="input-group mt-2">
-                                            <input type="text" class="form-control" value="{{ $attachment }}" readonly>
-                                           <!-- Button to trigger the deletion confirmation -->
-<div class="input-group-append">
-    <button type="button" class="btn btn-danger bi bi-trash3-fill delete-attachment" data-attachment="{{ $attachment }}">Delete</button>
-</div>
-                                        </div>
-                                    @endforeach
-                                @endif
-                                <form id="attachmentForm" method="POST" enctype="multipart/form-data" data-route="{{ route('tasfile.attach', $violation->id) }}">
-    @csrf
-    <div class="input-group mt-2">
-        <input type="file" class="form-control" name="file_attach_existing[]" multiple>
-        <button type="submit" class="btn btn-primary">Attach Files</button>
-    </div>
-</form>
-
-                            </div>
-                        </div>
+                <div class="modal-body" id="modal-body-{{ $violation->id }}">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
+                    Loading...
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $violation->id }}">Delete Case</button>
-                </div>
-       
+                
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmDeleteModal{{ $violation->id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ $violation->id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel{{ $violation->id }}">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this Case?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="{{ route('violations.delete', ['id' => $violation->id]) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger bi bi-trash"> </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
- 
 @endforeach
- 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const fetchViolationUrl = @json(route('fetchingeditfile', ['id' => 'ID_PLACEHOLDER']));
+
+    function initializeModalScripts(modalId) {
+        // Handle remarks form submission
+        $('#modal-body-' + modalId + ' .remarksForm').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const saveRemarksBtn = form.find('#saveRemarksBtn');
+            const spinner = saveRemarksBtn.find('.spinner-border');
+
+            spinner.removeClass('d-none');
+            saveRemarksBtn.prop('disabled', true);
+
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+                    showAlert(response.message);
+
+                    reloadModalContent(modalId);
+                },
+                error: function () {
+                    spinner.addClass('d-none');
+                    saveRemarksBtn.prop('disabled', false);
+                    showAlert('Failed to save remarks. Please try again later.', 'danger');
+                }
+            });
+        });
+
+        // Handle Finish Case form submission
+        $('#finishCaseFormTemplate').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const spinner = submitBtn.find('.spinner-border');
+
+            spinner.removeClass('d-none');
+            submitBtn.prop('disabled', true);
+
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+                    showAlert(response.message);
+                    $('#finishModalTemplate').modal('hide');
+                },
+                error: function () {
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+                    showAlert('Failed to finish case. Please try again later.', 'danger');
+                }
+            });
+        });
+
+        // Handle Delete Case form submission
+        $('#confirmDeleteModal' + modalId).on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const deleteBtn = form.find('button[type="submit"]');
+            const spinner = deleteBtn.find('.spinner-border');
+
+            spinner.removeClass('d-none');
+            deleteBtn.prop('disabled', true);
+
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    spinner.addClass('d-none');
+                    deleteBtn.prop('disabled', false);
+                    showAlert(response.message);
+                    $('#confirmDeleteModal' + modalId).modal('hide'); // Hide delete confirmation modal
+                    reloadModalContent(modalId); // Reload modal content after deletion
+                },
+                error: function () {
+                    spinner.addClass('d-none');
+                    deleteBtn.prop('disabled', false);
+                    showAlert('Failed to delete case. Please try again later.', 'danger');
+                }
+            });
+        });
+    }
+
+    // Function to reload modal content
+    function reloadModalContent(modalId) {
+        var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
+
+        fetch(fetchUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(html => {
+                $('#modal-body-' + modalId).html(html);
+                initializeModalScripts(modalId); // Reinitialize scripts after content reload
+            })
+            .catch(err => {
+                console.error('Failed to reload modal content', err);
+                $('#modal-body-' + modalId).html('<p>Error loading content</p>');
+            });
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var modalId = modal.getAttribute('id').replace('editViolationModal', ''); 
+            var modalBody = modal.querySelector('.modal-body');
+            
+            var fetchUrl = fetchViolationUrl.replace('ID_PLACEHOLDER', modalId);
+            
+            setTimeout(() => {
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                        initializeModalScripts(modalId);
+
+                        // Attach the Finish Case modal dynamically
+                        const finishModalHtml = $('#finishModalTemplate').html();
+                        $('#modal-body-' + modalId).append(finishModalHtml);
+                        $('#finishCaseFormTemplate').attr('action', '{{ route('finish.case', ['id' => 'modalId']) }}');
+                    });
+            }, 1500); // 1.5 seconds delay
+        });
+    });
+
+    $(document).ready(function () {
+        // Check if there's a cached modal ID and open it
+        var cachedModalId = localStorage.getItem('modalId');
+        if (cachedModalId) {
+            $('#' + cachedModalId).modal('show');
+        }
+
+        $('.modal').on('shown.bs.modal', function (e) {
+            // Cache the ID of the opened modal
+            localStorage.setItem('modalId', e.target.id);
+        });
+
+        $('.modal').on('hidden.bs.modal', function () {
+            // Remove cached modal ID when the modal is closed
+            localStorage.removeItem('modalId');
+        });
+    });
+
+    function showAlert(message, type = 'success') {
+        const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+        </div>`;
+        const alertElement = $(alertHtml).appendTo('body').hide().fadeIn();
+
+        setTimeout(() => {
+            alertElement.fadeOut(() => {
+                alertElement.remove();
+            });
+        }, 3000); // 3 seconds delay
+    }
+</script>
+
+
 
 <script>
 // Function to handle deleting a violation
@@ -372,8 +337,6 @@ function deleteViolation(violationId, index) {
         showMethod: 'fadeIn',
         hideMethod: 'fadeOut'
     };
-
-    // Define the HTML content for the confirmation prompt
     var confirmationPrompt = `
         <div class="confirmation-prompt">
             <p class="prompt-text">Are you sure you want to delete this violation?</p>
@@ -409,13 +372,13 @@ $(document).on('click', '.btn-confirm-yes', function() {
 $(document).on('click', '.btn-confirm-no', function() {
     toastr.clear(); // Clear the Toastr notification
 });
-
+const delvio = {!! json_encode(route('edit.viodelete', ['id' => 'ID_PLACEHOLDER'])) !!};
 // Function to send AJAX request to delete violation
 function deleteViolationRequest(violationId, index) {
-    // Perform AJAX request to delete violation
+    var fetchUrl = updvio.replace('ID_PLACEHOLDER', violationId);
     $.ajax({
         type: 'POST',
-        url: '/tasfile/' + violationId + '/deleteViolation',
+        url: fetchUrl,
         data: {
             _token: '{{ csrf_token() }}',
             index: index
@@ -434,7 +397,7 @@ function deleteViolationRequest(violationId, index) {
 
     document.addEventListener('DOMContentLoaded', function() {
         // Fetch violations data from PHP
-        violationsData = {!! $violations !!}; // Convert PHP array to JavaScript object
+        violationsData = {!! $violation !!}; // Convert PHP array to JavaScript object
 
         // Initialize autocomplete for existing inputs
         document.querySelectorAll('input[name="violations[]"]').forEach(function(input) {
@@ -537,9 +500,11 @@ function editViolation(violationId, index) {
         autocomplete(input, violationsData);
     }
 
-    // Function to send AJAX request to update violation
+    const updvio = {!! json_encode(route('edit.updatevio', ['id' => 'ID_PLACEHOLDER'])) !!};
     function updateViolation(violationId, index, newViolation) {
-        fetch(`/tasfile/${violationId}/updateViolation`, {
+        
+        var fetchUrl = updvio.replace('ID_PLACEHOLDER', violationId);
+        fetch(fetchUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -561,9 +526,10 @@ function editViolation(violationId, index) {
         });
     }
 
-    // Function to send AJAX request to delete violation
+    const delviox = {!! json_encode(route('edit.viodelete', ['id' => 'ID_PLACEHOLDER'])) !!};
     function deleteViolationRequest(violationId, index) {
-        fetch(`/tasfile/${violationId}/deleteViolation`, {
+        var fetchUrl = delviox.replace('ID_PLACEHOLDER', violationId);
+        fetch(fetchUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -664,16 +630,18 @@ function editViolation(violationId, index) {
             });
         });
 
-        // Function to handle confirmation of the deletion
-        function confirmDeletion() {
-            // Perform the deletion process here
+        /const delatt = {!! json_encode(route('tasfile.removeAttachment', ['id' => 'ID_PLACEHOLDER'])) !!};
+        function confirmDeletion(violationId) {
+            var fetchUrl = delatt.replace('ID_PLACEHOLDER', violationId);
             if (attachmentToRemove) {
                 // Perform AJAX request to delete attachment
                 $.ajax({
-                    type: 'DELETE',
-                    url: '{{ route("tasfile.removeAttachment", $violation->id) }}',
+                    
+                    url: fetchUrl,
+                    type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
+
                         attachment: attachmentToRemove
                     },
                     success: function(response) {
@@ -692,34 +660,34 @@ function editViolation(violationId, index) {
     });
 </script>
 <script>
-    function deleteRemark(violationId, index) {
-            // Assuming you have jQuery included in your project
-            // You can also use plain JavaScript if preferred
-
-            // Send an AJAX request to delete the remark
+  function confirmDeletion(violationId) {
+    // Perform the deletion process here
+    if (attachmentToRemove) {
         $.ajax({
-            url: '/delete-remark',
-            type: 'POST',
+            url: '{{ route("tasfile.removeAttachment", violationId) }}',
+            type: 'DELETE', // Specify the DELETE method
             data: {
-                violation_id: violationId,
-                index: index,
-                _token: '{{ csrf_token() }}'
+                _token: '{{ csrf_token() }}',
+                attachment: attachmentToRemove
             },
             success: function(response) {
-                // Remove the HTML element of the deleted remark
-                $('#remark_row_' + violationId + '_' + index).remove();
-                // Show success notification using Toastr
-                toastr.success('Remark deleted successfully');
+                console.log('Success:', response);
+                toastr.success(response.success); // Display success message
+                $('button[data-attachment="' + attachmentToRemove + '"]').closest('.input-group').remove();
             },
             error: function(xhr, status, error) {
-                // Handle the error
-                console.error(xhr.responseText);
-                // Show error notification using Toastr
-                toastr.error('An error occurred while deleting the remark');
+                console.error('Error:', xhr.responseJSON);
+                toastr.error(xhr.responseJSON.message); // Display error message
+            },
+            complete: function() {
+                toastr.clear(); // Clear the Toastr notification
             }
         });
+    } else {
+        console.error('Attachment to remove is not defined.');
+        toastr.error('Attachment to remove is not defined.'); // Show error message if attachment is not defined
     }
-    
+}
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -784,4 +752,5 @@ function editViolation(violationId, index) {
         </tbody>
     </table>
 </div> 
+
                         </div>-->
