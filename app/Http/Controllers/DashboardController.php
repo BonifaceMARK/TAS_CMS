@@ -705,103 +705,8 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Error creating Violation: ' . $e->getMessage());
         }
     }
-    public function updateTas(Request $request, $id)
-    {
-        try {
-            // Find the violation by ID
-            $violation = TasFile::findOrFail($id);
     
-            // Validate the incoming request data
-            $validatedData = $request->validate([
-                'case_no' => 'nullable|string|max:255',
-                'top' => 'nullable|string|max:255',
-                'driver' => 'nullable|string|max:255',
-                'apprehending_officer' => 'nullable|string|max:255',
-                'violation' => 'nullable|array',
-                'transaction_no' => 'nullable|string|max:255',
-                'date_received' => 'nullable|date',
-                'plate_no' => 'nullable|string|max:255',
-                'contact_no' => 'nullable|string|max:255',
-                'remarks.*.text' => 'nullable|string',
-                'file_attach.*' => 'nullable|file|max:10240',
-            ]);
-    
-            // Process remarks
-            if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
-                $remarksArray = [];
-                foreach ($validatedData['remarks'] as $remark) {
-                    $remarksArray[] = $remark['text'];
-                }
-                $validatedData['remarks'] = json_encode($remarksArray);
-            }
-    
-            // Handle file uploads and append new attachments to existing ones
-            if ($request->hasFile('file_attach')) {
-                $newAttachments = [];
-                foreach ($request->file('file_attach') as $file) {
-                    $filename = $validatedData['case_no'] . "_documents_" . time() . "_" . $file->getClientOriginalName();
-                    $file->storeAs('attachments', $filename, 'public'); // Store in public/attachments directory
-                    $newAttachments[] = 'attachments/' . $filename; // Store relative path in database
-                }
-                $currentAttachments = json_decode($violation->file_attach, true) ?? [];
-                $allAttachments = array_merge($currentAttachments, $newAttachments);
-                $validatedData['file_attach'] = json_encode($allAttachments);
-            }
-    
-            // Merge new violations into existing violations array
-            if (!empty($validatedData['violation'])) {
-                $existingViolations = json_decode($violation->violation, true) ?? [];
-                $newViolations = array_filter($validatedData['violation'], function($value) {
-                    return $value !== null;
-                });
-                $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
-            }
-    
-            // Update the violation with validated data
-            $violation->update($validatedData);
-    
-            // If new violations were added, add them to the TasFile model
-            if (!empty($newViolations)) {
-                foreach ($newViolations as $newViolation) {
-                    $violation->addViolation($newViolation);
-                }
-            }
-    
-            // Set success message
-            return back()->with('success', 'Violation updated successfully');
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('Error updating Violation: ' . $e->getMessage());
-    
-            // Set error message
-            return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
-        }
-    }
-    
-    
-    
-    public function updateStatus(Request $request, $id)
-    {
-        try {
-            // Log the request data for debugging
-            \Log::info('Request data: ', $request->all());
-
-            $tasFile = TasFile::findOrFail($id);
-
-            // Log the received status for debugging
-            \Log::info('Received status: ' . $request->status);
-
-            $tasFile->status = $request->status;
-            $tasFile->save();
-
-            return redirect()->back()->with('success', 'Status updated successfully.');
-        } catch (\Exception $e) {
-            // Log any errors for debugging
-            \Log::error('Error updating status: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
-        }
-    }
-
+   
 
     public function finishCase(Request $request, $id)
     {
@@ -925,38 +830,7 @@ class DashboardController extends Controller
         // Pass data to the view using compact
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
-    public function updateContest()
-    {
-        // Fetch all traffic violations
-        
-        
-        // Fetch recent TasFiles ordered by case number descending
-        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
-        
-        // Fetch all codes (assuming TrafficViolation model provides codes)
-        $codes = TrafficViolation::all();
-        
-        // Prepare a collection for officers
-        $officers = collect();
-       
-        
-        // Iterate through each TrafficViolation record
-        foreach ($recentViolationsToday as $violation) {
-            // Extract the name of the apprehending officer for the current TrafficViolation
-            $officerName = $violation->apprehending_officer;
-    
-            // Query the ApprehendingOfficer model for officers with the given name
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-    
-            // Merge the officers into the collection
-            $officers = $officers->merge($officersForFile);
-    
- 
-        }
-  
-        // Pass data to the view, including the new variable $violationData
-        return view('tas.edit', compact('recentViolationsToday', 'codes', 'officers' ));
-    }
+   
     public function updateAdmitted()
     {
         // Fetch all traffic violations
@@ -1167,10 +1041,6 @@ class DashboardController extends Controller
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
             $tasFile = TasFile::findOrFail($id);
-    {
-        try {
-            // Find the TasFile by its ID or throw a ModelNotFoundException
-            $tasFile = TasFile::findOrFail($id);
     
             // Retrieve related ApprehendingOfficers
             $relatedOfficers = ApprehendingOfficer::where('officer', $tasFile->apprehending_officer)->get();
@@ -1196,7 +1066,7 @@ class DashboardController extends Controller
             return response()->view('errors.404', [], 404);
         }
     }
-    
+ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////// UPDATE PAGE CONTEST ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1204,16 +1074,16 @@ public function updateContest()
 {
     // Fetch all traffic violations
     $violations = TrafficViolation::all();
-    
+
     // Fetch recent TasFiles ordered by case number descending
     $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
-    
+
     // Fetch all codes (assuming TrafficViolation model provides codes)
-    $codes = TrafficViolation::all();
-    
+    $codes = TrafficViolation::all()->pluck('code');
+
     // Prepare a collection for officers
     $officers = collect();
-    
+
     // Iterate through each TrafficViolation record
     foreach ($violations as $violation) {
         // Extract the name of the apprehending officer for the current TrafficViolation
@@ -1474,19 +1344,7 @@ public function deleteRemark(Request $request)
         return response()->json(['error' => $e->getMessage()], 500);
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////// ANALYTICS /////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////.
-public function getVehicleTypeData()
-{
-    // Retrieve data from the database
-    $data = TasFile::select('typeofvehicle', \DB::raw('count(*) as total'))
-            ->groupBy('typeofvehicle')
-            ->get();
-
-    // Return data as JSON
-    return view('' );
-}
+ 
  
 }
 

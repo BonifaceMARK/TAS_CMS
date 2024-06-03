@@ -106,6 +106,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/finishCase/{id}', [DashboardController::class, 'finishCase'])->name('finish.case');
 
     Route::get('/vehicle-type-data', [DashboardController::class, 'getVehicleTypeData']);
+    Route::post('/tasfile/{id}/updateViolation', [DashboardController::class, 'UPDATEVIO']);
+ 
+    Route::post('/tasfile/{id}/deleteViolation', [DashboardController::class, 'DELETEVIO']);
+    Route::post('/delete-remark',  [DashboardController::class, 'deleteRemark']);
+    Route::post('/tas-files/{id}/add-attachment', [DashboardController::class, 'addAttachment'])->name('add.attachment');
+    Route::post('/tasfile/{id}/attach', [DashboardController::class, 'attachFiles'])->name('tasfile.attach');
+        Route::get('tasfile/details/{id}',                  [DashboardController::class, 'detailstasfile'])->name('fetchingtasfile');
+        Route::delete('/tasfile/{id}/remove-attachment', [DashboardController::class, 'removeAttachment'])->name('tasfile.removeAttachment');
+
+////////////////////////////////////////////////ANALYTICS///////////////////////////////////////////////////////
+route::get('/analytics/vehicle', [DashboardController::class, 'indexAnalytics'])->name('analytics.vehicle');
 
 });
 
