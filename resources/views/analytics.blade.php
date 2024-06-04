@@ -37,50 +37,45 @@
         {{ session('error') }}
     </div>
 @endif
-
-<!-- Button to trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chartModal">
-  Contested Case Monthly Comparison
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="chartModalLabel">Contested Case Monthly Comparison Chart</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="monthlyChart" style="width: 100%; height: 400px;"></div>
-      </div>
+<div class="card mb-3">
+    <div class="row g-0">
+        <div class="col-md-4" id="chart"></div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">Vehicle Type Bar Chart</h5>
+                <p class="card-text">Number of cases by vehicle type.</p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // Get data from the PHP variable passed from the controller
-    const months = @json($months);
-    const counts = @json($counts);
-    const backgroundColors = @json($backgroundColors);
+    document.addEventListener('DOMContentLoaded', function () {
+        var vehicleData = {!! json_encode($vehicleCounts) !!};
+        
+        var options = {
+            chart: {
+                type: 'pie',
+                height: 350,
+            },
+            series: Object.values(vehicleData),
+            labels: Object.keys(vehicleData),
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        };
 
-    // Render the chart using ApexCharts
-    const options = {
-      chart: {
-        type: 'pie',
-      },
-      series: counts,
-      labels: months,
-      colors: backgroundColors,
-    };
-
-    const monthlyChart = new ApexCharts(document.querySelector("#monthlyChart"), options);
-    monthlyChart.render();
-  });
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+    });
 </script>
-
-
   </main><!-- End #main -->
 
  @include('layouts.footer')

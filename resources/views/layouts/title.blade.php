@@ -44,8 +44,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Template Main CSS File -->
   <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
-  
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   
   
   <!-- =======================================================

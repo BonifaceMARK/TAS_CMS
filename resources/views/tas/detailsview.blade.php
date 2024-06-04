@@ -160,8 +160,8 @@
     </a>  --}}
     <form action="{{ route('print.sub', ['id' => $tasFile->id]) }}" method="GET" target="_blank">
 
-        <button type="submit" class="btn btn-primary " name="details" value="motionrelease1">Motion w/Manual Resolution</button>
-        <button type="submit" class="btn btn-primary " name="details" value="motionrelease2">Motion w/out Manual Resolution</button>
+        <button type="submit" class="btn btn-primary " name="details" value="motionrelease1">Manual MR</button>
+        <button type="submit" class="btn btn-primary " name="details" value="motionrelease2">MR</button>
         <button type="submit" class="btn btn-primary " name="details" value="subpeona">Subpeona</button>
     </form>
     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finishModal{{ $tasFile->id }}">Finish</button>

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Models\TrafficViolation;
 use App\Models\ApprehendingOfficer;
@@ -102,9 +103,23 @@ Route::middleware(['auth'])->group(function () {
     })->name('fetchingofficer');
 
     Route::get('/viewTAS/tasfile{id}/details/', [DashboardController::class, 'detailstasfile'])->name('fetchingtasfile');
+    Route::get('/tasfileedit{id}/details/', [DashboardController::class, 'detailsedit'])->name('fetchingeditfile');
     Route::get('admitted/details/{id}', [DashboardController::class, 'detailsadmitted'])->name('fetchingadmitted');
     Route::get('/fetchFinishData/{id}', [DashboardController::class, 'fetchFinishData'])->name('fetchFinishData');
     Route::post('/finishCase/{id}', [DashboardController::class, 'finishCase'])->name('finish.case');
+
+    Route::post('/tasfile/{id}/updateViolation', [DashboardController::class, 'UPDATEVIO'])->name('edit.updatevio');
+ 
+Route::post('/tasfile/{id}/deleteViolation', [DashboardController::class, 'DELETEVIO'])->name('edit.viodelete');
+Route::post('/delete-remark/',  [DashboardController::class, 'deleteRemark'])->name('edit.deleteremarks');
+Route::post('/tas-files/{id}/add-attachment', [DashboardController::class, 'addAttachment'])->name('add.attachment');
+ 
+Route::delete('/tasfile/{id}/remove-attachment', [DashboardController::class, 'removeAttachment'])->name('tasfile.removeAttachment');
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////ANALYTICS/////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Route::get('/vehicle/chart', [AnalyticsController::class, 'vehicleBarChart'])->name('chart.data');
 });
 
 Route::get('/fetch-remarks/?id={id}', [DashboardController::class, 'fetchRemarks'])->name('fetch.remarks'); 
