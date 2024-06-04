@@ -630,16 +630,18 @@ function editViolation(violationId, index) {
             });
         });
 
-        // Function to handle confirmation of the deletion
-        function confirmDeletion() {
-            // Perform the deletion process here
+        /const delatt = {!! json_encode(route('tasfile.removeAttachment', ['id' => 'ID_PLACEHOLDER'])) !!};
+        function confirmDeletion(violationId) {
+            var fetchUrl = delatt.replace('ID_PLACEHOLDER', violationId);
             if (attachmentToRemove) {
                 // Perform AJAX request to delete attachment
                 $.ajax({
-                    type: 'DELETE',
-                    url: '{{ route("tasfile.removeAttachment", $violation->id) }}',
+                    
+                    url: fetchUrl,
+                    type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
+
                         attachment: attachmentToRemove
                     },
                     success: function(response) {
@@ -659,29 +661,32 @@ function editViolation(violationId, index) {
 </script>
 <script>
     function deleteRemark(violationId, index) {
-    $.ajax({
-        url: '{{ route('edit.deleteremarks') }}',
-        type: 'POST', // Change POST to PUT
-        data: {
-            violation_id: violationId,
-            index: index,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            // Remove the HTML element of the deleted remark
-            $('#remark_row_' + violationId + '_' + index).remove();
-            // Show success notification using Toastr
-            toastr.success('Remark deleted successfully');
-        },
-        error: function(xhr, status, error) {
-            // Handle the error
-            console.error(xhr.responseText);
-            // Show error notification using Toastr
-            toastr.error('An error occurred while deleting the remark');
-        }
-    });
-}
+            // Assuming you have jQuery included in your project
+            // You can also use plain JavaScript if preferred
 
+            // Send an AJAX request to delete the remark
+        $.ajax({
+            url: '/delete-remark',
+            type: 'POST',
+            data: {
+                violation_id: violationId,
+                index: index,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Remove the HTML element of the deleted remark
+                $('#remark_row_' + violationId + '_' + index).remove();
+                // Show success notification using Toastr
+                toastr.success('Remark deleted successfully');
+            },
+            error: function(xhr, status, error) {
+                // Handle the error
+                console.error(xhr.responseText);
+                // Show error notification using Toastr
+                toastr.error('An error occurred while deleting the remark');
+            }
+        });
+    }
     
 
 </script>

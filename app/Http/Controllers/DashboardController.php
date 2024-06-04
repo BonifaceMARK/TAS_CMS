@@ -199,28 +199,6 @@ class DashboardController extends Controller
                 $remarks = [];
             }
             $tasFile->remarks = $remarks;
-    public function tasView(){
-        $pageSize = 15; // Define the default page size
-        $tasFiles = TasFile::all()->sortByDesc('case_no');
-        $officers = collect();
-        
-        foreach ($tasFiles as $tasFile) {
-            $officerName = $tasFile->apprehending_officer;
-            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-            $officers = $officers->merge($officersForFile);
-            $tasFile->relatedofficer = $officersForFile;
-            
-            if (is_string($tasFile->remarks)) {
-                $remarks = json_decode($tasFile->remarks, true);
-                if ($remarks === null) {
-                    $remarks = [];
-                }
-            } else if (is_array($tasFile->remarks)) {
-                $remarks = $tasFile->remarks;
-            } else {
-                $remarks = [];
-            }
-            $tasFile->remarks = $remarks;
 
             $violations = json_decode($tasFile->violation);
             if ($violations) {
@@ -234,7 +212,22 @@ class DashboardController extends Controller
             }
             $tasFile->relatedViolations = $relatedViolations;
         }
+            $violations = json_decode($tasFile->violation);
+            if ($violations) {
+                if (is_array($violations)) {
+                    $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+                } else {
+                    $relatedViolations = TrafficViolation::where('code', $violations)->get();
+                }
+            } else {
+                $relatedViolations = [];
+            }
+            $tasFile->relatedViolations = $relatedViolations;
+        }
 
+        return view('tas.view', compact('tasFiles'));
+    }
+    public function admitmanage(){
         return view('tas.view', compact('tasFiles'));
     }
     public function admitmanage(){
@@ -360,6 +353,7 @@ class DashboardController extends Controller
         }
     }
     public function submitForm(Request $request){
+    public function submitForm(Request $request){
         try {
             $validatedData = $request->validate([
                 'case_no' => 'required|string',
@@ -425,6 +419,7 @@ class DashboardController extends Controller
         }
     }
 
+    public function admittedsubmit(Request $request) {
     public function admittedsubmit(Request $request) {
          // dd($request->all());
          try {
@@ -528,6 +523,7 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     } 
+    } 
     public function change($id){
         $user = User::findOrFail($id);
         return view('change_password', compact('user'));
@@ -609,6 +605,8 @@ class DashboardController extends Controller
         return view('ao.addoffi');
     }    
     public function editoffi(){
+    }    
+    public function editoffi(){
 
         $officers = ApprehendingOfficer::all();
 
@@ -618,7 +616,10 @@ class DashboardController extends Controller
     public function edivio(){
 
         $violations = TrafficViolation::orderBy('code', 'asc')->get();
+        $violations = TrafficViolation::orderBy('code', 'asc')->get();
 
+        // dd($officers[1]);
+        return view('ao.editvio', compact('violations'));
         // dd($officers[1]);
         return view('ao.editvio', compact('violations'));
     }
@@ -686,9 +687,11 @@ class DashboardController extends Controller
         }
     }
     public function updateTas(Request $request, $id) {
+    public function updateTas(Request $request, $id) {
         try {
             // Find the violation by ID
             $violation = TasFile::findOrFail($id);
+
 
             // Validate the incoming request data
             $validatedData = $request->validate([
@@ -702,6 +705,7 @@ class DashboardController extends Controller
                 'plate_no' => 'nullable|string|max:255',
                 'contact_no' => 'nullable|string|max:255',
                 'remarks.*.text' => 'nullable|string',
+                'file_attach_existing.*' => 'nullable|file|max:10240', // Added file validation rules
                 'file_attach_existing.*' => 'nullable|file|max:10240', // Added file validation rules
             ]);
 
@@ -737,17 +741,21 @@ if ($request->hasFile('file_attach_existing')) {
                 $validatedData['remarks'] = json_encode($remarksArray);
             }
 
+
             // Merge new violations into existing violations array
             if (!empty($validatedData['violation'])) {
                 $existingViolations = json_decode($violation->violation, true) ?? [];
+                $newViolations = array_filter($validatedData['violation'], function ($value) {
                 $newViolations = array_filter($validatedData['violation'], function ($value) {
                     return $value !== null;
                 });
                 $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
             }
 
+
             // Update the violation with validated data
             $violation->update($validatedData);
+
 
             // If new violations were added, add them to the TasFile model
             if (!empty($newViolations)) {
@@ -756,7 +764,12 @@ if ($request->hasFile('file_attach_existing')) {
                 }
                 // Refresh the model after adding new violations
                 $violation = TasFile::findOrFail($id);
+                // Refresh the model after adding new violations
+                $violation = TasFile::findOrFail($id);
             }
+
+            return back()->with('success', 'Violation updated successfully')->with('status', 201);
+
 
             return back()->with('success', 'Violation updated successfully')->with('status', 201);
 
@@ -764,10 +777,12 @@ if ($request->hasFile('file_attach_existing')) {
             // Log the error
             Log::error('Error updating Violation: ' . $e->getMessage());
 
+
             // Set error message
             return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
     }
+    public function updateStatus(Request $request, $id){
     public function updateStatus(Request $request, $id){
         try {
             // Log the request data for debugging
@@ -789,6 +804,7 @@ if ($request->hasFile('file_attach_existing')) {
         }
     }
     public function finishCase(Request $request, $id){
+    public function finishCase(Request $request, $id){
         $tasFile = TasFile::findOrFail($id);
         $tasFile->status = 'closed';
         $tasFile->fine_fee = $request->fine_fee;
@@ -796,6 +812,7 @@ if ($request->hasFile('file_attach_existing')) {
 
         return redirect()->back()->with('success', 'Case finished successfully.');
     }
+    public function printsub(Request $request, $id){
     public function printsub(Request $request, $id){
         $tasFile = TasFile::findOrFail($id);
         $changes = $tasFile;
@@ -917,6 +934,7 @@ if ($request->hasFile('file_attach_existing')) {
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
     public function updateContest(){
+    public function updateContest(){
         // Fetch all traffic violations
         
         
@@ -924,6 +942,7 @@ if ($request->hasFile('file_attach_existing')) {
         $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
         
         // Fetch all codes (assuming TrafficViolation model provides codes)
+        $violation = TrafficViolation::all();
         $violation = TrafficViolation::all();
         
         // Prepare a collection for officers
@@ -946,7 +965,9 @@ if ($request->hasFile('file_attach_existing')) {
   
         // Pass data to the view, including the new variable $violationData
         return view('tas.edit', compact('recentViolationsToday', 'violation', 'officers'));
+        return view('tas.edit', compact('recentViolationsToday', 'violation', 'officers'));
     }
+    public function updateAdmitted(){
     public function updateAdmitted(){
         // Fetch all traffic violations
         
@@ -979,6 +1000,7 @@ if ($request->hasFile('file_attach_existing')) {
         return view('admitted.edit', compact('recentViolationsToday', 'codes', 'officers' ));
     }
     public function historyIndex() {
+    public function historyIndex() {
 
         return view('history');
     }
@@ -988,6 +1010,7 @@ if ($request->hasFile('file_attach_existing')) {
 
         return response()->json(['remarks' => $remarks]);
     }
+    public function updateoffi(Request $request, $id){
     public function updateoffi(Request $request, $id){
         try {
             // Validate incoming request
@@ -1016,6 +1039,7 @@ if ($request->hasFile('file_attach_existing')) {
         }
     }
     public function updateviolation(Request $request, $id){
+    public function updateviolation(Request $request, $id){
         try {
             // Validate incoming request
             $request->validate([
@@ -1042,6 +1066,7 @@ if ($request->hasFile('file_attach_existing')) {
             return back()->with('error', 'Failed to update officer details. Please try again.');
         }
     }
+    public function detailstasfile(Request $request, $id){
     public function detailstasfile(Request $request, $id){
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
@@ -1115,6 +1140,47 @@ if ($request->hasFile('file_attach_existing')) {
     }
     
     public function detailsadmitted(Request $request, $id){
+    public function detailsedit(Request $request, $id) {
+        try {
+            // Find the TasFile by its ID or throw a ModelNotFoundException
+            $recentViolationsToday = TasFile::findOrFail($id);
+    
+            // Retrieve all Traffic Violations ordered by code ascending
+            $violationz = TrafficViolation::orderBy('code', 'asc')->get();
+    
+            // Prepare a collection for officers
+            $officers = collect();
+    
+            // Get the apprehending officer name from the TasFile
+            $officerName = $recentViolationsToday->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+            // Decode remarks if they are JSON-encoded
+            $remarks = json_decode($recentViolationsToday->remarks, true);
+            
+            // Check if $remarks is an array and reverse it if so
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array or JSON decoding failed, set it to an empty array
+                $remarks = [];
+            }
+    
+            // Pass data to the view
+            return view('tas.detailsedit', compact('recentViolationsToday', 'officers', 'violationz', 'remarks'));
+    
+        } catch (ModelNotFoundException $e) {
+            // Handle the case where the TasFile with the specified ID is not found
+            return response()->view('errors.404', [], 404);
+        }
+    }
+    
+    public function detailsadmitted(Request $request, $id){
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
             $admitted = admitted::findOrFail($id);
@@ -1147,6 +1213,7 @@ if ($request->hasFile('file_attach_existing')) {
         }
     }
     public function finishtasfile(Request $request, $id){
+    public function finishtasfile(Request $request, $id){
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
             $tasFile = TasFile::findOrFail($id);
@@ -1178,6 +1245,7 @@ if ($request->hasFile('file_attach_existing')) {
             return response()->view('errors.404', [], 404);
         }
     }
+    public function fetchFinishData($id){
     public function fetchFinishData($id){
         try {
             // Find the TasFile by its ID or throw a ModelNotFoundException
@@ -1234,11 +1302,104 @@ if ($request->hasFile('file_attach_existing')) {
         } catch (\Exception $e) {
             // Log the error or handle it as per your application's needs
             return response()->json(['error' => 'Failed to remove attachment.'], 500);
+    public function removeAttachment(Request $request, $id) {
+        try {
+            $tasFile = TasFile::findOrFail($id);
+            $attachmentToRemove = $request->input('attachment');
+    
+            if ($attachmentToRemove) {
+                $attachments = json_decode($tasFile->file_attach, true) ?? [];
+    
+                // Check if the attachment exists in the array
+                if (($key = array_search($attachmentToRemove, $attachments)) !== false) {
+                    unset($attachments[$key]);
+                    $tasFile->file_attach = json_encode(array_values($attachments)); // Reindex array and encode back to JSON
+                    $tasFile->save();
+    
+                    // Optionally, delete the file from the storage
+                    Storage::delete($attachmentToRemove);
+    
+                    return response()->json(['success' => 'Attachment removed successfully.']);
+                } else {
+                    return response()->json(['error' => 'Attachment not found in the list.'], 404);
+                }
+            } else {
+                return response()->json(['error' => 'Attachment parameter is missing.'], 400);
+            }
+        } catch (\Exception $e) {
+            // Log the error or handle it as per your application's needs
+            return response()->json(['error' => 'Failed to remove attachment.'], 500);
         }
     }
     
     public function UPDATEVIO(Request $request, $id){
+    }
+    
+    public function UPDATEVIO(Request $request, $id){
         $tasFile = TasFile::findOrFail($id);
+        $violationIndex = $request->input('index');
+        $newViolation = $request->input('violation');
+
+        // Retrieve existing violations
+        $violations = json_decode($tasFile->violation, true) ?? [];
+
+        if (isset($violations[$violationIndex])) {
+            $violations[$violationIndex] = $newViolation;
+            $tasFile->violation = json_encode($violations);
+            $tasFile->save();
+        }
+
+        return response()->json(['message' => 'Violation updated successfully', 'violations' => json_decode($tasFile->violation)]);
+    }
+    public function DELETEVIO(Request $request, $id) {
+        $tasFile = TasFile::findOrFail($id);
+        $violationIndex = $request->input('index');
+
+        // Retrieve existing violations
+        $violations = json_decode($tasFile->violation, true) ?? [];
+
+        if (isset($violations[$violationIndex])) {
+            array_splice($violations, $violationIndex, 1);
+            $tasFile->violation = json_encode($violations);
+            $tasFile->save();
+        }
+
+        return response()->json(['message' => 'Violation deleted successfully', 'violations' => json_decode($tasFile->violation)]);
+    }
+    public function deleteRemark(Request $request)
+    {
+        // Retrieve data from AJAX request
+        $violationId = $request->input('violation_id');
+        $index = $request->input('index');
+
+        // Find the TasFile by violation ID (assuming TasFile is your model)
+        try {
+            $tasFile = TasFile::findOrFail($violationId);
+
+            // Decode remarks from JSON to array
+            $remarks = json_decode($tasFile->remarks, true);
+
+            // Check if remarks exist and if the index is valid
+            if (is_array($remarks) && array_key_exists($index, $remarks)) {
+                // Remove the remark at the specified index
+                unset($remarks[$index]);
+
+                // Encode the updated remarks array back to JSON and update the TasFile
+                $tasFile->remarks = json_encode(array_values($remarks)); // Re-index array
+                $tasFile->save();
+
+                // Return a success response
+                return response()->json(['message' => 'Remark deleted successfully']);
+            } else {
+                // Return an error response if remark or index is invalid
+                return response()->json(['error' => 'Invalid remark index'], 404);
+            }
+        } catch (\Exception $e) {
+            // Return an error response if TasFile is not found or any other exception occurs
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+}
         $violationIndex = $request->input('index');
         $newViolation = $request->input('violation');
 
