@@ -199,6 +199,28 @@ class DashboardController extends Controller
                 $remarks = [];
             }
             $tasFile->remarks = $remarks;
+    public function tasView(){
+        $pageSize = 15; // Define the default page size
+        $tasFiles = TasFile::all()->sortByDesc('case_no');
+        $officers = collect();
+        
+        foreach ($tasFiles as $tasFile) {
+            $officerName = $tasFile->apprehending_officer;
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+            $officers = $officers->merge($officersForFile);
+            $tasFile->relatedofficer = $officersForFile;
+            
+            if (is_string($tasFile->remarks)) {
+                $remarks = json_decode($tasFile->remarks, true);
+                if ($remarks === null) {
+                    $remarks = [];
+                }
+            } else if (is_array($tasFile->remarks)) {
+                $remarks = $tasFile->remarks;
+            } else {
+                $remarks = [];
+            }
+            $tasFile->remarks = $remarks;
 
             $violations = json_decode($tasFile->violation);
             if ($violations) {
