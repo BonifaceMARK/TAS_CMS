@@ -30,7 +30,7 @@ Route::get('/logout', [AuthController::class, 'logoutx'])->name('logout');
 
 // start middleware
 Route::middleware(['auth'])->group(function () {
-    
+        
         Route::get('/dashboard', [DashboardController::class, 'indexa'])->name('dashboard');
         Route::get('/analytics', [DashboardController::class, 'analyticsDash'])->name('analytics.index');
         Route::get('/tables', [DashboardController::class, 'tables'])->name('tables');

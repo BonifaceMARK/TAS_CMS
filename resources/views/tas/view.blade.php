@@ -81,7 +81,8 @@
                                             <td>
                                                 @if ($tasFile->relatedofficer->isNotEmpty())
                                                     @foreach ($tasFile->relatedofficer as $officer)
-                                                        {{ $officer->department }}
+                                                        
+                                                    
                                                     @endforeach
                                                 @endif
                                             </td>
@@ -260,13 +261,17 @@
                             <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                             <p><strong>Violations:</strong></p>
                             
-                                @foreach ($tasFile->relatedViolations as $violation)
+                            
+                            @if ($tasFile->violation)
                                 <ul>
-                                    <li>
-                                        {{ $violation->code }} - {{ $violation->violation }}
-                                    </li>
+                                    @foreach (json_decode($tasFile->violation) as $violation)
+                                        <li>{{ $violation }}</li>
+                                    @endforeach
                                 </ul>
-                                @endforeach
+                            @else
+                                <p>No violations recorded.</p>
+                            @endif
+                        
                             
                             
                         </div>
@@ -326,13 +331,15 @@
                             <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
                             <p><strong>Violations:</strong></p>
                             
-                                @foreach ($tasFile->relatedViolations as $violation)
-                                <ul>
-                                    <li>
-                                        {{ $violation->id }} - {{ $violation->violation }}
-                                    </li>
-                                </ul>
+                            @if ($tasFile->violation)
+                            <ul>
+                                @foreach (json_decode($tasFile->violation) as $violation)
+                                    <li>{{ $violation }}</li>
                                 @endforeach
+                            </ul>
+                        @else
+                            <p>No violations recorded.</p>
+                        @endif
                             
                             <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                         </div>

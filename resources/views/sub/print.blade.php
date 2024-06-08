@@ -56,8 +56,11 @@
          }
 
          div.WordSection1 {
-             page: WordSection1;
-         }
+            margin: 0 auto;
+            max-width: 800px; 
+            padding: 20px;
+            /* page:WordSection1; */
+        }
          /* List Definitions */
          ol {
              margin-bottom: 0in;
@@ -66,15 +69,14 @@
          ul {
              margin-bottom: 0in;
          }
-
-         -->
+        
     </style>
 
 </head>
 
 <body lang=EN-US style='word-wrap:break-word'>
 
-    <div class=WordSection1>
+    <div style="position: absolute; top: 0.25in; left: 1in; bottom: 1in; right: 1in;">
 
         <p class=MsoNoSpacing><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>
             </span></p>
@@ -93,8 +95,8 @@
             font-family:"Arial",sans-serif'> </span><span style='font-size:14.0pt;
             font-family:"Arial",sans-serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LAND TRANSPORTATION OFFICE</span></p>
 
-        <p class=MsoNoSpacing align=center style='text-align:center'><b><span
-                    style='font-size:12.0pt;font-family:"Arial",sans-serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TRAFFIC
+        <p class=MsoNoSpacing align=center style='text-align:left'><b><span
+                    style='font-size:12.0pt;font-family:"Arial",sans-serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TRAFFIC
                     ADJUDICATION SERVICE </span></b></p>
 
         <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
@@ -109,12 +111,13 @@
                         {{ $officer->department }}
                     @endforeach
 
-                </span>represented by   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Case
-                No.<span style='color:red'> </span><b><span style='color:black'>{{ $compactData['changes']['case_no'] }}</span></b></span></p>
+                </span>
+                represented by <span style='margin-left:21.5%'> Case
+                    No.</span><b><span style='color:black'>{{ $compactData['changes']['case_no'] }}</span></b></span></p>
 
-        <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif;'>{{ $compactData['changes']['apprehending_officer'] }}</span></b><b><span style='font-size:12.0pt;
-                font-family:"Arial",sans-serif'>
-            </span></b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $compactData['changes']['transaction_no'] }}</span></p>
+        <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif;display:relative'>{{ $compactData['changes']['apprehending_officer'] }}</span></b><b><span style='font-size:12.0pt;
+                font-family:"Arial",sans-serif'>    
+            </span></b><span  style='font-size:12.0pt;font-family:"Arial";justify-content: right;align-items: right;'>{{ $compactData['changes']['transaction_no'] }}</span></p>
 
         <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'> 
             </span></b></p>
@@ -127,13 +130,17 @@
 
                 <p class=MsoNoSpacing style='margin-left:3.0in'><b><span style='font-size:12.0pt;
                 font-family:"Arial",sans-serif'> 
-                </span></b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>FOR:<br>
-
+                </span></b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>FOR:&nbsp;&nbsp;&nbsp;&nbsp;
+                    
                     <?php $counter = 1; ?>
-                    @foreach ($compactData['relatedViolations'] as $violation)
-                        {{ $counter }}. {{ $violation->code }} - {{ $violation->violation }} <br>
-                        <?php $counter++; ?>
-                    @endforeach
+                    @if (!empty($compactData['changes']['violation']))
+                        @foreach (json_decode($compactData['changes']['violation']) as $violation)
+                            {{ $counter }}. {{ $violation}} <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <?php $counter++; ?>
+                        @endforeach
+                    @else
+                        No violations recorded.
+                    @endif
                     </p>
 
         <p class=MsoNoSpacing style='margin-left:3.0in'><span style='font-size:12.0pt;
@@ -141,6 +148,7 @@
 
         <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif;
             '>
+            <br>
             {{ $compactData['changes']['driver'] }}
             </span></b></p>
 
@@ -164,14 +172,14 @@
                 Executive Order No. 266 dated July 25,1987, you are hereby ordered to <b>submit
                     Position Paper</b> before the Traffic Adjudication Service, LTO Central Office,
                 East Avenue, Quezon City, Philippines, on <b><span >{{$compactData['hearing']}} at 2:00 p.m.</b> in connection with the charge/s involving motor
-                vehicle with Plate No<b>. <span>{{$compactData['changes']['plate_no']}}.</span></b></span></p>
+                vehicle with Plate No<b>. <span>{{$compactData['changes']['plate_no']}}.<br><br></span></b></span></p>
 
         <p class=MsoNoSpacing style='text-align:justify'><b><span style='font-size:
                     12.0pt;font-family:"Arial",sans-serif'></span></b></p>
 
         <p class=MsoNoSpacing style='text-align:justify'><b><span style='font-size:
                     12.0pt;font-family:"Arial",sans-serif'> </span></b><span
-                style='font-size:12.0pt;font-family:"Arial",sans-serif'>Failure to comply with
+                style='font-size:12.0pt;font-family:"Arial",sans-serif'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Failure to comply with
                 the lawful order of this Office is tantamount to disobedience. As such, this
                 Office will recommend the revocation of your Deputation Order.</span></p>
 
@@ -201,7 +209,7 @@
         </p>
 
         <p class="MsoNoSpacing" style="margin-right:.4in;text-align: center;">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <b>
                 <span style="font-size:12.0pt;font-family:'Arial',sans-serif;"></span>
             </b>
@@ -211,7 +219,7 @@
         </p>
 
         <p class="MsoNoSpacing" style="text-align: center;">
-            <span style="font-size:12.0pt;font-family:'Arial',sans-serif;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chief, Traffic Adjudication Service</span>
+            <span style="font-size:12.0pt;font-family:'Arial',sans-serif;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chief, Traffic Adjudication Service</span>
         </p>
 
         <p class=MsoNoSpacing><b><span style='font-size:12.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>

@@ -214,23 +214,19 @@ $violations = TrafficViolation::all();
             // Assign the related officers to the $tasFile object
             $tasFile->relatedofficer = $officersForFile;
         }
-        
-        // dd($officers);
-        foreach ($tasFiles as $tasFile) {
-            // $tasFile->relatedofficer = $officer;
-            $violations = json_decode($tasFile->violation);
-            
-            // $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-            if ($violations) {
-                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
-            } else {
-                $relatedViolations = [];
-            }
-            $tasFile->relatedViolations = $relatedViolations;
-            
+        // foreach ($tasFiles as $tasFile) {
+        //     $officialviolation = json_decode($tasFile->violation);
+
+        //     $tasFile->relatedViolations = $officialviolation;
+        // }
+        foreach ($tasFile as $violation)
+        {
+            $violation;
         }
-        // dd($relatedViolations);
+        // dd($violation);
+        // dd($tasFile);
         return view('tas.view', compact('tasFiles'));
+        
     }
     
     
@@ -329,7 +325,8 @@ $violations = TrafficViolation::all();
             'top' => 'nullable|string',
             'driver' => 'required|string',
             'apprehending_officer' => 'required|string',
-            'violation' => 'required|string',
+            'violation' => 'required|array',
+            'violation.*' => 'required|string',
             'transaction_no' => 'nullable|string',
             'date_received' => 'required|date',
             'contact_no' => 'required|string',
@@ -345,7 +342,7 @@ $violations = TrafficViolation::all();
                 'top' => $validatedData['top'],
                 'driver' => $validatedData['driver'],
                 'apprehending_officer' => $validatedData['apprehending_officer'],
-                'violation' => json_encode(explode(', ', $validatedData['violation'])),
+                'violation' => json_encode($validatedData['violation']),
                 'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
                 'plate_no' => $validatedData['plate_no'],
                 'date_received' => $validatedData['date_received'],
@@ -683,6 +680,76 @@ $violations = TrafficViolation::all();
             // Set error message
             return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
+    }   
+    public function printsub($id)
+    {
+        $tasFile = TasFile::findOrFail($id);
+        $changes = $tasFile;
+        $officerName = $changes->apprehending_officer;
+        $officers = ApprehendingOfficer::where('officer', $officerName)->get();
+        if (!empty($changes->violation)) {
+            $violations = json_decode($changes->violation);
+            if ($violations !== null) {
+                $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
+            } else {
+                $relatedViolations = [];
+            }
+        } else {
+            $relatedViolations = [];
+        }
+
+        $holidays = [
+            // List of holidays, format: 'MM-DD' or 'YYYY-MM-DD'
+            '01-01', // New Year's Day
+            '04-09', // Araw ng Kagitingan
+            '05-01', // Labor Day
+            '06-12', // Independence Day
+            '08-26', // National Heroes Day
+            '11-30', // Bonifacio Day
+            '12-25', // Christmas Day
+            '02-25', // EDSA People Power Revolution Anniversary
+            '08-21', // Ninoy Aquino Day
+            '11-01', // All Saints' Day
+            '11-02', // All Souls' Day
+            '12-30', // Rizal Day
+            '02-14', // Valentine's Day
+            '03-08', // International Women's Day
+            '10-31', // Halloween
+            '04-20', // 420 (Cannabis Culture)
+            '07-04', // Independence Day (United States)
+            '10-31', // Halloween
+            '05-14', // Additional holiday declared by the government
+            '11-15', // Regional holiday
+        ];
+        // Get the current date and format it as "Month Day, Year"
+        $startDate = $changes->date_received; // Example output: "May 6, 2024"
+        
+
+        // Add the specified number of days
+        
+        $date = new DateTime($startDate);
+        $numDays = 4;
+        $date->modify("+" . $numDays . " days");
+        $newDate = $date->format('F j, Y');
+        while ($numDays > 0) {
+            $date->modify('+1 day');
+            if ($date->format('N') >= 6 || in_array($date->format('m-d'), $holidays)) {
+                continue; 
+            }
+            
+            $numDays--;
+        }
+        $endDate = $date->format('F j, Y');
+        $compactData = [
+            'changes' => $changes,
+            'officers' => $officers,
+            'relatedViolations' => $relatedViolations,
+            'date' => $newDate,
+            'hearing' => $endDate,
+        ];
+        // dd($compactData);
+        return view('sub.print', compact('tasFile', 'compactData'));
+    }
     }
     public function deleteTas($id)
 {
