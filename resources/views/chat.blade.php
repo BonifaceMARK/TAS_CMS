@@ -43,7 +43,7 @@
                             <div class="message{{ $message->user->id == Auth::user()->id ? ' outgoing' : ' incoming' }}">
                                 <div class="message-details{{ $message->user->id == Auth::user()->id ? ' text-end' : '' }}">
                                     <span class="message-sender"><strong>{{ $message->user->fullname }}</strong></span>
-                                    <span class="message-time">{{ $message->created_at->format('M d, Y H:i A') }}</span>
+                                    <span class="message-time">{{ $message->created_at->format('M d, Y H:i A') }} <i class="bi bi-clock"></i> </span>
                                 </div>
                                 <div class="message-content{{ $message->user->id == Auth::user()->id ? ' outgoing' : ' incoming' }}">{{ $message->message }}</div>
                             </div>
