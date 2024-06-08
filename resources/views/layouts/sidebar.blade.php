@@ -41,6 +41,11 @@
       </a>
     </li>
     <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('chat.index')}}">
+      <i class="bi bi-chat-left-text"></i><span> Chat</span>
+      </a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tables-nav" href="{{route ('see.vio')}}">
           <i class="bi bi-file-earmark-text"></i><span> Add Violation</span>
       </a>
