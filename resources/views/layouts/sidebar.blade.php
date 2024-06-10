@@ -147,11 +147,22 @@
       <i class="bi bi-file-earmark-check"></i><span>View Admitted Cases</span>
       </a>
     </li><!-- End Tables Nav -->
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('edit.admit')}}">
+      <i class="bi bi-file-earmark-check"></i><span>Update Admitted Cases</span>
+      </a>
+    </li><!-- End Tables Nav -->
     <li class="nav-heading" style="border-bottom: 1px solid #000;"></li>
     <li class="nav-item">
       <a class="nav-link collapsed" href="{{route('case.view')}}">
       <i class="bi bi-file-earmark-zip-fill"></i>
         <span>Case Archives</span>
+      </a>
+    </li><!-- End Profile Page Nav -->
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="{{route('history.index')}}">
+      <i class="bi bi-clock-history"></i>
+        <span>History</span>
       </a>
     </li><!-- End Profile Page Nav -->
   </ul>
@@ -197,6 +208,7 @@
         <span>Case Archives</span>
       </a>
     </li><!-- End Profile Page Nav -->
+
   </ul>
 </aside><!-- End Sidebar-->
 @endif

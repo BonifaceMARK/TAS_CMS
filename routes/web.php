@@ -74,8 +74,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/violations/{id}', [DashboardController::class, 'updateTas'])->name('violations.updateTas');
         Route::delete('/violations/{id}', [DashboardController::class, 'deleteTas'])->name('violations.delete');
 
-
-
+        Route::get('/history', [DashboardController::class, 'historyIndex'])->name('history.index');
+        Route::get('/AdmittedEdit', [DashboardController::class, 'editAdmit'])->name('edit.admit');
             
         Route::get('/print.subpoena/{id}', [DashboardController::class, 'printsub'])->name('print.sub');
 });

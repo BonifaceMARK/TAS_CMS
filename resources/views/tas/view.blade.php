@@ -39,6 +39,7 @@
                                     <th>Driver</th>
                                     <th>Top</th>
                                     <th>Violation</th>
+                                    <th>Status</th>
                                     <th>Transaction No</th>
                                     <th>Transaction Date</th>
                                     <th>Attachment</th>
@@ -63,6 +64,7 @@
                                     <td>{{ $tasFile->driver }}</td>
                                     <td>{{ $tasFile->top ?? 'N/A' }}</td>
                                     <td>{{ $tasFile->violation }}</td>
+                                    <td>{{ $tasFile->status }}</td>
                                     <td>{{ $tasFile->transaction_no ?? 'N/A' }}</td>
                                     <td>{{ $tasFile->created_at }}</td>
                                     <td>

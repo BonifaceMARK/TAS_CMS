@@ -23,6 +23,7 @@ class TasFile extends Model
         'remarks',
         'file_attach',
         'history',
+        'status', 
     ];
     public function setofficerAttribute($value)
     {

@@ -330,61 +330,69 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
     }
     public function submitForm(Request $request) // contest manage
     {
-        // dd($request->all());
-         try {
-        $validatedData = $request->validate([
-            'case_no' => 'required|string',
-            'top' => 'nullable|string',
-            'driver' => 'required|string',
-            'apprehending_officer' => 'required|string',
-            'violation' => 'required|string',
-            'transaction_no' => 'nullable|string',
-            'date_received' => 'required|date',
-            'contact_no' => 'required|string',
-            'plate_no' => 'required|string',
-            'file_attachment' => 'nullable|array',
-            'file_attachment.*' => 'nullable|file|max:5120',
-        ]);
-        DB::beginTransaction();
-        $existingTasFile = TasFile::where('case_no', $validatedData['case_no'])->first();
-        if (!$existingTasFile) {
-            $tasFile = new TasFile([
-                'case_no' => $validatedData['case_no'],
-                'top' => $validatedData['top'],
-                'driver' => $validatedData['driver'],
-                'apprehending_officer' => $validatedData['apprehending_officer'],
-                'violation' => json_encode(explode(', ', $validatedData['violation'])),
-                'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
-                'plate_no' => $validatedData['plate_no'],
-                'date_received' => $validatedData['date_received'],
-                'contact_no' => $validatedData['contact_no'],
+        try {
+            $validatedData = $request->validate([
+                'case_no' => 'required|string',
+                'top' => 'nullable|string',
+                'driver' => 'required|string',
+                'apprehending_officer' => 'required|string',
+                'violation' => 'required|string',
+                'transaction_no' => 'nullable|string',
+                'date_received' => 'required|date',
+                'contact_no' => 'required|string',
+                'plate_no' => 'required|string',
+                'status' => 'required|string|in:closed,in-progress,settled,unsettled',
+                'file_attachment' => 'nullable|array',
+                'file_attachment.*' => 'nullable|file|max:5120',
             ]);
-            if ($request->hasFile('file_attachment')) {
-                $filePaths = [];
-                $cx = 1;
-                foreach ($request->file('file_attachment') as $file) {
-                    $x = $validatedData['case_no'] . "_documents_" . $cx . "_";
-                    $fileName = $x . time();
-                    $file->storeAs('attachments', $fileName, 'public');
-                    $filePaths[] = 'attachments/' . $fileName;
-                    $cx++;
+    
+            DB::beginTransaction();
+    
+            $existingTasFile = TasFile::where('case_no', $validatedData['case_no'])->first();
+    
+            if (!$existingTasFile) {
+                $tasFile = new TasFile([
+                    'case_no' => $validatedData['case_no'],
+                    'top' => $validatedData['top'],
+                    'driver' => $validatedData['driver'],
+                    'apprehending_officer' => $validatedData['apprehending_officer'],
+                    'violation' => json_encode(explode(', ', $validatedData['violation'])),
+                    'transaction_no' => $validatedData['transaction_no'] ? "TRX-LETAS-" . $validatedData['transaction_no'] : null,
+                    'plate_no' => $validatedData['plate_no'],
+                    'date_received' => $validatedData['date_received'],
+                    'contact_no' => $validatedData['contact_no'],
+                    'status' => $validatedData['status'],
+                ]);
+    
+                if ($request->hasFile('file_attachment')) {
+                    $filePaths = [];
+                    $cx = 1;
+                    foreach ($request->file('file_attachment') as $file) {
+                        $x = $validatedData['case_no'] . "_documents_" . $cx . "_";
+                        $fileName = $x . time();
+                        $file->storeAs('attachments', $fileName, 'public');
+                        $filePaths[] = 'attachments/' . $fileName;
+                        $cx++;
+                    }
+                    $tasFile->file_attach = json_encode($filePaths);
                 }
-                $tasFile->file_attach = json_encode($filePaths);
+    
+                $tasFile->save();
+            } else {
+                return redirect()->back()->with('error', 'Case no. already exists.');
             }
-            $tasFile->save();
-        } else {
-            return redirect()->back()->with('error', 'Case no. already exists.');
+    
+            DB::commit();
+    
+            return redirect()->back()->with('success', 'Form submitted successfully!');
+        } catch (ValidationException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
         }
-        DB::commit();
-        return redirect()->back()->with('success', 'Form submitted successfully!');
-    } catch (ValidationException $e) {
-        return redirect()->back()->with('error', $e->getMessage());
-        
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->back()->with('error', $e->getMessage());
     }
-    }
+    
     public function admittedsubmit(Request $request) // admitted
     {
          // dd($request->all());
@@ -869,6 +877,18 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         ->get();
         $violations = TrafficViolation::all();
         return view('tas.edit',compact('recentViolationsToday','violations'));
+    }
+
+    public function historyIndex()
+    {
+      
+        return view('history');
+    }
+
+    public function editAdmit()
+    {
+      
+        return view('admitted.edit');
     }
 }
 
