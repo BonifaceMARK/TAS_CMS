@@ -270,7 +270,7 @@
         series: [{
             name: 'Total Officers From:',
             type: 'pie',
-            radius: ['40%', '70%'],
+            radius: ['45%', '100%'],
             avoidLabelOverlap: false,
             label: {
                 show: false,
@@ -324,79 +324,7 @@
 </div>
 
 
-            <!-- Top Selling -->
-            <div class="col-12">
-              <div class="card top-selling overflow-auto">
 
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body pb-0">
-                  <h5 class="card-title">Top Selling <span>| Today</span></h5>
-
-                  <table class="table table-borderless">
-                    <thead>
-                      <tr>
-                        <th scope="col">Preview</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Sold</th>
-                        <th scope="col">Revenue</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-1.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Ut inventore ipsa voluptas nulla</a></td>
-                        <td>$64</td>
-                        <td class="fw-bold">124</td>
-                        <td>$5,828</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-2.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Exercitationem similique doloremque</a></td>
-                        <td>$46</td>
-                        <td class="fw-bold">98</td>
-                        <td>$4,508</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-3.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Doloribus nisi exercitationem</a></td>
-                        <td>$59</td>
-                        <td class="fw-bold">74</td>
-                        <td>$4,366</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-4.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Officiis quaerat sint rerum error</a></td>
-                        <td>$32</td>
-                        <td class="fw-bold">63</td>
-                        <td>$2,016</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-5.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Sit unde debitis delectus repellendus</a></td>
-                        <td>$79</td>
-                        <td class="fw-bold">41</td>
-                        <td>$3,239</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                </div>
-
-              </div>
-            </div><!-- End Top Selling -->
 
           </div>
         </div><!-- End Left side columns -->
@@ -449,6 +377,96 @@
       
 
         </div><!-- End Right side columns -->
+<!-- Rankings Table -->
+<div class="col-12">
+    <div class="card top-selling overflow-auto">
+        <div class="card-body pb-0">
+            <h5 class="card-title">Top Apprehending Officers <span>| Cases</span></h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover custom-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Apprehending Officer</th>
+                            <th scope="col">Department</th>
+                            <th scope="col">Total Cases</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($officers)
+                            @foreach($officers as $index => $officer)
+                                <tr class="{{ $index < 3 ? 'top-officer' : '' }}"> <!-- Highlight top 3 officers -->
+                                    <th scope="row">{{ $index + 1 }}</th>
+                                    <td>
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#officerModal{{ $index }}">{{ $officer->apprehending_officer ?: 'Unknown' }}</a>
+                                    </td>
+                                    <td>{{ $officer->department }}</td>
+                                    <td>{{ $officer->total_cases }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            <p>Showing top {{ count($officers) ?? 0 }} officers based on the total number of cases.</p>
+            <p>For more detailed information, click on the officer's name.</p>
+        </div>
+    </div>
+</div>
+@if($officers->isNotEmpty())
+    @foreach($officers as $index => $officer)
+        <!-- Modal for Officer Details -->
+        <div class="modal fade" id="officerModal{{ $index }}" tabindex="-1" aria-labelledby="officerModalLabel{{ $index }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cases Handled by {{ $officer->apprehending_officer ?: 'Unknown' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Total Cases:</strong> {{ $officer->total_cases }}</p>
+                        <div class="list-group">
+                            @php
+                                $caseNumbers = explode(',', $officer->case_numbers);
+                            @endphp
+                            @foreach($caseNumbers as $caseNo)
+                                <div class="list-group-item">
+                                    <p><strong>Case No:</strong> {{ $caseNo }}</p>
+                                    <!-- Retrieve other case details as needed -->
+                                    <!-- For example: -->
+                                    @php
+                                        $case = App\Models\TasFile::where('case_no', $caseNo)->first();
+                                    @endphp
+                                    @if($case)
+                                        <p><strong>Driver:</strong> {{ $case->driver }}</p>
+                                        <p><strong>Violation:</strong> {{ $case->violation }}</p>
+                                        <p><strong>Date Received:</strong> {{ $case->date_received }}</p>
+                                        <p><strong>Contact No:</strong> {{ $case->contact_no }}</p>
+                                        <p><strong>Plate No:</strong> {{ $case->plate_no }}</p>
+                                        <p><strong>Remarks:</strong> {{ $case->remarks ?? 'No remarks' }}</p>
+                                    @else
+                                        <em>Case details not found.</em>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal for Officer Details -->
+    @endforeach
+@else
+    <p>No officers found.</p>
+@endif
+
+
+
+
+
+
 
       </div>
     </section>

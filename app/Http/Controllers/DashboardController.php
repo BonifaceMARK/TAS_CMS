@@ -94,8 +94,16 @@ $today = Carbon::now()->format('Y-m-d');
 
 // Fetch the data created on today's date
 $salesToday = TasFile::whereDate('created_at', $today)->get();
+$officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_officer', '=', 'apprehending_officers.officer')
+    ->select('tas_files.apprehending_officer', 'apprehending_officers.department')
+    ->selectRaw('COUNT(tas_files.apprehending_officer) as total_cases')
+    ->selectRaw('GROUP_CONCAT(tas_files.case_no) as case_numbers')
+    ->groupBy('tas_files.apprehending_officer', 'apprehending_officers.department')
+    ->orderByDesc('total_cases')
+    ->get();
+
         
-        return view('index', compact('yearlyData','countByMonth','unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+        return view('index', compact('officers','yearlyData','countByMonth','unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
     public function editViolation(Request $request, $id)

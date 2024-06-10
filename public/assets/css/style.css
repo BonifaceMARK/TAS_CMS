@@ -1383,3 +1383,40 @@ h6 {
   transform: translateY(-5px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+/* Custom Table Styling */
+.custom-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.custom-table th {
+  background-color: #f8f9fa; /* Header background color */
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #f8f9fa; /* Alternate row background color */
+}
+
+.custom-table .top-officer {
+  background-color: #f4fcf0; /* Background color for top officers */
+}
+
+/* Card Footer Styling */
+.card-footer {
+  background-color: #f8f9fa; /* Footer background color */
+  border-top: 1px solid #dee2e6; /* Footer border */
+  border-radius: 0 0 5px 5px; /* Rounded bottom corners */
+  padding: 10px 15px; /* Padding */
+  margin-top: -20px; /* Adjust spacing */
+}
+
+.card-footer p {
+  margin-bottom: 5px; /* Bottom margin for paragraphs */
+}
