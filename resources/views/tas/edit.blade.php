@@ -363,50 +363,7 @@
       </div>
     </div>
   </div>
-  <script>
-    function addViolation() {
-        var violationContainer = document.getElementById('violationContainer');
-        var newInput = document.createElement('input');
-        newInput.type = 'text';
-        newInput.name = 'violation[]'; // Use an array to handle multiple violations
-        newInput.className = 'form-control violation-input mt-2';
-        newInput.required = true;
-        violationContainer.appendChild(newInput);
-
-        // Create a "Minus" button
-        var minusButton = document.createElement('button');
-        minusButton.type = 'button';
-        minusButton.className = 'btn btn-danger mt-2';
-        minusButton.textContent = 'Remove';
-        minusButton.onclick = function() {
-            violationContainer.removeChild(newInput);
-            violationContainer.removeChild(minusButton);
-        };
-        violationContainer.appendChild(minusButton);
-    }
-</script>
-  <script>
-    function selectViolation(selectedViolation) {
-      var input = document.getElementById('validationTooltipViolation');
-      // Split the input value into an array of violations
-      var currentViolations = input.value.split(',').map(violation => violation.trim());
-      // Trim and split the selectedViolation
-      var selectedViolations = selectedViolation.split('-').map(violation => violation.trim());
   
-      // Check if the selected violation is already in the list
-      var isDuplicate = currentViolations.includes(selectedViolations[0]);
-      
-      if (!isDuplicate) {
-        if (input.value === '') {
-          input.value = selectedViolation;
-        } else {
-          input.value += ', ' + selectedViolation;
-        }
-      }
-      $('#violationsModal').modal('hide'); // Close the modal after selecting a violation
-    }
-  </script>
-    
     
   </main><!-- End #main -->
 

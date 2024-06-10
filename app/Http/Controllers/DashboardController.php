@@ -71,22 +71,14 @@ class DashboardController extends Controller
         ];
     });      $departmentsData = ApprehendingOfficer::all();
 
-       // Replace 'YOUR_API_KEY' with your actual News API key
-       $apiKey = '014d72b0e8ae42aeab34e2163a269a83';
-       $newsApiUrl = 'https://newsapi.org/v2/top-headlines?country=ph&apiKey=' . $apiKey;
-
-       // Fetch news articles from the News API
-       $response = Http::get($newsApiUrl);
-
-       // Extract news articles from the response
-       $articles = $response->json()['articles'];
+  
        $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
        $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
             $user = Auth::user();
             $name = $user->name;
             $department = $user->department;
       
-        return view('index', compact('unreadMessageCount','messages', 'name', 'department','articles','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+        return view('index', compact('unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
     public function editViolation(Request $request, $id)
@@ -791,6 +783,10 @@ $violations = TrafficViolation::all();
         // Pass data to the view using compact
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
-    
+    public function updateContest()
+    {
+        
+        return view('tas.edit');
+    }
 }
 

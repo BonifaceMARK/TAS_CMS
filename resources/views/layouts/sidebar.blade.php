@@ -69,7 +69,7 @@
       </a>
     </li><!-- End Tables Nav -->
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('tas.view')}}">
+      <a class="nav-link collapsed" data-bs-target="#tables-nav"  href="{{route('update.contest.index')}}">
       <i class="bi bi-file-arrow-up"></i><span>Update Contested Cases</span>
       </a>
     </li><!-- End Tables Nav -->
