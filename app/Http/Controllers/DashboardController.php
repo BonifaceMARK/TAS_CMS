@@ -83,10 +83,9 @@ class DashboardController extends Controller
     }
     public function editViolation(Request $request, $id)
     {
-        // Step 1: Retrieve the violation record
         $violation = Violation::find($id);
         
-        // Check if the violation exists
+
         if (!$violation) {
             // Handle the case where the violation does not exist
             return redirect()->back()->with('error', 'Violation not found.');
