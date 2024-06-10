@@ -30,34 +30,71 @@
         <!-- Left side columns -->
         <div class="col-lg-8">
           <div class="row">
-<!-- Sales Card -->
+<!-- Clickable Sales Card -->
 <div class="col-xxl-4 col-md-6">
-    <div class="card info-card sales-card">
+    <div class="card info-card sales-card clickable-card" data-bs-toggle="modal" data-bs-target="#salesModal">
         <div class="card-body">
-            <h5 class="card-title"> {{ date('l') }} <span> | Violations Today</span></h5> <!-- Display today's date -->
+            <h5 class="card-title">{{ date('l') }} <span> | Violations Today</span></h5> <!-- Display today's date -->
             <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <i class="bi bi-cone-striped"></i>
                 </div>
                 <div class="ps-3">
-                    <h6>{{ $salesToday }}</h6> <!-- Display sales for today -->
-                    {{-- @if($averageSalesLastWeek > 0)
-                    @php
-                        $percentageChange = (($salesToday - $averageSalesLastWeek) / $averageSalesLastWeek) * 100;
-                    @endphp
-                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif --}}
+                    @if($salesToday->isEmpty())
+                        <p>No Violations recorded today.</p>
+                    @else
+                        <h6>{{ $salesToday->count() }}</h6> <!-- Display count of violations for today -->
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- End Sales Card -->
+<!-- End Clickable Sales Card -->
+
+<div class="modal fade" id="salesModal" tabindex="-1" aria-labelledby="salesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Adjust modal size as needed -->
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="salesModalLabel">Traffic Violations Today</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-dialog-scrollable"> <!-- Added modal-dialog-scrollable class -->
+                @if($salesToday->isEmpty())
+                    <p>No traffic violations recorded today.</p>
+                @else
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Case Number</th>
+                                <th>Driver</th>
+                                <th>Plate Number</th>
+                                <th>Violation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($salesToday as $violation)
+                                <tr>
+                                    <td>{{ $violation->case_no }}</td>
+                                    <td>{{ $violation->driver }}</td>
+                                    <td>{{ $violation->plate_no }}</td>
+                                    <td>{{ $violation->violation }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
 <!-- Revenue Card -->
 <div class="col-xxl-4 col-md-6">
-    <div class="card info-card revenue-card">
+    <div class="card info-card revenue-card clickable-card" data-bs-toggle="modal" data-bs-target="#revenueModal">
         <div class="card-body">
             <h5 class="card-title">{{ date('F') }} <span> | This Month</span></h5> <!-- Display current month name -->
             <div class="d-flex align-items-center">
@@ -80,9 +117,46 @@
 <!-- End Revenue Card -->
 
 
+<!-- Revenue Modal -->
+<div class="modal fade" id="revenueModal" tabindex="-1" aria-labelledby="revenueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="revenueModalLabel">Record Count by Month</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Record Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($countByMonth as $count)
+                        <tr>
+                            <td>{{ Carbon\Carbon::create()->month($count['month'])->format('F') }}</td>
+                            <td>{{ $count['record_count'] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Revenue Modal -->
+
+
+
+
 <!-- Customers Card -->
 <div class="col-xxl-4 col-xl-12">
-    <div class="card info-card customers-card">
+    <div class="card info-card customers-card clickable-card" data-bs-toggle="modal" data-bs-target="#customersModal">
         <div class="card-body">
             <h5 class="card-title">{{ date('Y') }}<span> | This Year</span></h5> <!-- Display current year -->
             <div class="d-flex align-items-center">
@@ -91,12 +165,6 @@
                 </div>
                 <div class="ps-3">
                     <h6>{{ $customersThisYear }}</h6> <!-- Display customers for this year -->
-                    {{-- @if($previousYearCustomers > 0)
-                    @php
-                        $percentageChange = (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100;
-                    @endphp
-                    <span class="text-muted small pt-2">({{ $percentageChange > 0 ? '+' : '' }}{{ number_format($percentageChange, 2) }}%)</span>
-                    @endif --}}
                 </div>
             </div>
         </div>
@@ -104,22 +172,47 @@
 </div>
 <!-- End Customers Card -->
 
+<!-- Customers Modal -->
+<div class="modal fade" id="customersModal" tabindex="-1" aria-labelledby="customersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customersModalLabel">Yearly Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Record Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    @foreach($yearlyData as $year => $record)
+        <tr>
+            <td>{{ $year }}</td>
+            <td>{{ $record->record_count }}</td>
+        </tr>
+    @endforeach
+</tbody>
+
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Customers Modal -->
+
+
 
           <!-- Website Traffic -->
           <div class="col-12">
           <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
+          
 
             <div class="card-body pb-0">
             <h5 class="card-title">Concerned Apprehending Offices <span id="todaySpan">| Chart</span></h5>
@@ -170,9 +263,10 @@
             trigger: 'item'
         },
         legend: {
-            top: '5%',
-            left: 'center'
-        },
+        orient: 'vertical',
+        left: '5%',
+        top: 'center',
+    },
         series: [{
             name: 'Total Officers From:',
             type: 'pie',

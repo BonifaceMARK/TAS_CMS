@@ -26,16 +26,16 @@ class DashboardController extends Controller
 {
     public function indexa()
     {
-        $revenueThisMonth = TasFile::whereMonth('created_at', now())->count();
-        $previousMonthRevenue = TasFile::whereMonth('created_at', Carbon::now()->subMonth())->count();
+$revenueThisMonth = TasFile::whereMonth('date_received', date('m'))->count();
+
+        $previousMonthRevenue = TasFile::whereMonth('date_received', Carbon::now()->subMonth())->count();
     
         // // Calculate the percentage change
         // $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
     
         // $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
         $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        $salesToday = TasFile::whereDate('created_at', today())->count();
-        $customersThisYear = TasFile::whereYear('created_at', now())->count();
+        $customersThisYear = TasFile::whereYear('date_received', now())->count();
         $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
         $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])->count() / 7;
         $admittedData = Admitted::all();
@@ -59,8 +59,43 @@ class DashboardController extends Controller
             $user = Auth::user();
             $name = $user->name;
             $department = $user->department;
-      
-        return view('index', compact('unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
+         
+            $allMonths = collect(range(1, 12))->map(function ($month) {
+                return ['month' => $month, 'record_count' => 0];
+            });
+        
+            // Count records for all months
+            $countByMonth = TasFile::select(
+                    DB::raw('MONTH(date_received) as month'),
+                    DB::raw('COUNT(*) as record_count')
+                )
+                ->groupBy(DB::raw('MONTH(date_received)'))
+                ->get()
+                ->keyBy('month');
+        
+            // Merge the count by month with all months and fill missing months with record count 0
+            $countByMonth = $allMonths->map(function ($month) use ($countByMonth) {
+                return $countByMonth->has($month['month']) ? $countByMonth[$month['month']] : $month;
+            });
+        
+            // Sort the collection by month
+            $countByMonth = $countByMonth->sortBy('month')->values();
+
+    // Fetch yearly data grouped by the date_received field
+    $yearlyData = TasFile::select(
+        DB::raw('IFNULL(YEAR(date_received), "Unknown") as year'),
+        DB::raw('COUNT(*) as record_count')
+    )
+    ->groupBy(DB::raw('IFNULL(YEAR(date_received), "Unknown")'))
+    ->get()
+    ->keyBy('year');
+// Get today's date
+$today = Carbon::now()->format('Y-m-d');
+
+// Fetch the data created on today's date
+$salesToday = TasFile::whereDate('created_at', $today)->get();
+        
+        return view('index', compact('yearlyData','countByMonth','unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
     public function editViolation(Request $request, $id)
@@ -110,11 +145,9 @@ class DashboardController extends Controller
     public function tasManage()
     {
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
-        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
-        ->get();
         // dd($recentViolationsToday[1]);
-$violations = TrafficViolation::all();
-        return view('tas.manage', compact('officers','recentViolationsToday','violations'));
+        $violations = TrafficViolation::all();
+        return view('tas.manage',compact('officers','violations'));
     }
     public function updateAdmittedCase(Request $request, $id)
     {
@@ -823,8 +856,11 @@ $violations = TrafficViolation::all();
     }
     public function updateContest()
     {
-        
-        return view('tas.edit');
+      
+        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
+        ->get();
+        $violations = TrafficViolation::all();
+        return view('tas.edit',compact('recentViolationsToday','violations'));
     }
 }
 
