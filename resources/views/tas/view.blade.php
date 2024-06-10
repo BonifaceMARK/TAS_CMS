@@ -274,13 +274,20 @@
                             <h6>Remarks</h6>
                             @if ($tasFile->remarks)
                                 <ul>
-                                    @php
-                                        $remarks = json_decode($tasFile->remarks);
-                                        $remarks = array_reverse($remarks);
-                                    @endphp
-                                    @foreach ($remarks as $remark)
-                                        <li>{{ $remark }}</li>
-                                    @endforeach
+                                @php
+    $remarks = json_decode($tasFile->remarks, true);
+
+    if ($remarks !== null) {
+        $remarks = array_reverse($remarks);
+    }
+@endphp
+
+@if ($remarks !== null)
+    @foreach ($remarks as $remark)
+        <li>{{ $remark }}</li>
+    @endforeach
+@endif
+
                                 </ul>
                             @else
                                 <p>No remarks available.</p>

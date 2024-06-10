@@ -180,18 +180,21 @@
                         <td>{{ \Carbon\Carbon::parse($historyItem['timestamp'])->format('Y-m-d H:i:s') }}</td>
                         <td>
                         <ul class="list-group">
-    @foreach($historyItem['changes'] as $field => $values)
-        <li class="list-group-item">
-            <strong>{{ $field }}:</strong>
-            @if (is_array($values) && isset($values['old_value']) && isset($values['new_value']))
-                <span class="badge bg-primary">{{ $values['old_value'] }}</span>
-                <i class="bi bi-caret-right mx-2"></i>
-                <span class="badge bg-success">{{ $values['new_value'] }}</span>
-            @else
-                <span class="badge bg-secondary">N/A</span>
-            @endif
-        </li>
-    @endforeach
+                        @foreach($historyItem['changes'] as $field => $values)
+    <li class="list-group-item">
+        <strong>{{ $field }}:</strong>
+        @if (is_array($values) && isset($values['old_value']) && isset($values['new_value']))
+            <span class="badge bg-primary">{{ is_string($values['old_value']) ? htmlspecialchars($values['old_value'], ENT_NOQUOTES) : 'N/A' }}</span>
+            <i class="bi bi-caret-right mx-2"></i>
+            <span class="badge bg-success">{{ is_string($values['new_value']) ? htmlspecialchars($values['new_value'], ENT_NOQUOTES) : 'N/A' }}</span>
+        @else
+            <span class="badge bg-secondary">N/A</span>
+        @endif
+    </li>
+@endforeach
+
+
+
 </ul>
 
                         </td>
