@@ -750,57 +750,47 @@ $violations = TrafficViolation::all();
         // dd($compactData);
         return view('sub.print', compact('tasFile', 'compactData'));
     }
-    }
-    public function deleteTas($id)
-{
-    try {
-        // Find the violation by ID
-        $violation = TasFile::findOrFail($id);
-
-        // Delete the violation
-        $violation->delete();
-
-        // Set success message
-        return redirect()->back()->with('success', 'Violation deleted successfully');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error deleting Violation: ' . $e->getMessage());
-
-        // Set error message
-        return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
-    }
-}
-// Update the analyticsDash() function in your controller
-public function analyticsDash()
-{
-    // Fetch the data from the database
-    $data = TasFile::select(
-        DB::raw('MONTH(date_received) as month'),
-        DB::raw('COUNT(*) as count')
-    )
-    ->groupBy(DB::raw('MONTH(date_received)'))
-    ->get();
-
-    // Define colors for each month
-    $colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8000', '#8000ff', '#0080ff', '#ff0080', '#80ff00', '#00ff80'];
-
-    // Prepare the data for the chart
-    $months = [];
-    $counts = [];
-    $backgroundColors = [];
-    foreach ($data as $index => $item) {
-        $monthDateTime = \DateTime::createFromFormat('!m', $item->month);
-        if ($monthDateTime !== false) { // Check if DateTime object was created successfully
-            $months[] = $monthDateTime->format('M'); // Convert month number to month name
-            $counts[] = $item->count;
-            $backgroundColors[] = $colors[$index % count($colors)]; // Assign color based on index
+    function deleteTas($id)
+    {
+        try {
+            $violation = TasFile::findOrFail($id);
+            $violation->delete();
+            return redirect()->back()->with('success', 'Violation deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Error deleting Violation: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
         }
     }
-
-    // Pass data to the view using compact
-    return view('analytics', compact('months', 'counts', 'backgroundColors'));
+    
+    public function analyticsDash()
+    {
+        // Fetch the data from the database
+        $data = TasFile::select(
+            DB::raw('MONTH(date_received) as month'),
+            DB::raw('COUNT(*) as count')
+        )
+        ->groupBy(DB::raw('MONTH(date_received)'))
+        ->get();
+    
+        // Define colors for each month
+        $colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8000', '#8000ff', '#0080ff', '#ff0080', '#80ff00', '#00ff80'];
+    
+        // Prepare the data for the chart
+        $months = [];
+        $counts = [];
+        $backgroundColors = [];
+        foreach ($data as $index => $item) {
+            $monthDateTime = \DateTime::createFromFormat('!m', $item->month);
+            if ($monthDateTime !== false) { // Check if DateTime object was created successfully
+                $months[] = $monthDateTime->format('M'); // Convert month number to month name
+                $counts[] = $item->count;
+                $backgroundColors[] = $colors[$index % count($colors)]; // Assign color based on index
+            }
+        }
+    
+        // Pass data to the view using compact
+        return view('analytics', compact('months', 'counts', 'backgroundColors'));
+    }
+    
 }
 
-
-
-}
