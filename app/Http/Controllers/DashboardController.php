@@ -682,83 +682,83 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         }
     }   
     public function updateTas(Request $request, $id)
-{
-    try {
-        // Find the violation by ID
-        $violation = TasFile::findOrFail($id);
-    
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'resolution_no' => 'nullable|string|max:255',
-            'top' => 'nullable|string|max:255',
-            'driver' => 'nullable|string|max:255',
-            'apprehending_officer' => 'nullable|string|max:255',
-            'violation' => 'nullable|array', // Changed to array, as we expect multiple violations
-            'transaction_no' => 'nullable|string|max:255',
-            'date_received' => 'nullable|date',
-            'plate_no' => 'nullable|string|max:255',
-            'contact_no' => 'nullable|string|max:255',
-            'remarks.*' => 'nullable|string',
-        ]);
-    
-                // If 'remarks' is set and is an array, join the array elements into a single string
-        if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
-            $validatedData['remarks'] = implode(', ', $validatedData['remarks']);
-        }
-
-        // Trim the 'remarks' field only if it is a string
-        if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
-            $validatedData['remarks'] = trim($validatedData['remarks']);
-        }
-    
-        // Merge new violations into existing violations array
-        if (!empty($validatedData['violation'])) {
-            $existingViolations = json_decode($violation->violation, true) ?? [];
-            $newViolations = array_filter($validatedData['violation'], function($value) {
-                return $value !== null;
-            });
-            $validatedData['violation'] = array_unique(array_merge($existingViolations, $newViolations));
-        }
-    
-        // Capture changes
-        $changes = [];
-        foreach ($validatedData as $field => $newValue) {
-            if ($violation->$field !== $newValue) {
-                $changes[$field] = [
-                    'old_value' => $violation->$field,
-                    'new_value' => $newValue,
-                ];
+    {
+        try {
+            // Find the violation by ID
+            $violation = TasFile::findOrFail($id);
+        
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'case_no' => 'nullable|string|max:255',
+                'top' => 'nullable|string|max:255',
+                'driver' => 'nullable|string|max:255',
+                'apprehending_officer' => 'nullable|string|max:255',
+                'violation' => 'nullable|array', // Changed to array, as we expect multiple violations
+                'transaction_no' => 'nullable|string|max:255',
+                'date_received' => 'nullable|date',
+                'plate_no' => 'nullable|string|max:255',
+                'contact_no' => 'nullable|string|max:255',
+                'remarks.*' => 'nullable|string',
+            ]);
+        
+            // If 'remarks' is set and is an array, join the array elements into a single string
+            if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
+                $validatedData['remarks'] = implode(', ', $validatedData['remarks']);
             }
+    
+            // Trim the 'remarks' field only if it is a string
+            if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
+                $validatedData['remarks'] = trim($validatedData['remarks']);
+            }
+        
+            // Merge new violations into existing violations array
+            if (!empty($validatedData['violation'])) {
+                $existingViolations = json_decode($violation->violation, true) ?? [];
+                $newViolations = array_filter($validatedData['violation'], function($value) {
+                    return $value !== null;
+                });
+                $validatedData['violation'] = array_unique(array_merge($existingViolations, $newViolations));
+            }
+        
+            // Capture changes
+            $changes = [];
+            foreach ($validatedData as $field => $newValue) {
+                if ($violation->$field !== $newValue) {
+                    $changes[$field] = [
+                        'old_value' => $violation->$field,
+                        'new_value' => $newValue,
+                    ];
+                }
+            }
+        
+            // Append new changes to existing history
+            $history = $violation->history ?? [];
+    
+            $history[] = [
+                'action' => 'EDIT',
+                'user_id' => auth()->id(), // Assuming you have user authentication
+                'username' => auth()->user()->username,
+                'timestamp' => now(),
+                'changes' => $changes,
+            ];
+            
+            // Update the violation with validated data
+            $violation->update($validatedData);
+            
+            // Save updated history along with violation
+            $violation->history = $history;
+            $violation->save();
+        
+            // Set success message
+            return back()->with('success', 'Violation updated successfully');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error updating Violation: ' . $e->getMessage());
+        
+            // Set error message
+            return back()->with('error', 'Error updating Violation: ' . $e->getMessage());
         }
-    
-        // Append new changes to existing history
-        $history = $violation->history ?? [];
-
-        $history[] = [
-            'action' => 'EDIT',
-            'user_id' => auth()->id(), // Assuming you have user authentication
-            'username' => auth()->user()->username,
-            'timestamp' => now(),
-            'changes' => $changes,
-        ];
-        
-        // Update the violation with validated data
-        $violation->update($validatedData);
-        
-        // Save updated history along with violation
-        $violation->history = $history;
-        $violation->save();
-    
-        // Set success message
-        return redirect()->back()->with('success', 'Violation updated successfully');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error updating Violation: ' . $e->getMessage());
-    
-        // Set error message
-        return redirect()->back()->with('error', 'Error updating Violation: ' . $e->getMessage());
     }
-}
 
     public function printsub($id)
     {

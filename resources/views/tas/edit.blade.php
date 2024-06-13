@@ -47,7 +47,7 @@
             <table class="table table-borderless datatable">
                 <thead>
                     <tr>
-                        <th scope="col">Resolution No.</th>
+                        <th scope="col">Case No.</th>
                         <th scope="col">TOP</th>
                         <th scope="col">Driver</th>
                         <th scope="col">Apprehending Officer</th>
@@ -63,8 +63,8 @@
                 </thead>
                 <tbody>
                     @foreach($recentViolationsToday as $violation)
-                    <tr>
-                        <td>{{ $violation->resolution_no }}</td>
+                    <tr class="table-row">
+                        <td>{{ $violation->case_no }}</td>
                         <td>{{ $violation->top }}</td>
                         <td>{{ $violation->driver }}</td>
                         <td>{{ $violation->apprehending_officer }}</td>
@@ -92,7 +92,11 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">Edit Violation</h5>
+            <h5 class="modal-title" id="editViolationModalLabel{{ $violation->id }}">
+    <span><i class="bi bi-pencil-square"></i></span>
+    Edit Violation
+</h5>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editViolationForm{{ $violation->id }}" action="{{ route('violations.updateTas', ['id' => $violation->id]) }}" method="POST" enctype="multipart/form-data">
@@ -104,8 +108,8 @@
                             <!-- Violation details section -->
                             <h6 class="fw-bold mb-3">Violation Details</h6>
                             <div class="mb-3">
-                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Resolution No.</label>
-                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="resolution_no" value="{{ $violation->resolution_no }}">
+                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
                             </div>
                             <div class="mb-3">
                                 <label for="top{{ $violation->id }}" class="form-label">TOP</label>
