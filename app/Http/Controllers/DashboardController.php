@@ -936,11 +936,6 @@ class DashboardController extends Controller
 
         return response()->json(['remarks' => $remarks]);
     }
-    public function fetchRemarks($id){
-        $tasFile = TasFile::findOrFail($id);
-        $remarks = json_decode($tasFile->remarks);
-
-        return response()->json(['remarks' => $remarks]);
-    }
+  
 }
 
