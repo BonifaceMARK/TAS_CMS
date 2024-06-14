@@ -283,20 +283,21 @@ class DashboardController extends Controller
             $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
-
+        
             DB::beginTransaction();
             $tasFile->update(['remarks' => $updatedRemarksJson]);
             DB::commit();
-
+        
             // Send back a response with JavaScript to close the tab
             $remarksHtml = view('remarksupdate', ['remarks' => $tasFile->remarks])->render();
             
-            return response()->json(['remarks' => $remarksHtml]);
+            return back()->with('success', 'Remarks saved successfully.');
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
-            return back()->with('error', 'Failed to save remarks. Please try again later.');
+            return back()->withErrors([$th->getMessage()]);
         }
+        
     }
     //admitted remarks
     public function admitremark(Request $request){
