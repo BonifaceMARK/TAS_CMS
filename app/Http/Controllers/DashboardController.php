@@ -24,90 +24,80 @@ use DateTime;
 
 class DashboardController extends Controller
 {
-    public function indexa()
-    {
-$revenueThisMonth = TasFile::whereMonth('date_received', date('m'))->count();
+    public function indexa(){
+            $revenueThisMonth = TasFile::whereMonth('date_received', date('m'))->count();
 
-        $previousMonthRevenue = TasFile::whereMonth('date_received', Carbon::now()->subMonth())->count();
-    
-        // // Calculate the percentage change
-        // $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
-    
-        // $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
-        $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        $customersThisYear = TasFile::whereYear('date_received', now())->count();
-        $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
-        $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])->count() / 7;
-        $admittedData = Admitted::all();
-        $tasFileData = TasFile::all();  
-    $chartData = $admittedData->map(function ($item) {
-        $violationCount = 0;
-        if ($item->violation) {
-            $violations = json_decode($item->violation);
-            $violationCount = is_array($violations) ? count($violations) : 0;
-        }
-        return [
-            'name' => $item->name,
-            'violation_count' => $violationCount,
-            'transaction_date' => $item->transaction_date,
-        ];
-    });      $departmentsData = ApprehendingOfficer::all();
+            $previousMonthRevenue = TasFile::whereMonth('date_received', Carbon::now()->subMonth())->count();
+        
+            // // Calculate the percentage change
+            // $percentageChange = $previousMonthRevenue > 0 ? (($revenueThisMonth - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
+        
+            // $percentageChange = $previousYearCustomers > 0 ? (($customersThisYear - $previousYearCustomers) / $previousYearCustomers) * 100 : 0;
+            $recentActivity = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
+            $customersThisYear = TasFile::whereYear('date_received', now())->count();
+            $recentSalesToday = TasFile::whereDate('created_at', today())->latest()->take(5)->get();
+            $averageSalesLastWeek = TasFile::whereBetween('created_at', [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->subDays(1)->endOfDay()])->count() / 7;
+            $admittedData = Admitted::all();
+            $tasFileData = TasFile::all();  
+            $chartData = $admittedData->map(function ($item) {
+            $violationCount = 0;
+            if ($item->violation) {
+                $violations = json_decode($item->violation);
+                $violationCount = is_array($violations) ? count($violations) : 0;
+            }
+            return [
+                'name' => $item->name,
+                'violation_count' => $violationCount,
+                'transaction_date' => $item->transaction_date,
+            ];
+        });      
+        $departmentsData = ApprehendingOfficer::all();
+        $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
+        $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
+        $user = Auth::user();
+        $name = $user->name;
+        $department = $user->department;
+        $allMonths = collect(range(1, 12))->map(function ($month) {
+            return ['month' => $month, 'record_count' => 0];
+        });
+        $countByMonth = TasFile::select(
+                DB::raw('MONTH(date_received) as month'),
+                DB::raw('COUNT(*) as record_count')
+            )
+            ->groupBy(DB::raw('MONTH(date_received)'))
+            ->get()
+            ->keyBy('month');
 
-  
-       $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
-       $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
-            $user = Auth::user();
-            $name = $user->name;
-            $department = $user->department;
-         
-            $allMonths = collect(range(1, 12))->map(function ($month) {
-                return ['month' => $month, 'record_count' => 0];
-            });
-        
-            // Count records for all months
-            $countByMonth = TasFile::select(
-                    DB::raw('MONTH(date_received) as month'),
-                    DB::raw('COUNT(*) as record_count')
-                )
-                ->groupBy(DB::raw('MONTH(date_received)'))
-                ->get()
-                ->keyBy('month');
-        
-            // Merge the count by month with all months and fill missing months with record count 0
-            $countByMonth = $allMonths->map(function ($month) use ($countByMonth) {
-                return $countByMonth->has($month['month']) ? $countByMonth[$month['month']] : $month;
-            });
-        
-            // Sort the collection by month
-            $countByMonth = $countByMonth->sortBy('month')->values();
+        $countByMonth = $allMonths->map(function ($month) use ($countByMonth) {
+            return $countByMonth->has($month['month']) ? $countByMonth[$month['month']] : $month;
+        });
 
-    // Fetch yearly data grouped by the date_received field
-    $yearlyData = TasFile::select(
+        $countByMonth = $countByMonth->sortBy('month')->values();
+        $yearlyData = TasFile::select(
         DB::raw('IFNULL(YEAR(date_received), "Unknown") as year'),
         DB::raw('COUNT(*) as record_count')
-    )
-    ->groupBy(DB::raw('IFNULL(YEAR(date_received), "Unknown")'))
-    ->get()
-    ->keyBy('year');
-// Get today's date
-$today = Carbon::now()->format('Y-m-d');
+        )
+        ->groupBy(DB::raw('IFNULL(YEAR(date_received), "Unknown")'))
+        ->get()
+        ->keyBy('year');
+        // Get today's date
+        $today = Carbon::now()->format('Y-m-d');
 
-// Fetch the data created on today's date
-$salesToday = TasFile::whereDate('created_at', $today)->get();
-$officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_officer', '=', 'apprehending_officers.officer')
-    ->select('tas_files.apprehending_officer', 'apprehending_officers.department')
-    ->selectRaw('COUNT(tas_files.apprehending_officer) as total_cases')
-    ->selectRaw('GROUP_CONCAT(tas_files.case_no) as case_numbers')
-    ->groupBy('tas_files.apprehending_officer', 'apprehending_officers.department')
-    ->orderByDesc('total_cases')
-    ->get();
+        // Fetch the data created on today's date
+        $salesToday = TasFile::whereDate('created_at', $today)->get();
+        $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_officer', '=', 'apprehending_officers.officer')
+        ->select('tas_files.apprehending_officer', 'apprehending_officers.department')
+        ->selectRaw('COUNT(tas_files.apprehending_officer) as total_cases')
+        ->selectRaw('GROUP_CONCAT(tas_files.case_no) as case_numbers')
+        ->groupBy('tas_files.apprehending_officer', 'apprehending_officers.department')
+        ->orderByDesc('total_cases')
+        ->get();
 
         
         return view('index', compact('officers','yearlyData','countByMonth','unreadMessageCount','messages', 'name', 'department','departmentsData','tasFileData','admittedData','chartData','recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek'));
        // return view('index', compact('recentActivity', 'recentSalesToday', 'salesToday', 'revenueThisMonth', 'customersThisYear', 'averageSalesLastWeek','previousYearCustomers', 'previousMonthRevenue', 'percentageChange'));
     }
-    public function editViolation(Request $request, $id)
-    {
+    public function editViolation(Request $request, $id){
         $violation = Violation::find($id);
         
 
@@ -119,8 +109,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         $violation->update($validatedData);
         return redirect()->back()->with('success', 'Violation updated successfully.');
     }
-    public function chatIndex()
-    {
+    public function chatIndex(){
         $messages = G5ChatMessage::latest()->with('user')->limit(10)->get();
         $user = Auth::user();
         $name = $user->name;
@@ -128,8 +117,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         $unreadMessageCount = G5ChatMessage::where('is_read', false)->count();
         return view('chat',compact('unreadMessageCount','messages', 'name', 'department'));
     }
-    public function storeMessage(Request $request)
-    {
+    public function storeMessage(Request $request){
         $request->validate([
             'message' => 'required|string',
         ]);
@@ -139,26 +127,20 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         $message->save();
         return redirect()->back()->with('success', 'Message sent successfully.');
     }
-    public function getByDepartmentName($departmentName)
-    {
+    public function getByDepartmentName($departmentName){
         $officers = ApprehendingOfficer::where('department', $departmentName)->get();
         return response()->json($officers);
     }
-
-    public function tables()
-    {
+    public function tables(){
         return view('layout');
     }
-
-    public function tasManage()
-    {
+    public function tasManage(){
         $officers = ApprehendingOfficer::select('officer', 'department')->get();
         // dd($recentViolationsToday[1]);
         $violations = TrafficViolation::all();
         return view('tas.manage',compact('officers','violations'));
     }
-    public function updateAdmittedCase(Request $request, $id)
-    {
+    public function updateAdmittedCase(Request $request, $id){
         // Validate the request
         $validatedData = $request->validate([
             'editTop' => 'required|string',
@@ -190,18 +172,13 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         // Redirect back or to a success page
         return redirect()->back()->with('success', 'Admitted case updated successfully');
     }
-
-    public function caseIndex()
-    {
+    public function caseIndex(){
         return view('case_archives');
     }
 
     public function tasView()
     {
-        // Define the default page size
-        $pageSize = 15;
-    
-        // Fetch all TasFile records and sort them by case_no in descending order
+        $pageSize = 15; // Define the default page size
         $tasFiles = TasFile::all()->sortByDesc('case_no');
     
         // Initialize a collection to hold related officers
@@ -251,7 +228,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
     public function admitmanage()
     {
          // Retrieve data: count of traffic violations per plate number
-    $trafficData = Admitted::select('violation', DB::raw('COUNT(*) as total'))
+        $trafficData = Admitted::select('violation', DB::raw('COUNT(*) as total'))
                            ->groupBy('violation')
                            ->get();
 
@@ -259,37 +236,34 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         $admitteds = Admitted::all(); // Retrieve all admitted cases
         return view('admitted.manage', compact('admitteds','trafficData'));
     }
+    public function admitview(){
+        // Retrieve admitted data
+        $admitted = Admitted::all()->sortByDesc('resolution_no');
 
-    public function admitview()
-{
-    // Retrieve admitted data
-    $admitted = Admitted::all()->sortByDesc('resolution_no');
-
-    foreach ($admitted as $admit) {
-        $violations = json_decode($admit->violation);
-        $officerName = $admit->apprehending_officer;
-            $officer = ApprehendingOfficer::firstOrCreate(['officer' => $officerName]);
-            $admit->relatedofficer = $officer;
-        if ($violations) {
-            $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
-        } else {
-            // If $violations is null, set $relatedViolations to an empty collection
-            $relatedViolations = [];
+        foreach ($admitted as $admit) {
+            $violations = json_decode($admit->violation);
+            $officerName = $admit->apprehending_officer;
+                $officer = ApprehendingOfficer::firstOrCreate(['officer' => $officerName]);
+                $admit->relatedofficer = $officer;
+            if ($violations) {
+                $relatedViolations = TrafficViolation::whereIn('id', $violations)->get();
+            } else {
+                // If $violations is null, set $relatedViolations to an empty collection
+                $relatedViolations = [];
+            }
+        
+            $admit->relatedViolations = $relatedViolations;
         }
-    
-        $admit->relatedViolations = $relatedViolations;
+
+        // Pass the modified admitted data to the view
+        return view('admitted.view', compact('admitted'));
     }
-
-    // Pass the modified admitted data to the view
-    return view('admitted.view', compact('admitted'));
-}
-
-    public function saveRemarks(Request $request) //contested case
-    {
+    public function saveRemarks(Request $request){
         $request->validate([
             'remarks' => 'required|string',
             'tas_file_id' => 'required|exists:tas_files,id', 
         ]);
+
         try {
             $id = $request->input('tas_file_id');
             $remarks = $request->input('remarks');
@@ -299,18 +273,23 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             $newRemark = $remarks . ' - ' . $timestamp .' - by '. Auth::user()->fullname;
             $existingRemarks[] = $newRemark;
             $updatedRemarksJson = json_encode($existingRemarks);
+
             DB::beginTransaction();
             $tasFile->update(['remarks' => $updatedRemarksJson]);
             DB::commit();
-            return redirect()->back()->with('success', 'Remarks Updated');
+
+            // Send back a response with JavaScript to close the tab
+            $remarksHtml = view('remarksupdate', ['remarks' => $tasFile->remarks])->render();
+            
+            return response()->json(['remarks' => $remarksHtml]);
         } catch (\Throwable $th) {
             DB::rollBack();
             logger()->error('Error saving remarks: ' . $th->getMessage());
             return back()->with('error', 'Failed to save remarks. Please try again later.');
         }
     }
-    public function admitremark(Request $request) //admitted remarks
-    {
+    //admitted remarks
+    public function admitremark(Request $request){
         $request->validate([
             'remarks' => 'required|string',
             'tas_file_id' => 'required|exists:tas_files,id', 
@@ -460,13 +439,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
-    public function updateAdmitted(Request $request)
-    {
-        // Validate the incoming request data if needed
-        // $request->validate([...]);
-
-        // Extract data from the request
+    public function updateAdmitted(Request $request){
         $data = $request->only([
             'resolution_no',
             'top',
@@ -492,9 +465,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return response()->json(['error' => 'Failed to update admitted case', 'message' => $e->getMessage()], 500);
         }
     }
-
-    public function profile(Request $request)
-    {
+    public function profile(Request $request){
         $userId = $request->id;
         $user = User::find($userId); 
     
@@ -503,13 +474,11 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         }
         return view('profile', ['user' => $user]);
     }
-    public function edit($id)
-    {
+    public function edit($id){
         $user = User::findOrFail($id); 
         return view('edit_profile', compact('user'));
     }
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
         try {
             $request->validate([
                 'fullname' => 'required|string|max:255',
@@ -530,13 +499,11 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
-    public function change($id)
-    {
+    public function change($id){
         $user = User::findOrFail($id); 
         return view('change_password', compact('user'));
     }
-    public function updatePassword(Request $request)
-    {
+    public function updatePassword(Request $request){
         try {
             $user = Auth::user();
             if (!Hash::check($request->current_password, $user->password)) {
@@ -551,24 +518,20 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return back()->with('error', $e->getMessage());
         }
     }
-    public function management()
-    {
+    public function management(){
         $users = User::all(); 
 
         return view('user_management', ['users' => $users]);
     }
-    public function userdestroy(User $user)
-    {
+    public function userdestroy(User $user){
         $user->delete();
 
         return redirect()->route('user_management')->with('success', 'User deleted successfully');
     }
-    public function add_user()
-    {
+    public function add_user(){
         return view('add-user');
     }
-    public function store_user(Request $request)
-    {
+    public function store_user(Request $request){
         try {
             // Validate the incoming request data
             $request->validate([
@@ -610,20 +573,14 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return redirect()->back()->with('error', 'Error creating user: ' . $e->getMessage());
         }
     }   
-
-    public function violationadd()
-    {
-        
+    public function violationadd(){
         return view('addvio');
     }
-    public function officergg()
-    {
-        
+    public function officergg(){ 
         return view('addoffi');
     }
     //add officer
-    public function save_offi(Request $request)
-    {
+    public function save_offi(Request $request){
         try {
             $request->validate([
                 'officer' => 'required|string',
@@ -657,10 +614,8 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return redirect()->back()->with('error', 'Error creating Officer: ' . $e->getMessage());
         }
     } 
-
     // add violation//
-    public function addvio(Request $request)
-    {
+    public function addvio(Request $request){
         try {
             $request->validate([
                 'code' => 'string',
@@ -918,8 +873,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         // dd($compactData);
         return view('sub.print', compact('tasFile', 'compactData'));
     }
-    function deleteTas($id)
-    {
+    function deleteTas($id){
         try {
             $violation = TasFile::findOrFail($id);
             $violation->delete();
@@ -929,9 +883,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
             return redirect()->back()->with('error', 'Error deleting Violation: ' . $e->getMessage());
         }
     }
-    
-    public function analyticsDash()
-    {
+    public function analyticsDash(){
         // Fetch the data from the database
         $data = TasFile::select(
             DB::raw('MONTH(date_received) as month'),
@@ -959,8 +911,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         // Pass data to the view using compact
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
-    public function updateContest()
-    {
+    public function updateContest(){
         $codes = TrafficViolation::all();
         $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
         ->get();
@@ -978,6 +929,18 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
     {
         
         return view('admitted.edit');
+    }
+    public function fetchRemarks($id){
+        $tasFile = TasFile::findOrFail($id);
+        $remarks = json_decode($tasFile->remarks);
+
+        return response()->json(['remarks' => $remarks]);
+    }
+    public function fetchRemarks($id){
+        $tasFile = TasFile::findOrFail($id);
+        $remarks = json_decode($tasFile->remarks);
+
+        return response()->json(['remarks' => $remarks]);
     }
 }
 
