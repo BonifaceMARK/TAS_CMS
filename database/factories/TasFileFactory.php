@@ -1,5 +1,5 @@
 <?php
-// database/factories/TasFileFactory.php
+
 namespace Database\Factories;
 
 use App\Models\TasFile;
@@ -22,20 +22,21 @@ class TasFileFactory extends Factory
     public function definition()
     {
         return [
-            'case_no' => $this->faker->randomNumber(5),
-            'top' => $this->faker->sentence(),
-            'apprehending_officer' => $this->faker->name(),
-            'driver' => $this->faker->name(),
-            'violation' => $this->faker->numberBetween(1, 10), // Update to generate a number between 1 and 10
-
-            'transaction_no' => $this->faker->uuid(),
-            'date_received' => $this->faker->date(), // Changed to 'date_received' to match the migration
-            'contact_no' => $this->faker->phoneNumber(), // Added contact_no field
-            'plate_no' => $this->faker->bothify('???-####'),
-            'remarks' => $this->faker->sentence(),
-            'file_attach' => $this->faker->imageUrl(), 
-            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'case_no' => $this->faker->randomNumber(6),
+            'top' => $this->faker->text(10),
+            'apprehending_officer' => $this->faker->name,
+            'driver' => $this->faker->name,
+            'violation' => $this->faker->word,
+            'transaction_no' => $this->faker->text(10),
+            'date_received' => $this->faker->date(),
+            'contact_no' => $this->faker->phoneNumber,
+            'plate_no' => $this->faker->text(10),
+            'remarks' => $this->faker->sentence,
+            'file_attach' => $this->faker->word . '.pdf',
+            'history' => $this->faker->sentence,
+            'status' => $this->faker->randomElement(['closed', 'in-progress', 'settled', 'unsettled']),
+            'typeofvehicle' => $this->faker->randomElement(['Car', 'Truck', 'Motorcycle']),
+            'fine_fee' => $this->faker->randomFloat(2, 50, 200),
         ];
     }
 }

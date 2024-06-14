@@ -78,6 +78,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/AdmittedEdit', [DashboardController::class, 'editAdmit'])->name('edit.admit');
             
         Route::get('/print.subpoena/{id}', [DashboardController::class, 'printsub'])->name('print.sub');
+
+        Route::post('/update-status/{id}', [DashboardController::class, 'updateStatus'])->name('update.status');
+        Route::post('/finish-case/{id}', [DashboardController::class, 'finishCase'])->name('finish.case');
 });
 
 Route::get('/subpoena', function () {

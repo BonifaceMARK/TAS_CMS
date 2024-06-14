@@ -109,18 +109,14 @@
             </div>
         </div>
     </div>
-                        <div class="col-md-6">
-                            <label for="validationTooltipStatus" class="form-label">Status</label>
-                            <select name="status" class="form-control" id="validationTooltipStatus" required>
-                                <option value="in-progress">In Progress</option>
-                                <option value="closed">Closed</option>
-                                <option value="settled">Settled</option>
-                                <option value="unsettled">Unsettled</option>
-                            </select>
-                            <div class="invalid-tooltip">
-                                Please select a status.
-                            </div>
-                        </div>
+    <div class="col-md-6">
+    <label for="validationTooltipStatus" class="form-label">Status</label>
+    <input type="text" name="status" class="form-control" id="validationTooltipStatus" value="in-progress" readonly>
+    <div class="invalid-tooltip">
+        Status is in-progress and cannot be changed.
+    </div>
+</div>
+
                         <div class="col-md-6">
                             <label for="validationTooltipTransac" class="form-label">Transaction No.</label>
                             <input type="text" name="transaction_no" class="form-control" id="validationTooltipTransac" placeholder="(TRX-LETAS) NO. ONLY">

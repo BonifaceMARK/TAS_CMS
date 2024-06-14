@@ -28,6 +28,8 @@ return new class extends Migration
             $table->text('file_attach')->nullable(); 
             $table->text('history')->nullable(); 
             $table->enum('status', ['closed', 'in-progress', 'settled', 'unsettled'])->default('in-progress');
+            $table->string('typeofvehicle')->nullable();
+            $table->decimal('fine_fee', 8, 2)->nullable(); 
             $table->timestamps();
         });
     }

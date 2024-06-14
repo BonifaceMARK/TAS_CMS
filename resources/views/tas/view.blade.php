@@ -169,69 +169,88 @@
             
             @if (Auth::user()->role == 9 || Auth::user()->role == 2)
             <form action="{{ route('save.remarks') }}" id="printForm" method="POST">
-                @csrf
-                <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Case No:</strong> {{ $tasFile->case_no }}</p>
-                            <p><strong>Driver:</strong> {{ $tasFile->driver }}</p>
-                            <p><strong>Contact No:</strong> {{ $tasFile->contact_no }}</p>
-                            <p><strong>TOP:</strong> {{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
-                            <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
-                            <p><strong>Received Date:</strong> {{ $tasFile->date_received }}</p>
-                            <hr>
-                            <h5>Violation Details</h5>
-                            <p><strong>Plate No:</strong> {{ $tasFile->plate_no }}</p>
-                            <p><strong>Apprehending Officer:</strong> {{ $tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A' }}</p>
-                            <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
-                            <p><strong>Violations:</strong></p>
-                            
-                            @if ($tasFile->relatedViolations->count() > 0)
-                                <ul>
-                                    @foreach ($tasFile->relatedViolations as $violation)
-                                        <li>{{ $violation->code }} - {{ $violation->violation }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No violations recorded.</p>
-                            @endif
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Remarks</h6>
-                            @if ($tasFile->remarks !== null)
-                                <ul>
-                                    @php
-                                        $remarks = json_decode($tasFile->remarks);
-                                        if (is_array($remarks)) {
-                                            $remarks = array_reverse($remarks);
-                                        } else {
-                                            $remarks = [];
-                                        }
-                                    @endphp
-                                    @foreach ($remarks as $remark)
-                                        <li>{{ $remark }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No remarks available.</p>
-                            @endif
-                            <div class="mt-3">
-                                <h6>Add Remark</h6>
-                                <hr>
-                                <textarea class="form-control" name="remarks" rows="5"></textarea>
-                            </div>
-                        </div>
-                    </div>
+    @csrf
+    <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Case No:</strong> {{ $tasFile->case_no }}</p>
+                <p><strong>Driver:</strong> {{ $tasFile->driver }}</p>
+                <p><strong>Contact No:</strong> {{ $tasFile->contact_no }}</p>
+                <p><strong>TOP:</strong> {{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
+                <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
+                <p><strong>Received Date:</strong> {{ $tasFile->date_received }}</p>
+                <hr>
+                <h5>Violation Details</h5>
+                <p><strong>Plate No:</strong> {{ $tasFile->plate_no }}</p>
+                <p><strong>Apprehending Officer:</strong> {{ $tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A' }}</p>
+                <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
+                <p><strong>Violations:</strong></p>
+                
+                @if ($tasFile->relatedViolations->count() > 0)
+                    <ul>
+                        @foreach ($tasFile->relatedViolations as $violation)
+                            <li>{{ $violation->code }} - {{ $violation->violation }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p>No violations recorded.</p>
+                @endif
+            </div>
+            <div class="col-md-6">
+                <h6>Remarks</h6>
+                @if ($tasFile->remarks !== null)
+                    <ul>
+                        @php
+                            $remarks = json_decode($tasFile->remarks);
+                            if (is_array($remarks)) {
+                                $remarks = array_reverse($remarks);
+                            } else {
+                                $remarks = [];
+                            }
+                        @endphp
+                        @foreach ($remarks as $remark)
+                            <li>{{ $remark }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p>No remarks available.</p>
+                @endif
+                <div class="mt-3">
+                    <h6>Add Remark</h6>
+                    <hr>
+                    <textarea class="form-control" name="remarks" rows="5"></textarea>
                 </div>
-                <div class="modal-footer">
-                    <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">
-                        <span class="bi bi-printer"></span> Print Subpeona
-                    </a>                    
-                    <button type="submit" class="btn btn-primary">Save Remarks</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            <div class="col-md-6">
+                <label for="validationTooltipStatus" class="form-label">Status</label>
+                <input type="text" name="status" class="form-control" id="validationTooltipStatus" value="in-progress" readonly>
+                <div class="invalid-tooltip">
+                    Status is in-progress and cannot be changed.
                 </div>
-            </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">
+            <span class="bi bi-printer"></span> Print Subpeona
+        </a>
+        <button type="submit" class="btn btn-primary">Save Remarks</button>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finishModal{{ $tasFile->id }}">Finish</button>
+        <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
+    @csrf
+    <input type="hidden" name="status" value="settled">
+    <button type="submit" class="btn btn-warning">Settled</button>
+</form>
+
+        <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
+            @csrf
+            <input type="hidden" name="status" value="unsettled">
+            <button type="submit" class="btn btn-danger">Unsettled</button>
+        </form>
+    </div>
+</form>
+
             @else
                 <div class="modal-body">
                     <div class="row">
@@ -246,15 +265,20 @@
                             <p><strong>Transaction No:</strong> {{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
                             <p><strong>Violations:</strong></p>
                             
-                            @if ($tasFile->relatedViolations->count() > 0)
-                                <ul>
-                                    @foreach ($tasFile->relatedViolations as $violation)
-                                        <li>{{ $violation->id }} - {{ $violation->violation }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No violations recorded.</p>
-                            @endif
+                            @if (!empty($tasFile->relatedViolations))
+    @if ($tasFile->relatedViolations->count() > 0)
+        <ul>
+            @foreach ($tasFile->relatedViolations as $violation)
+                <li>{{ $violation->code }} - {{ $violation->violation }}</li>
+            @endforeach
+        </ul>
+    @else
+        <p>No violations recorded.</p>
+    @endif
+@else
+    <p>No violations recorded.</p>
+@endif
+
                             <p><strong>Transaction Date:</strong> {{ $tasFile->created_at }}</p>
                         </div>
                         <div class="col-md-6">
@@ -285,6 +309,30 @@
 </div>
 
 @endforeach
+
+<!-- Finish Modal -->
+<div class="modal fade" id="finishModal{{ $tasFile->id }}" tabindex="-1" role="dialog" aria-labelledby="finishModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('finish.case', ['id' => $tasFile->id]) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="finishModalLabel">Finish Case</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="fine_fee">Fine Fee</label>
+                        <input type="number" step="0.01" class="form-control" id="fine_fee" name="fine_fee" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Finish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 
 </div>

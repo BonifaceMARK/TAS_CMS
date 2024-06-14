@@ -270,7 +270,7 @@
         series: [{
             name: 'Total Officers From:',
             type: 'pie',
-            radius: ['45%', '100%'],
+            radius: ['45%', '95%'],
             avoidLabelOverlap: false,
             label: {
                 show: false,

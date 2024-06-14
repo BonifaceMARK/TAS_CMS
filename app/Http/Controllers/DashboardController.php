@@ -198,48 +198,54 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
 
     public function tasView()
     {
-        $pageSize = 15; // Define the default page size
+        // Define the default page size
+        $pageSize = 15;
+    
+        // Fetch all TasFile records and sort them by case_no in descending order
         $tasFiles = TasFile::all()->sortByDesc('case_no');
+    
+        // Initialize a collection to hold related officers
         $officers = collect();
-
+    
+        // Iterate through each TasFile record
         foreach ($tasFiles as $tasFile) {
+            // Extract the name of the apprehending officer for the current TasFile
             $officerName = $tasFile->apprehending_officer;
-        
+            
             // Query the ApprehendingOfficer model for officers with the given name
             $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-        
-            // Merge the results into the $officers collection
+
             $officers = $officers->merge($officersForFile);
-        
-            // Assign the related officers to the $tasFile object
+            
+   
             $tasFile->relatedofficer = $officersForFile;
         }
-       
-        // dd($officers);
-        foreach ($tasFiles as $tasFile) {
-            // $tasFile->relatedofficer = $officer;
-            $violations = json_decode($tasFile->violation);
 
+        foreach ($tasFiles as $tasFile) {
+
+            $violations = json_decode($tasFile->violation);
+    
             if ($violations) {
-                // Check if $violations is an array
+
                 if (is_array($violations)) {
+
                     $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
                 } else {
-                    // If $violations is not an array, handle the case accordingly
-                    // For example, you can consider it as a single violation code and proceed accordingly
+
                     $relatedViolations = TrafficViolation::where('code', $violations)->get();
                 }
             } else {
+
                 $relatedViolations = [];
             }
-            
+
             $tasFile->relatedViolations = $relatedViolations;
         }
-        // dd($violation);
-        // dd($tasFile);
+    
+
         return view('tas.view', compact('tasFiles'));
-        
     }
+    
     
     
     public function admitmanage()
@@ -686,7 +692,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         try {
             // Find the violation by ID
             $violation = TasFile::findOrFail($id);
-        
+            
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'case_no' => 'nullable|string|max:255',
@@ -699,18 +705,69 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
                 'plate_no' => 'nullable|string|max:255',
                 'contact_no' => 'nullable|string|max:255',
                 'remarks.*' => 'nullable|string',
+                'delete_file.*' => 'nullable|string', // Added validation for delete_file array
+                'file_attach.*' => 'nullable|file|max:10240', // Adjust max file size as needed
             ]);
-        
+            
             // If 'remarks' is set and is an array, join the array elements into a single string
             if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
                 $validatedData['remarks'] = implode(', ', $validatedData['remarks']);
             }
-    
+        
             // Trim the 'remarks' field only if it is a string
             if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
                 $validatedData['remarks'] = trim($validatedData['remarks']);
             }
-        
+            
+            // Check if file deletion option is selected
+            if ($request->has('delete_file')) {
+                // Get the checked attachments to delete
+                $attachmentsToDelete = $validatedData['delete_file'] ?? [];
+                
+                // Remove the checked attachments from the current file attachments
+                $attachments = json_decode($violation->file_attach, true) ?? [];
+                $newAttachments = array_diff($attachments, $attachmentsToDelete);
+                
+                // Update the file_attach attribute in the database
+                $violation->update(['file_attach' => json_encode($newAttachments)]);
+                
+                // Append deletion action to history
+                foreach ($attachmentsToDelete as $attachment) {
+                    $history[] = [
+                        'action' => 'DELETE_ATTACHMENT',
+                        'user_id' => auth()->id(), // Assuming you have user authentication
+                        'username' => auth()->user()->username,
+                        'timestamp' => now(),
+                        'attachment' => $attachment,
+                    ];
+                }
+            }
+            
+            // Check if new attachments are uploaded
+            if ($request->hasFile('file_attach')) {
+                // Handle file uploads and append new attachments to existing ones
+                $newAttachments = [];
+                foreach ($request->file('file_attach') as $file) {
+                    $filename = $validatedData['case_no'] . "_documents_" . time() . "_" . $file->getClientOriginalName();
+                    $file->storeAs('attachments', $filename, 'public'); // Store in public/attachments directory
+                    $newAttachments[] = 'attachments/' . $filename; // Store relative path in database
+                }
+                $currentAttachments = json_decode($violation->file_attach, true) ?? [];
+                $allAttachments = array_merge($currentAttachments, $newAttachments);
+                $validatedData['file_attach'] = json_encode($allAttachments);
+                
+                // Append addition action to history
+                foreach ($newAttachments as $attachment) {
+                    $history[] = [
+                        'action' => 'ADD_ATTACHMENT',
+                        'user_id' => auth()->id(), // Assuming you have user authentication
+                        'username' => auth()->user()->username,
+                        'timestamp' => now(),
+                        'attachment' => $attachment,
+                    ];
+                }
+            }
+            
             // Merge new violations into existing violations array
             if (!empty($validatedData['violation'])) {
                 $existingViolations = json_decode($violation->violation, true) ?? [];
@@ -719,7 +776,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
                 });
                 $validatedData['violation'] = array_unique(array_merge($existingViolations, $newViolations));
             }
-        
+            
             // Capture changes
             $changes = [];
             foreach ($validatedData as $field => $newValue) {
@@ -730,17 +787,18 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
                     ];
                 }
             }
-        
+            
             // Append new changes to existing history
             $history = $violation->history ?? [];
-    
-            $history[] = [
-                'action' => 'EDIT',
-                'user_id' => auth()->id(), // Assuming you have user authentication
-                'username' => auth()->user()->username,
-                'timestamp' => now(),
-                'changes' => $changes,
-            ];
+            if (isset($history)) {
+                $history[] = [
+                    'action' => 'EDIT',
+                    'user_id' => auth()->id(), // Assuming you have user authentication
+                    'username' => auth()->user()->username,
+                    'timestamp' => now(),
+                    'changes' => $changes,
+                ];
+            }
             
             // Update the violation with validated data
             $violation->update($validatedData);
@@ -760,6 +818,37 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
         }
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $tasFile = TasFile::findOrFail($id);
+            
+            // Log the received status for debugging
+            \Log::info('Received status: ' . $request->status);
+            
+            $tasFile->status = $request->status;
+            $tasFile->save();
+    
+            return redirect()->back()->with('success', 'Status updated successfully.');
+        } catch (\Exception $e) {
+            // Log any errors for debugging
+            \Log::error('Error updating status: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
+        }
+    }
+    
+    
+
+    public function finishCase(Request $request, $id)
+    {
+        $tasFile = TasFile::findOrFail($id);
+        $tasFile->status = 'closed';
+        $tasFile->fine_fee = $request->fine_fee;
+        $tasFile->save();
+
+        return redirect()->back()->with('success', 'Case finished successfully.');
+    }
+    
     public function printsub($id)
     {
         $tasFile = TasFile::findOrFail($id);
