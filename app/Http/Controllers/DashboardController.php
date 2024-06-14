@@ -323,7 +323,7 @@ class DashboardController extends Controller
             return back()->with('error', 'Failed to save remarks. Please try again later.');
         }
     }
-    public function submitForm(Request $request) // contest manage
+    public function submitForm(Request $request)
     {
         try {
             $validatedData = $request->validate([
@@ -339,6 +339,7 @@ class DashboardController extends Controller
                 'status' => 'required|string|in:closed,in-progress,settled,unsettled',
                 'file_attachment' => 'nullable|array',
                 'file_attachment.*' => 'nullable|file|max:5120',
+                'typeofvehicle' => 'required|string', // Add validation for typeofvehicle
             ]);
     
             DB::beginTransaction();
@@ -357,6 +358,7 @@ class DashboardController extends Controller
                     'date_received' => $validatedData['date_received'],
                     'contact_no' => $validatedData['contact_no'],
                     'status' => $validatedData['status'],
+                    'typeofvehicle' => $validatedData['typeofvehicle'], // Add typeofvehicle field to be saved
                 ]);
     
                 if ($request->hasFile('file_attachment')) {

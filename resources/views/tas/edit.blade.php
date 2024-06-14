@@ -75,23 +75,7 @@
                         <td>{{ $violation->contact_no }}</td>
                         <td>{{ $violation->remarks }}</td>
                         <td>
-    @if (!is_null($violation->file_attach))
-        @php
-            $decodedFiles = json_decode($violation->file_attach, true);
-        @endphp
-
-        @if (is_array($decodedFiles))
-            @foreach ($decodedFiles as $filePath)
-                <li>
-                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                </li>
-            @endforeach
-        @else
-            <li>
-                <a href="{{ asset('storage/' . $violation->file_attach) }}" target="_blank">{{ basename($violation->file_attach) }}</a>
-            </li>
-        @endif
-    @endif
+    
 </td>
 
                         <td>
