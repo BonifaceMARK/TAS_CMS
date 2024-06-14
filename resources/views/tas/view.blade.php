@@ -218,6 +218,7 @@
                     <h6><strong>Add Remark</strong></h6>
                     <hr>
                     <textarea class="form-control" name="remarks" rows="5"></textarea>
+                    <button type="submit" class="mt-3 btn btn-primary">Save Remarks</button>
                 </div>
                 <div class="mt-3 attachment-section">
                         <h6><strong>Attachments:</strong></h6>
