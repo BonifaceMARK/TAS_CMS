@@ -872,11 +872,11 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
     }
     public function updateContest()
     {
-      
+        $codes = TrafficViolation::all();
         $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
         ->get();
         $violations = TrafficViolation::all();
-        return view('tas.edit',compact('recentViolationsToday','violations'));
+        return view('tas.edit',compact('recentViolationsToday','violations','codes'));
     }
 
     public function historyIndex()
@@ -887,7 +887,7 @@ $officers = TasFile::leftJoin('apprehending_officers', 'tas_files.apprehending_o
 
     public function editAdmit()
     {
-      
+        
         return view('admitted.edit');
     }
 }
