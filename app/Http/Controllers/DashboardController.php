@@ -196,6 +196,16 @@ class DashboardController extends Controller
             
    
             $tasFile->relatedofficer = $officersForFile;
+
+            $remarks = json_decode($tasFile->remarks);
+            
+            if (is_array($remarks)) {
+                $remarks = array_reverse($remarks);
+            } else {
+                // If $remarks is not an array, set it to an empty array
+                $remarks = [];
+            }
+            $tasFile->remarks = is_array($remarks) ? $remarks : [];
         }
 
         foreach ($tasFiles as $tasFile) {
@@ -792,8 +802,6 @@ class DashboardController extends Controller
         }
     }
     
-    
-
     public function finishCase(Request $request, $id)
     {
         $tasFile = TasFile::findOrFail($id);
