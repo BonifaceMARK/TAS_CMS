@@ -789,6 +789,9 @@ class DashboardController extends Controller
     public function updateStatus(Request $request, $id)
     {
         try {
+            // Log the request data for debugging
+            \Log::info('Request data: ', $request->all());
+    
             $tasFile = TasFile::findOrFail($id);
             
             // Log the received status for debugging
@@ -804,6 +807,7 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
         }
     }
+    
     
     public function finishCase(Request $request, $id)
     {

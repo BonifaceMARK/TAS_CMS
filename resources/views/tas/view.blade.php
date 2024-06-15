@@ -147,15 +147,21 @@
           <a href="{{ route('print.sub', ['id' => $tasFile->id]) }}" class="btn btn-primary" onclick="openInNewTabAndPrint('{{ route('print.sub', ['id' => $tasFile->id]) }}'); return false;">
             <span class="bi bi-printer"></span> Print Subpeona </a>
           <button type="submit" class="btn btn-primary">Save Remarks</button>
+          </form>
           <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finishModal{{ $tasFile->id }}">Finish</button>
-          <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;"> @csrf <input type="hidden" name="status" value="settled">
-            <button type="submit" class="btn btn-warning">Settled</button>
-          </form>
-          <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;"> @csrf <input type="hidden" name="status" value="unsettled">
-            <button type="submit" class="btn btn-danger">Unsettled</button>
-          </form>
+          <form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
+    @csrf
+    <input type="hidden" name="status" value="settled">
+    <button type="submit" class="btn btn-warning">Settled</button>
+</form>
+<form action="{{ route('update.status', ['id' => $tasFile->id]) }}" method="POST" style="display:inline;">
+    @csrf
+    <input type="hidden" name="status" value="unsettled">
+    <button type="submit" class="btn btn-danger">Unsettled</button>
+</form>
+
         </div>
-        </form>
+    
       </div>
     </div>
   </div>
