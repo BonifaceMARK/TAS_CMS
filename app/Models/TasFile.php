@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TrafficViolation;
+use Illuminate\Support\Facades\Schema;
+
 class TasFile extends Model
 {
-
     use HasFactory;
+
     protected $table = 'tas_files';
 
     protected $fillable = [
@@ -29,6 +31,7 @@ class TasFile extends Model
         'fine_fee',
         'symbols', 
     ];
+
     public function setofficerAttribute($value)
     {
         $this->attributes['apprehending_officer'] = strtoupper($value);
@@ -88,4 +91,39 @@ class TasFile extends Model
     return $value ? json_decode($value, true) : [];
 }
     
+public function checkCompleteness()
+{
+    try {
+        $fillableAttributes = $this->getFillable();
+        $incompleteSymbols = [];
+
+        foreach ($fillableAttributes as $attribute) {
+            // Skip updating non-existent columns
+            if (!Schema::hasColumn('tas_files', $attribute)) {
+                continue;
+            }
+
+            if ($attribute !== 'history' && empty($this->$attribute)) {
+                $incompleteSymbols[$attribute] = 'incomplete';
+            }
+        }
+
+        if (empty($incompleteSymbols)) {
+            $this->symbols = 'complete';
+        } else {
+            $this->symbols = json_encode($incompleteSymbols);
+        }
+
+        $this->save();
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        \Log::error('Error updating symbols attribute: ' . $e->getMessage());
+
+        // You can handle the error based on your requirement
+        // For example, you can throw a custom exception, return a response, or perform any other action.
+        throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
+    }
+}
+
+
 }

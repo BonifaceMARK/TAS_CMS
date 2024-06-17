@@ -1538,3 +1538,139 @@ h6 {
   background-color: #5a6268;
   border-color: #545b62;
 }
+.btn-close-circle {
+  position: relative;
+  width: 20px; /* Adjust the size as needed */
+  height: 20px; /* Adjust the size as needed */
+  border-radius: 30%; /* Make the background circular */
+  background-color: #f00; /* Change to your desired color */
+  border: none; /* Remove default border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close-circle::before {
+  content: '';
+  position: absolute;
+  width: 20px; /* Adjust the size of the "x" icon as needed */
+  height: 2px; /* Adjust the thickness of the "x" icon as needed */
+  background-color: #fff; /* Change to your desired color */
+  transform: rotate(45deg);
+}
+
+.btn-close-circle::after {
+  content: '';
+  position: absolute;
+  width: 20px; /* Adjust the size of the "x" icon as needed */
+  height: 2px; /* Adjust the thickness of the "x" icon as needed */
+  background-color: #fff; /* Change to your desired color */
+  transform: rotate(-45deg);
+}
+.modal-header .badge.bg-primary {
+  background-color: #007bff;
+}
+/* Custom class for positioning modals */
+.custom-modal {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80%; /* Adjust width as needed */
+}
+
+
+.right-modal {
+  position: absolute;
+  right: 0;
+  width: 40%; /* Adjust as needed */
+}
+.sidebar {
+  background-color: #f8f9fa;
+  width: 250px; /* Adjust width as needed */
+  padding: 20px;
+}
+
+.sidebar {
+  background-color: #f8f9fa;
+  width: 250px; /* Adjust width as needed */
+  padding: 20px;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding-left: 0;
+}
+
+.nav-item {
+  margin-bottom: 10px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #000;
+  transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #e9ecef;
+}
+
+.nav-link.collapsed {
+  background-color: #cce5ff; /* Change collapsed color as needed */
+}
+
+.nav-link .bi {
+  margin-right: 10px;
+}
+
+.nav-heading {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #007bff; /* Change the color to blue */
+}
+
+.nav-heading + .nav-item {
+  margin-top: 5px;
+}
+
+.nav-heading + .nav-item:first-child {
+  margin-top: 0;
+}
+/* Styles for collapsed state */
+.nav-link.collapsed {
+  background-color: #f8f9fa; /* Specify your collapsed state color */
+}
+
+/* Styles for active state */
+.nav-link.active {
+  background-color: #007bff; /* Specify your active state color */
+}
+
+
+/* Hover effect */
+.nav-link:hover {
+  opacity: 0.8; /* Reduce opacity on hover */
+}
+
+/* Collapsed state */
+.nav-link.collapsed {
+  color: #000; /* Black text color */
+}
+
+/* Active state */
+.nav-link.active {
+  font-weight: bold; /* Bold text for active button */
+}
+/* Add styles for uncollapsed items */
+.nav-link.uncollapse {
+  background-color: #1c31ac; /* Example background color */
+  /* Add any other styles you want for uncollapsed items */
+}
+.nav-heading {
+  font-weight: bold;
+  color: #000000; /* Dark black color */
+  font-size: 1.2rem; /* Adjust the font size as needed */
+}
+

@@ -228,7 +228,11 @@ class DashboardController extends Controller
 
             $tasFile->relatedViolations = $relatedViolations;
         }
-    
+        // Fetch TasFile data
+        $tF = TasFile::all();
+     foreach ($tF as $tasFile) {
+        $tasFile->checkCompleteness();
+    }
 
         return view('tas.view', compact('tasFiles'));
     }
@@ -926,13 +930,34 @@ class DashboardController extends Controller
         // Pass data to the view using compact
         return view('analytics', compact('months', 'counts', 'backgroundColors'));
     }
-    public function updateContest(){
+    public function updateContest()
+    {
         $codes = TrafficViolation::all();
-        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')
-        ->get();
+        $recentViolationsToday = TasFile::orderBy('case_no', 'desc')->get();
         $violations = TrafficViolation::all();
-        return view('tas.edit',compact('recentViolationsToday','violations','codes'));
+        $officers = collect();
+    
+        // Iterate through each TrafficViolation record
+        foreach ($violations as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            $officers = $officers->merge($officersForFile);
+    
+            // Decode the violation data if it's stored as JSON
+            $violationData = json_decode($violation->violation, true);
+    
+            // Pass the violation data to the view
+            $violation->violationData = $violationData;
+        }
+    
+        // Pass data to the view
+        return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
     }
+    
 
     public function historyIndex()
     {
