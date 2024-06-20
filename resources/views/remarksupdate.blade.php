@@ -1,7 +1,7 @@
 @if ($remarks !== null)
     <ul class="remarks-list">
         @foreach ($remarks as $remark)
-            <li>{{ $remark }}</li>
+            <span class="bi bi-check2-circle">{{ $remark }}</span>
             <br><br>
         @endforeach
     </ul>

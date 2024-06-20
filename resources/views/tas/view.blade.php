@@ -316,80 +316,76 @@
   </div> @endforeach
 
 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
 
+  <script defer>
+        $(document).ready(function () {
+            // Check if there's a cached modal ID and open it
+            const cachedModalId = localStorage.getItem('modalId');
+            if (cachedModalId) {
+                $('#' + cachedModalId).modal('show');
+            }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function openInNewTabAndPrint(url) {
-        var win = window.open(url, '_blank');
-        win.onload = function() {
-            win.print();
-        };
-    }
-</script>
+            $('.modal').on('shown.bs.modal', function (e) {
+                // Cache the ID of the opened modal
+                localStorage.setItem('modalId', e.target.id);
+            });
 
-<script>
-    $(document).ready(function () {
-        // Check if there's a cached modal ID and open it
-        var cachedModalId = localStorage.getItem('modalId');
-        if (cachedModalId) {
-            $('#' + cachedModalId).modal('show');
-        }
+            $('.modal').on('hidden.bs.modal', function () {
+                // Remove cached modal ID when the modal is closed
+                localStorage.removeItem('modalId');
+            });
 
-        $('.modal').on('shown.bs.modal', function (e) {
-            // Cache the ID of the opened modal
-            var modalId = e.target.id;
-            localStorage.setItem('modalId', modalId);
-        });
+            // Form submission with AJAX
+            $('.remarksForm').on('submit', function (e) {
+                e.preventDefault();
+                const form = $(this);
+                const saveRemarksBtn = form.find('#saveRemarksBtn');
+                const spinner = saveRemarksBtn.find('.spinner-border');
 
-        $('.modal').on('hidden.bs.modal', function (e) {
-            // Remove cached modal ID when the modal is closed
-            localStorage.removeItem('modalId');
-        });
-        
-        // Form submission
-        $('.remarksForm').on('submit', function (e) {
-            e.preventDefault();
-            var form = $(this);
-            var saveRemarksBtn = form.find('#saveRemarksBtn');
-            var spinner = saveRemarksBtn.find('.spinner-border');
-            
-            // Show spinner
-            spinner.removeClass('d-none');
-            // Disable button to prevent multiple submissions
-            saveRemarksBtn.prop('disabled', true);
+                // Show spinner and disable button
+                spinner.removeClass('d-none');
+                saveRemarksBtn.prop('disabled', true);
 
-            // Perform AJAX request
-            $.ajax({
-                type: form.attr('method'),
-                url: form.attr('action'),
-                data: form.serialize(),
-                success: function (response) {
-                    // Hide spinner
-                    spinner.addClass('d-none');
-                    // Enable button
-                    saveRemarksBtn.prop('disabled', false);
-                    // Update remarks section with new data
-                    var remarksList = form.closest('.modal-content').find('.remarks-list');
-                    remarksList.html(response.remarks);
-                    // Display success alert
-                    alert('Remarks saved successfully.');
-                    // Reload the page
-                    window.location.reload();
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                    // Hide spinner
-                    spinner.addClass('d-none');
-                    // Enable button
-                    saveRemarksBtn.prop('disabled', false);
-                    // Display error alert
-                    alert('Failed to save remarks. Please try again later.');
-                }
+                // Perform AJAX request
+                $.ajax({
+                    type: form.attr('method'),
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        // Hide spinner and enable button
+                        spinner.addClass('d-none');
+                        saveRemarksBtn.prop('disabled', false);
+
+                        // Update remarks section with new data
+                        form.closest('.modal-content').find('.remarks-list').html(response.remarks);
+
+                        // Display success alert
+                        alert('Remarks saved successfully.');
+
+                        // Reload the page
+                        window.location.reload();
+                    },
+                    error: function () {
+                        // Hide spinner and enable button
+                        spinner.addClass('d-none');
+                        saveRemarksBtn.prop('disabled', false);
+
+                        // Display error alert
+                        alert('Failed to save remarks. Please try again later.');
+                    }
+                });
             });
         });
-    });
-</script>
+
+        // Function to open a URL in a new tab and print
+        function openInNewTabAndPrint(url) {
+            const win = window.open(url, '_blank');
+            win.onload = function () {
+                win.print();
+            };
+        }
+    </script>
 
 
   </main><!-- End #main -->
