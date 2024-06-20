@@ -90,7 +90,19 @@ class TasFile extends Model
     {
         return $value ? json_decode($value, true) : [];
     }
+    // Define mutator for 'remarks' field
+public function setRemarksAttribute($value)
+{
+    // Convert the array of remarks to a comma-separated string
+    $this->attributes['remarks'] = implode(',', $value);
+}
 
+// Define accessor for 'remarks' field
+public function getRemarksAttribute($value)
+{
+    // Convert the comma-separated string of remarks to an array
+    return $value ? explode(',', $value) : [];
+}
 
     public function checkCompleteness()
     {

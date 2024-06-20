@@ -298,7 +298,7 @@
                     <label class="form-label">Remarks</label>
                     <div class="input-group">
                         <span class="input-group-text bi bi-clipboard-check"></span>
-                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text" readonly>
+                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text">
                     </div>
                 </div>
 
@@ -331,30 +331,28 @@
 
 
 
-        <div class="col-md-12 mb-3">
-            <label class="bi bi-folder-fill form-label"> File Attachments</label>
-            @php
-                $attachments = explode(',', $violation->file_attach);
-            @endphp
-            @if (!empty($attachments))
-                @foreach ($attachments as $attachment)
-                    <div class="input-group mt-2">
-                        <input type="file" class="form-control" name="file_attach_existing[]">
-                        <input type="text" class="form-control" value="{{ $attachment }}" readonly>
-                        <div class="input-group-append">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" name="delete_file[]" value="{{ $attachment }}">
-                                <label class="form-check-label">Delete</label>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @endif
+<div class="col-md-12 mb-3">
+    <label class="bi bi-folder-fill form-label"> File Attachments</label>
+    @php
+        $attachments = explode(',', $violation->file_attach);
+    @endphp
+    @if (!empty($attachments))
+        @foreach ($attachments as $attachment)
             <div class="input-group mt-2">
-               
-                <input type="file" class="form-control" name="file_attach_new[]"><span class="bi bi-bookmark-plus input-group-text custom-new-badge" > Add New</span> 
+                <input type="file" class="form-control" name="file_attach_existing[]">
+                <input type="text" class="form-control" value="{{ $attachment }}" readonly>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger" data-attachment="{{ $attachment }}">Delete</button>
+                </div>
             </div>
-        </div> 
+        @endforeach
+    @endif
+    <div class="input-group mt-2">
+        <input type="file" class="form-control" name="file_attach_new[]">
+        <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span> 
+    </div>
+</div>
+
         
 
 

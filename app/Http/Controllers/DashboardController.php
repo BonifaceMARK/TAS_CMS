@@ -917,10 +917,9 @@ class DashboardController extends Controller
             // Assign the decoded violation data back to the violation object
             $violation->violationData = $violationData;
     
-    // Convert the remarks attribute to an array
-    $violation->remarks = explode(',', $violation->remarks);
-}
-
+            // Convert the remarks attribute to an array using the correct delimiter
+            $violation->remarks = explode(" - ", $violation->remarks);
+        }
     
         // Pass data to the view
         return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
