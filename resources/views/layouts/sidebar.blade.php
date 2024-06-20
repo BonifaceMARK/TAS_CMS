@@ -160,14 +160,3 @@
     @endif
   </ul>
 </aside><!-- End Sidebar -->
-<script>// Get all collapsed nav links
-const collapsedLinks = document.querySelectorAll('.nav-link.collapsed');
-
-// Add click event listeners to each collapsed nav link
-collapsedLinks.forEach(link => {
-  link.addEventListener('click', function() {
-    // Toggle the 'uncollapse' class on the clicked link
-    this.classList.toggle('uncollapse');
-  });
-});
-</script>

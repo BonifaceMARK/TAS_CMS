@@ -179,47 +179,28 @@ class DashboardController extends Controller
    public function tasView()
 {
     $pageSize = 15; // Define the default page size
-    $tasFiles = TasFile::orderBy('case_no', 'desc')->paginate($pageSize);
-    
-    
-    // Initialize a collection to hold related officers
+    $tasFiles = TasFile::orderBy('case_no', 'desc')->get();
     $officers = collect();
     
-    // Iterate through each TasFile record
     foreach ($tasFiles as $tasFile) {
-        // Extract the name of the apprehending officer for the current TasFile
         $officerName = $tasFile->apprehending_officer;
-        
-        // Query the ApprehendingOfficer model for officers with the given name
         $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-
         $officers = $officers->merge($officersForFile);
         $tasFile->relatedofficer = $officersForFile;
         
-        // Handle remarks field
         if (is_string($tasFile->remarks)) {
-            // Decode JSON string to array
             $remarks = json_decode($tasFile->remarks, true);
-
-            // Check if decoding was successful
             if ($remarks === null) {
-                // Handle case where JSON is invalid
                 $remarks = [];
             }
         } else if (is_array($tasFile->remarks)) {
-            // If $tasFile->remarks is already an array, use it directly
             $remarks = $tasFile->remarks;
         } else {
-            // If remarks is neither a string nor an array, set it to an empty array
             $remarks = [];
         }
         $tasFile->remarks = $remarks;
-    }
 
-    // Process violations
-    foreach ($tasFiles as $tasFile) {
         $violations = json_decode($tasFile->violation);
-
         if ($violations) {
             if (is_array($violations)) {
                 $relatedViolations = TrafficViolation::whereIn('code', $violations)->get();
@@ -229,14 +210,7 @@ class DashboardController extends Controller
         } else {
             $relatedViolations = [];
         }
-
         $tasFile->relatedViolations = $relatedViolations;
-    }
-
-    // Fetch TasFile data again (if needed)
-    $tF = TasFile::all();
-    foreach ($tF as $tasFile) {
-        $tasFile->checkCompleteness();
     }
 
     return view('tas.view', compact('tasFiles'));
