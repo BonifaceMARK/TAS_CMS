@@ -165,6 +165,10 @@
                             
                             {{-- Container for dynamically created input fields --}}
                             <div id="violationsContainer{{ $violation->id }}"></div>
+                            <div class="input-group ">
+    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
+    <input type="text" class="form-control" id="violation{{ $violation->id }}_new" name="violation[]" value="" placeholder="Add new Violation">
+</div> 
                             
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
@@ -283,36 +287,49 @@
     @if(is_array($violation->remarks))
         @foreach ($violation->remarks as $index => $remark)
             @php
-                // Split the remark into text, timestamp, and user
+                // Split the remark into text, timestamp, and user using the '||' separator
                 $parts = explode(" - ", $remark);
                 $text = $parts[0] ?? '';
                 $timestamp = $parts[1] ?? '';
                 $user = $parts[2] ?? '';
             @endphp
-            <div class="col-md-4">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text">
+            <div class="row mb-2">
+                <div class="col-md-5">
+                    <label class="form-label">Remarks</label>
+                    <div class="input-group">
+                        <span class="input-group-text bi bi-clipboard-check"></span>
+                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text" readonly>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="timestamp{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][timestamp]" value="{{ $timestamp }}" placeholder="Timestamp">
+
+                <div class="col-md-3">
+                    <label class="form-label bi bi-clock-fill">Timestamp</label>
+                    <div class="input-group">
+                        <p class="form-control">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" id="user{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][user]" value="{{ $user }}" placeholder="User">
+
+                <div class="col-md-4">
+                    <label class="form-label bi bi-person-fill">User</label>
+                    <div class="input-group">
+                        <p class="form-control">{{ $user }}</p>
+                    </div>
                 </div>
             </div>
         @endforeach
     @endif
-</div>
+ 
 
 <!-- Always include one additional input field for new remarks -->
-<div class="input-group mb-2">
+<div class="input-group ">
     <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
     <input type="text" class="form-control" id="remarks{{ $violation->id }}_new" name="remarks[]" value="" placeholder="Add new Remarks">
 </div>
+
+</div>
+
+
+
 
         <div class="col-md-12 mb-3">
             <label class="bi bi-folder-fill form-label"> File Attachments</label>
@@ -334,8 +351,8 @@
                 @endforeach
             @endif
             <div class="input-group mt-2">
-                <input type="file" class="form-control" name="file_attach_new[]">
-                <span class="bi bi-paperclip input-group-text custom-new-badge" > Add New</span>
+               
+                <input type="file" class="form-control" name="file_attach_new[]"><span class="bi bi-bookmark-plus input-group-text custom-new-badge" > Add New</span> 
             </div>
         </div> 
         

@@ -900,28 +900,28 @@ class DashboardController extends Controller
         // Prepare a collection for officers
         $officers = collect();
         
-      // Iterate through each TrafficViolation record
-foreach ($violations as $violation) {
-    // Extract the name of the apprehending officer for the current TrafficViolation
-    $officerName = $violation->apprehending_officer;
-
-    // Query the ApprehendingOfficer model for officers with the given name
-    $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
-
-    // Merge the officers into the collection
-    $officers = $officers->merge($officersForFile);
-
-    // Decode the violation data if it's stored as JSON
-    $violationData = json_decode($violation->violation, true);
-
-    // Assign the decoded violation data back to the violation object
-    $violation->violationData = $violationData;
-
+        // Iterate through each TrafficViolation record
+        foreach ($violations as $violation) {
+            // Extract the name of the apprehending officer for the current TrafficViolation
+            $officerName = $violation->apprehending_officer;
+    
+            // Query the ApprehendingOfficer model for officers with the given name
+            $officersForFile = ApprehendingOfficer::where('officer', $officerName)->get();
+    
+            // Merge the officers into the collection
+            $officers = $officers->merge($officersForFile);
+    
+            // Decode the violation data if it's stored as JSON
+            $violationData = json_decode($violation->violation, true);
+    
+            // Assign the decoded violation data back to the violation object
+            $violation->violationData = $violationData;
+    
     // Convert the remarks attribute to an array
     $violation->remarks = explode(',', $violation->remarks);
 }
 
-        
+    
         // Pass data to the view
         return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
     }

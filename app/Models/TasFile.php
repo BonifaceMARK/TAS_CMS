@@ -90,7 +90,8 @@ class TasFile extends Model
     {
         return $value ? json_decode($value, true) : [];
     }
-    
+
+
     public function checkCompleteness()
     {
         try {
