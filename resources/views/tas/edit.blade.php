@@ -287,11 +287,12 @@
     @if(is_array($violation->remarks))
         @foreach ($violation->remarks as $index => $remark)
             @php
-                // Split the remark into text, timestamp, and user using the '||' separator
-                $parts = explode(" - ", $remark);
-                $text = $parts[0] ?? '';
-                $timestamp = $parts[1] ?? '';
-                $user = $parts[2] ?? '';
+                // Decode the JSON-encoded remark data
+                $remarkData = json_decode($remark, true);
+                // Extract text, timestamp, and user from the decoded data
+                $text = $remarkData['text'] ?? '';
+                $timestamp = $remarkData['timestamp'] ?? '';
+                $user = $remarkData['user'] ?? '';
             @endphp
             <div class="row mb-2">
                 <div class="col-md-5">
@@ -301,14 +302,12 @@
                         <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text">
                     </div>
                 </div>
-
                 <div class="col-md-3">
                     <label class="form-label bi bi-clock-fill">Timestamp</label>
                     <div class="input-group">
                         <p class="form-control">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
                     </div>
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label bi bi-person-fill">User</label>
                     <div class="input-group">
@@ -318,6 +317,8 @@
             </div>
         @endforeach
     @endif
+ 
+
  
 
 <!-- Always include one additional input field for new remarks -->
