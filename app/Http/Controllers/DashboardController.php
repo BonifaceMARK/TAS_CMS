@@ -656,20 +656,19 @@ class DashboardController extends Controller
                 'date_received' => 'nullable|date',
                 'plate_no' => 'nullable|string|max:255',
                 'contact_no' => 'nullable|string|max:255',
-                'remarks.*' => 'nullable|string',
+                'remarks.*.text' => 'nullable|string', // Validate each remark text as a string
                 'file_attach.*' => 'nullable|file|max:10240', // Adjust max file size as needed
             ]);
-            
-            // If 'remarks' is set and is an array, join the array elements into a single string
+    
+            // Process remarks
             if (isset($validatedData['remarks']) && is_array($validatedData['remarks'])) {
-                $validatedData['remarks'] = implode(', ', $validatedData['remarks']);
+                $remarksArray = [];
+                foreach ($validatedData['remarks'] as $remark) {
+                    $remarksArray[] = $remark['text'];
+                }
+                $validatedData['remarks'] = json_encode($remarksArray);
             }
-        
-            // Trim the 'remarks' field only if it is a string
-            if (isset($validatedData['remarks']) && is_string($validatedData['remarks'])) {
-                $validatedData['remarks'] = trim($validatedData['remarks']);
-            }
-            
+    
             // Check if new attachments are uploaded
             if ($request->hasFile('file_attach')) {
                 // Handle file uploads and append new attachments to existing ones
@@ -701,9 +700,9 @@ class DashboardController extends Controller
                 $newViolations = array_filter($validatedData['violation'], function($value) {
                     return $value !== null;
                 });
-                $validatedData['violation'] = array_unique(array_merge($existingViolations, $newViolations));
+                $validatedData['violation'] = json_encode(array_unique(array_merge($existingViolations, $newViolations)));
             }
-            
+    
             // Capture changes
             $changes = [];
             foreach ($validatedData as $field => $newValue) {
@@ -733,6 +732,13 @@ class DashboardController extends Controller
             // Save updated history along with violation
             $violation->history = $history;
             $violation->save();
+            
+            // If new violations were added, add them to the TasFile model
+            if (!empty($newViolations)) {
+                foreach ($newViolations as $newViolation) {
+                    $violation->addViolation($newViolation);
+                }
+            }
         
             // Set success message
             return back()->with('success', 'Violation updated successfully');
@@ -924,6 +930,8 @@ class DashboardController extends Controller
         // Pass data to the view
         return view('tas.edit', compact('recentViolationsToday', 'violations', 'codes', 'officers'));
     }
+    
+    
     
     
     public function historyIndex()

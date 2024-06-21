@@ -137,23 +137,34 @@
                     <div class="row">
                         <div class="col-md-6"> 
                             <!-- Violation details section -->
-                            <h6 class="fw-bold mb-3">Violation Details</h6>
-                            <div class="mb-3">
-                                <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
-                                <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="top{{ $violation->id }}" class="form-label">TOP</label>
-                                <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
-                                <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
-                                <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
-                            </div>
+                            <h5 class="fw-bold mb-3 bi bi-card-list"> Violation Details</h5>
+                            <div class="row">
+    <div class="col-md-6">
+        <!-- Case No. -->
+        <div class="mb-3">
+            <label for="resolutionNo{{ $violation->id }}" class="form-label">Case No.</label>
+            <input type="text" class="form-control" id="resolutionNo{{ $violation->id }}" name="case_no" value="{{ $violation->case_no }}">
+        </div>
+        <!-- TOP -->
+        <div class="mb-3">
+            <label for="top{{ $violation->id }}" class="form-label">TOP</label>
+            <input type="text" class="form-control" id="top{{ $violation->id }}" name="top" value="{{ $violation->top }}">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!-- Driver -->
+        <div class="mb-3">
+            <label for="driver{{ $violation->id }}" class="form-label">Driver</label>
+            <input type="text" class="form-control" id="driver{{ $violation->id }}" name="driver" value="{{ $violation->driver }}">
+        </div>
+        <!-- Apprehending Officer -->
+        <div class="mb-3">
+            <label for="apprehendingOfficer{{ $violation->id }}" class="form-label">Apprehending Officer</label>
+            <input type="text" class="form-control" id="apprehendingOfficer{{ $violation->id }}" name="apprehending_officer" value="{{ $violation->apprehending_officer }}">
+        </div>
+    </div>
+</div>
+
                             @php
                             $violations = \App\Models\TrafficViolation::pluck('code')->toJson();
                         @endphp
@@ -263,7 +274,7 @@
                         </div>
                         <div class="col-lg-6">
     <!-- Additional details section -->
-    <h6 class="fw-bold mb-3">Additional Details</h6>
+    <h5 class="fw-bold mb-3 bi bi-collection me-1"> Additional Details</h5>
     <div class="row">
         <div class="col-md-6 mb-3">
             <label for="transactionNo{{ $violation->id }}" class="form-label">Transaction No.</label>
@@ -287,46 +298,37 @@
     @if(is_array($violation->remarks))
         @foreach ($violation->remarks as $index => $remark)
             @php
-                // Decode the JSON-encoded remark data
-                $remarkData = json_decode($remark, true);
-                // Extract text, timestamp, and user from the decoded data
-                $text = $remarkData['text'] ?? '';
-                $timestamp = $remarkData['timestamp'] ?? '';
-                $user = $remarkData['user'] ?? '';
+                // Split the remark into text, timestamp, and user using the ' - ' separator
+                $parts = explode(" - ", $remark);
+                // Extract text, timestamp, and user from the remark
+                $text = $parts[0] ?? '';
+                $timestamp = $parts[1] ?? '';
+                $user = $parts[2] ?? '';
             @endphp
             <div class="row mb-2">
                 <div class="col-md-5">
-                    <label class="form-label">Remarks</label>
+                    <!-- Remarks input -->
                     <div class="input-group">
                         <span class="input-group-text bi bi-clipboard-check"></span>
-                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ $text }}" placeholder="Text">
+                        <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label bi bi-clock-fill">Timestamp</label>
+                    <!-- Timestamp -->
                     <div class="input-group">
-                        <p class="form-control">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
+                        <p class="form-control badge bg-dark">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label bi bi-person-fill">User</label>
+                    <!-- User -->
                     <div class="input-group">
-                        <p class="form-control">{{ $user }}</p>
+                        <p class="form-control badge bg-primary">{{ str_replace(['"', '[', ']'], '', $user) }}</p>
                     </div>
                 </div>
             </div>
         @endforeach
     @endif
- 
-
- 
-
-<!-- Always include one additional input field for new remarks -->
-<div class="input-group ">
-    <span class="bi bi-bookmark-plus input-group-text custom-new-badge"> Add New</span>
-    <input type="text" class="form-control" id="remarks{{ $violation->id }}_new" name="remarks[]" value="" placeholder="Add new Remarks">
-</div>
-
+  
 </div>
 
 

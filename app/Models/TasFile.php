@@ -90,12 +90,17 @@ class TasFile extends Model
     {
         return $value ? json_decode($value, true) : [];
     }
-    // Define mutator for 'remarks' field
-public function setRemarksAttribute($value)
-{
-    // Convert the array of remarks to a comma-separated string
-    $this->attributes['remarks'] = implode(',', $value);
-}
+    public function setRemarksAttribute($value)
+    {
+        if (is_array($value)) {
+            // Convert the array of remarks to a comma-separated string
+            $this->attributes['remarks'] = implode(',', $value);
+        } else {
+            // If it's already a string, simply assign it
+            $this->attributes['remarks'] = $value;
+        }
+    }
+    
 
 // Define accessor for 'remarks' field
 public function getRemarksAttribute($value)
@@ -137,6 +142,20 @@ public function getRemarksAttribute($value)
             throw new \Exception('Error updating symbols attribute: ' . $e->getMessage());
         }
     }
-    
+      // Method to add a new violation
+      public function addViolation($newViolation)
+      {
+          // Retrieve existing violations
+          $violations = $this->violation ?? [];
+  
+          // Add the new violation
+          $violations[] = $newViolation;
+  
+          // Update the violation attribute
+          $this->violation = $violations;
+  
+          // Save the model
+          $this->save();
+      }
    
 }
