@@ -129,140 +129,138 @@
             </div>
 
             <div class="modal-body">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Case Information</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Case No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->case_no }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Driver:</h6>
-                                    <p class="fw-bold">{{ $tasFile->driver }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Contact No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->contact_no }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">TOP:</h6>
-                                    <p class="fw-bold">{{ $tasFile->top ? $tasFile->top : 'N/A' }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Transaction No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Received Date:</h6>
-                                    <p class="fw-bold">{{ $tasFile->date_received }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Violation Details</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Plate No:</h6>
-                                    <p class="fw-bold">{{ $tasFile->plate_no }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Apprehending Officer:</h6>
-                                    <p class="fw-bold">{{ $tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A' }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Date Recorded:</h6>
-                                    <p class="fw-bold">{{ $tasFile->created_at }}</p>
-                                </div>
-                                <hr>
-                                <div class="mb-4">
-                                    <h6 class="text-muted">Violations:</h6>
+            <div class="card border-0 shadow">
+    
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Case Information -->
+                <div class="mb-4">
+                    <h6 class="text-muted">Case Information</h6>
+                    <div class="separator"></div>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Case No</th>
+                                <td>{{ $tasFile->case_no }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Driver</th>
+                                <td>{{ $tasFile->driver }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Contact No</th>
+                                <td>{{ $tasFile->contact_no }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">TOP</th>
+                                <td>{{ $tasFile->top ? $tasFile->top : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Transaction No</th>
+                                <td>{{ $tasFile->transaction_no ? $tasFile->transaction_no : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Received Date</th>
+                                <td>{{ $tasFile->date_received }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Violation Details -->
+                <div class="mb-4">
+                    <h6 class="text-muted">Violation Details</h6>
+                    <div class="separator"></div>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Plate No</th>
+                                <td>{{ $tasFile->plate_no }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Apprehending Officer</th>
+                                <td>{{ $tasFile->apprehending_officer ? $tasFile->apprehending_officer : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Date Recorded</th>
+                                <td>{{ $tasFile->created_at }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Violations</th>
+                                <td>
                                     @if (isset($tasFile->relatedViolations) && !is_array($tasFile->relatedViolations) && $tasFile->relatedViolations->count() > 0)
-                                        <ul class="list-unstyled">
-                                            @foreach ($tasFile->relatedViolations as $violation)
-                                                <li>{{ $violation->code }} - {{ $violation->violation }}</li>
-                                            @endforeach
-                                        </ul>
+                                    <ul class="list-unstyled">
+                                        @foreach ($tasFile->relatedViolations as $violation)
+                                        <li>{{ $violation->code }} - {{ $violation->violation }}</li>
+                                        @endforeach
+                                    </ul>
                                     @else
-                                        <p>No violations recorded.</p>
+                                    <p>No violations recorded.</p>
                                     @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header ">
-                                <h5 class="card-title mb-0">Remarks</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                
-                                @include('remarksupdate', ['remarks' => $tasFile->remarks])
-
-                                    <form action="{{ route('save.remarks') }}" id="remarksForm" method="POST" class="remarksForm">
-                                        @csrf
-                                        <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
-                                        <div class="mt-3">
-                                            <label for="remarks" class="form-label">Add Remark</label>
-                                            <hr>
-                                            <textarea class="form-control" name="remarks" id="remarks" rows="5"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary mt-3" id="saveRemarksBtn">
-                                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                            Save Remarks
-                                        </button>
-                                    </form>
-                            </div>
-                        </div>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow">
+             
+            <div class="card-body">
+                @include('remarksupdate', ['remarks' => $tasFile->remarks])
+                <form action="{{ route('save.remarks') }}" id="remarksForm" method="POST" class="remarksForm">
+                    @csrf
+                    <input type="hidden" name="tas_file_id" value="{{ $tasFile->id }}">
+                    <div class="mt-3">
+                        <label for="remarks" class="form-label">Add Remark</label>
+                        <hr>
+                        <textarea class="form-control" name="remarks" id="remarks" rows="5"></textarea>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow">
-                            <div class="card-header ">
-                                <h5 class="card-title mb-0">File Attachments</h5>
-                            </div>
-                            <div class="card-body mt-3">
-                                <!-- File attachments content -->
-                                @if (!is_null($tasFile->file_attach))
-                                    @php
-                                        $decodedFiles = json_decode($tasFile->file_attach, true);
-                                    @endphp
-                                    @if (!is_null($decodedFiles))
-                                        <ol>
-                                            @foreach ($decodedFiles as $filePath)
-                                                <li>
-                                                    <i class="bi bi-paperclip me-1"></i>
-                                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
-                                                </li>
-                                            @endforeach
-                                        </ol>
-                                    @else
-                                        <p>No attachments available.</p>
-                                    @endif
-                                @else
-                                    <p>No attachments available.</p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    <button type="submit" class="btn btn-primary mt-3" id="saveRemarksBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Save Remarks
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow">
+            <div class="card-header">
+                <h5 class="card-title mb-0 bi bi-paperclip">File Attachments</h5>
+            </div>
+            <div class="card-body">
+                <!-- File attachments content -->
+                @if (!is_null($tasFile->file_attach))
+                    @php
+                        $decodedFiles = json_decode($tasFile->file_attach, true);
+                    @endphp
+                    @if (!is_null($decodedFiles))
+                        <ul>
+                            @foreach ($decodedFiles as $filePath)
+                                <li>
+                                    <i class="bi bi-paperclip me-1"></i>
+                                    <a href="{{ asset('storage/' . $filePath) }}" target="_blank">{{ basename($filePath) }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p>No attachments available.</p>
+                    @endif
+                @else
+                    <p>No attachments available.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
 
 
