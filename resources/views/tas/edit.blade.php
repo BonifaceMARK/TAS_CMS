@@ -306,25 +306,14 @@
                 $user = $parts[2] ?? '';
             @endphp
             <div class="row mb-2">
-                <div class="col-md-5">
+                <div class="col-md-12">
                     <!-- Remarks input -->
                     <div class="input-group">
                         <span class="input-group-text bi bi-clipboard-check"></span>
                         <input type="text" class="form-control" id="text{{ $violation->id }}_{{ $index }}" name="remarks[{{ $index }}][text]" value="{{ str_replace(['"', '[', ']'], '', $text) }}" placeholder="Text">
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <!-- Timestamp -->
-                    <div class="input-group">
-                        <p class="form-control badge bg-dark">{{ Carbon\Carbon::parse(str_replace('\/', '/', $timestamp))->format('h:ia m/d/y') }}</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <!-- User -->
-                    <div class="input-group">
-                        <p class="form-control badge bg-primary">{{ str_replace(['"', '[', ']'], '', $user) }}</p>
-                    </div>
-                </div>
+
             </div>
         @endforeach
     @endif
