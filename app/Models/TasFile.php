@@ -58,14 +58,27 @@ class TasFile extends Model
     {
         $this->attributes['name'] = strtoupper($value);
     }
+    public function setViolationAttribute($value)
+    {
+        if (is_array($value)) {
+            // Convert the array of violations to a comma-separated string
+            $this->attributes['violation'] = implode(',', $value);
+        } else {
+            // If it's already a string, simply assign it
+            $this->attributes['violation'] = $value;
+        }
+    }
 
-    // Define mutator for 'violation' field
-    // public function setViolationAttribute($value)
-    // {
-    //     $this->attributes['violation'] = strtoupper($value);
-    // }
-
-    // Define mutator for 'transaction_no' field
+    public function getViolationAttribute($value)
+    {
+        // Check if the value is already a string, then return it
+        if (is_string($value)) {
+            return $value;
+        }
+        
+        // If it's an array, convert it to a string
+        return $value ? implode(',', $value) : '';
+    }
     public function setTransactionNoAttribute($value)
     {
         $this->attributes['transaction_no'] = strtoupper($value);
